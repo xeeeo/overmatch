@@ -12,12 +12,13 @@ public static class Ui
     /// <summary>Fit a design canvas to the viewport. Returns the scale and the design height.</summary>
     public static (float scale, float height) Fit(Control canvas, Vector2 viewport)
     {
-        var scale = Math.Min(viewport.X / DesignWidth, viewport.Y / MinDesignHeight);
-        var height = Math.Max(MinDesignHeight, viewport.Y / scale);
-        canvas.Scale = Vector2.One * scale;
+        // The window's content scale factor (UiScaler) already makes the viewport at least 1600 x 900 design units,
+        // so nothing is stretched here: the 1600-wide page is simply centred.
+        var height = Math.Max(MinDesignHeight, viewport.Y);
+        canvas.Scale = Vector2.One;
         canvas.Size = new Vector2(DesignWidth, height);
-        canvas.Position = new Vector2((viewport.X - DesignWidth * scale) / 2f, 0);
-        return (scale, height);
+        canvas.Position = new Vector2(Mathf.Round((viewport.X - DesignWidth) / 2f), 0);
+        return (1f, height);
     }
 
     public static ConsolePanel Panel(Node parent, float x, float y, float w, float h, Color fill, bool accent = false, float cut = 8, bool blockMouse = false)

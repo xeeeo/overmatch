@@ -83,6 +83,8 @@ public partial class MainMenu : CanvasLayer
 
     // ------------------------------------------------------------------ title
 
+    public void OpenSettings() => AddChild(new SettingsPanel());
+
     private void BuildTitle()
     {
         Ui.Text(_page, "REAL-TIME STRATEGY  /  2030s", 70, 108, 670, 30, 19, CommandTheme.Gold, true);
@@ -95,8 +97,13 @@ public partial class MainMenu : CanvasLayer
         Ui.Text(skirmish, "Fight computer commanders on six battlefields", 31, 42, 480, 24, 16, CommandTheme.Muted);
         Ui.Text(skirmish, "›", 545, 8, 32, 45, 34, CommandTheme.Gold, true);
 
-        var quit = Ui.Button(_page, "", 72, 573, 598, 76, () => GetTree().Quit());
-        Ui.Text(quit, "02    STAND DOWN", 31, 8, 480, 33, 25, CommandTheme.Text, true);
+        var settings = Ui.Button(_page, "", 72, 573, 598, 76, OpenSettings);
+        Ui.Text(settings, "02    SETTINGS", 31, 8, 480, 33, 25, CommandTheme.Text, true);
+        Ui.Text(settings, "Display, interface size, sound and keys", 31, 42, 482, 24, 16, CommandTheme.Muted);
+        Ui.Text(settings, "›", 545, 8, 32, 45, 34, CommandTheme.Muted, true);
+
+        var quit = Ui.Button(_page, "", 72, 665, 598, 76, () => GetTree().Quit());
+        Ui.Text(quit, "03    STAND DOWN", 31, 8, 480, 33, 25, CommandTheme.Text, true);
         Ui.Text(quit, "Quit to desktop", 31, 42, 482, 24, 16, CommandTheme.Muted);
         Ui.Text(quit, "›", 545, 8, 32, 45, 34, CommandTheme.Muted, true);
 

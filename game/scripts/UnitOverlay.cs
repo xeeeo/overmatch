@@ -32,6 +32,18 @@ public partial class UnitOverlay : Control
         QueueRedraw();
     }
 
+    /// <summary>The control-group number, worn at the unit's feet so groups can be told apart at a glance.</summary>
+    private void DrawGroupTag(Camera3D cam, EntityView view, Overmatch.Sim.Entity e, int group)
+    {
+        var at = view.Position + new Vector3(0, 0.1f, 0);
+        if (cam.IsPositionBehind(at)) return;
+        var p = cam.UnprojectPosition(at) + new Vector2(-e.Radius * 9f - 9f, 6f);
+        var box = new Rect2(p.X - 7f, p.Y - 8f, 14f, 16f);
+        DrawRect(box, new Color(0.04f, 0.07f, 0.08f, 0.85f));
+        DrawRect(box, view.Selected ? Gold : new Color(0.55f, 0.62f, 0.62f), false, 1f);
+        DrawString(Font, new Vector2(box.Position.X, p.Y + 5f), group.ToString(), HorizontalAlignment.Center, 14f, 14, view.Selected ? Gold : new Color(0.85f, 0.9f, 0.9f));
+    }
+
     public override void _Draw()
     {
         var cam = Root.Camera.Camera;
@@ -41,6 +53,8 @@ public partial class UnitOverlay : Control
             var e = view.Entity;
             var frac = e.HpFraction;
             var building = e.IsBuilding;
+            var group = !building && GameSettings.GroupTags && e.Owner == Root.LocalPlayer ? Root.Selection.GroupOf(e.Id) : -1;
+            if (group >= 0) DrawGroupTag(cam, view, e, group);
             var capture = 0f;
             if (building)
                 foreach (var u in Root.World.Entities)

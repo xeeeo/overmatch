@@ -136,6 +136,19 @@ public partial class GameRoot : Node3D
                     for (var y = 0.1f; y < 0.8f; y += 0.2f)
                         Selection.HoverHint(new Vector2(size.X * x, size.Y * y));
                 foreach (var d in w.Rules.Units.Values.Cast<Overmatch.Sim.Data.ObjectDef>().Concat(w.Rules.Buildings.Values)) Hud.Describe(d);
+// Picking must survive interface scaling: the point a unit projects to has to pick that unit, and the ground under it.
+                if (builder is not null)
+                {
+                    var at = Camera.Camera.UnprojectPosition(MapView.ToWorld(builder.Pos, 0.5f));
+                    var picked = Picking.PickAt(this, at, e => true);
+                    var ground = Camera.GroundPoint(at);
+                    var off = ground is { } gp ? (MapView.ToSim(gp) - builder.Pos).Length : 999f;
+                    if (picked?.Id != builder.Id || off > 2.5f) GD.PushError($"[Smoke] picking is off under UI scale {UiScaler.Factor:0.00}: picked {picked?.Def.Id}, ground error {off:0.0}");
+                    else GD.Print($"[Smoke] picking ok at UI scale {UiScaler.Factor:0.00}, ground error {off:0.00}");
+                }
+                // Control groups and their number tags.
+                var army = w.Entities.Where(e => e.Owner == LocalPlayer && !e.IsBuilding).Select(e => e.Id).ToArray();
+                Selection.DebugSetGroup(1, army);
                 GD.Print("[Smoke] UI paths exercised");
             }
             else if (_uiStage == 2 && minutes >= 1.2f)

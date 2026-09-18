@@ -395,6 +395,32 @@ public sealed class World
                 }
                 break;
             }
+            case GuardCommand g:
+            {
+                var guards = OwnedUnits(g.Player, g.Units).Where(u => u.HasWeapons && !u.IsBuilding).ToList();
+                IssueMove(guards, g.Target, MoveKind.AttackMove);
+                foreach (var u in guards) u.GuardPos = u.Move!.Target;
+                break;
+            }
+            case ScatterCommand sc:
+            {
+                var units = OwnedUnits(sc.Player, sc.Units).Where(u => !u.IsBuilding && !u.IsInside).ToList();
+                if (units.Count == 0) break;
+                var centre = new Vec2(units.Average(u => u.Pos.X), units.Average(u => u.Pos.Y));
+                for (var i = 0; i < units.Count; i++)
+                {
+                    var u = units[i];
+                    var away = u.Pos - centre;
+                    // Units stacked on the centre fan out evenly instead of all going the same way.
+                    var angle = away.Length > 0.3f ? away.Angle : i * MathF.Tau / units.Count;
+                    var guard = u.GuardPos;
+                    ClearJobs(u);
+                    u.GuardPos = guard;
+                    u.TargetId = 0; u.ExplicitTarget = false; u.SuspendedMove = null;
+                    u.Move = new MoveOrder { Target = ClampToMap(u.Pos + Vec2.FromAngle(angle) * Combat.ScatterDistance), Kind = MoveKind.Move };
+                }
+                break;
+            }
             case StopCommand s:
                 foreach (var u in OwnedUnits(s.Player, s.Units))
                 {
@@ -517,6 +543,7 @@ public sealed class World
     private static void ClearJobs(Entity u)
     {
         u.BuildTargetId = 0;
+        u.GuardPos = null;
         u.RepairTargetId = 0;
         u.ReturningToBase = false;
         u.EnterTargetId = 0;

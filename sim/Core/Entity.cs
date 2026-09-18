@@ -81,6 +81,8 @@ public sealed class Entity
     /// <summary>Aircraft ordered home. Stays on the pad until fixed or given another order.</summary>
     public bool ReturningToBase { get; set; }
     public int LastDamagedTick { get; set; } = -100000;
+    /// <summary>Guard mode: the post this unit holds. Null when not guarding.</summary>
+    public Vec2? GuardPos { get; set; }
     public bool Rearming { get; set; }
     public float RearmTimer { get; set; }
     public int SalvageLevel { get; set; }

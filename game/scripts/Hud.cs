@@ -29,8 +29,11 @@ public partial class Hud : CanvasLayer
     private Label _notice = null!;
     private Label _hint = null!;
     private PortraitCache _portraits = null!;
-    private float _scale = 1f;
+    private float _width = Ui.DesignWidth;
     private float _height = 900f;
+    private readonly List<Control> _fullWidth = new();                      // bars that span the screen
+    private readonly List<(Control Node, float X)> _right = new();          // anchored to the right edge
+    private readonly List<(Control Node, float X)> _centre = new();         // centred
     private float _noticeTtl;
 
     private readonly List<Action> _live = new();          // per-frame text/state updates for the header
@@ -45,7 +48,7 @@ public partial class Hud : CanvasLayer
     /// <summary>The radar housing; GameRoot parents the live minimap here.</summary>
     public Control MinimapSlot { get; private set; } = null!;
     /// <summary>Screen-space Y where the console begins (for the minimap's camera outline and input tests).</summary>
-    public float ConsoleTopScreenY => (_height - ConsoleHeight) * _scale;
+    public float ConsoleTopScreenY => _height - ConsoleHeight;
 
     public override void _Ready()
     {
@@ -62,9 +65,20 @@ public partial class Hud : CanvasLayer
 
     private void Layout()
     {
-        (_scale, _height) = Ui.Fit(_canvas, GetViewport().GetVisibleRect().Size);
+        // The viewport is already in design units (see UiScaler). On a big screen with a reduced interface it is wider
+        // than the 1600 the console was drawn for: bars stretch, the left cluster stays put, the right cluster follows the edge.
+        var size = GetViewport().GetVisibleRect().Size;
+        _width = Math.Max(Ui.DesignWidth, size.X);
+        _height = Math.Max(Ui.MinDesignHeight, size.Y);
+        _canvas.Scale = Vector2.One;
+        _canvas.Position = Vector2.Zero;
+        _canvas.Size = new Vector2(_width, _height);
+        var extra = _width - Ui.DesignWidth;
+        foreach (var bar in _fullWidth) bar.Size = new Vector2(_width, bar.Size.Y);
+        foreach (var (node, x) in _right) node.Position = new Vector2(x + extra, node.Position.Y);
+        foreach (var (node, x) in _centre) node.Position = new Vector2(x + Mathf.Round(extra / 2f), node.Position.Y);
         _console.Position = new Vector2(0, _height - ConsoleHeight);
-        _hint.Position = new Vector2(300, _height - ConsoleHeight - 34);
+        _hint.Position = new Vector2(_hint.Position.X, _height - ConsoleHeight - 34);
         HideTooltip();
     }
 
@@ -76,8 +90,11 @@ public partial class Hud : CanvasLayer
         var p = w.Player(Root.LocalPlayer);
         var h = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
         _canvas.AddChild(h);
-        Ui.Panel(h, 0, 0, 1600, HeaderHeight, new Color("11191bf5"), false, 0, blockMouse: true);
-        Ui.Rule(h, 0, HeaderHeight - 1, 1600, CommandTheme.Line);
+        _fullWidth.Add(Ui.Panel(h, 0, 0, 1600, HeaderHeight, new Color("11191bf5"), false, 0, blockMouse: true));
+        _fullWidth.Add(Ui.Rule(h, 0, HeaderHeight - 1, 1600, CommandTheme.Line));
+        var hr = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
+        h.AddChild(hr);
+        _right.Add((hr, 0));
         Ui.Icon(h, Ui.FactionIcon(p.Faction.Id), 22, 9, 42, CommandTheme.Gold);
         Ui.Text(h, "OVERMATCH", 76, 8, 205, 35, 30, CommandTheme.Text, true);
         Ui.Text(h, $"{p.Faction.Name.ToUpperInvariant()} COMMAND", 262, 22, 210, 20, 14, CommandTheme.Muted, true);
@@ -88,11 +105,13 @@ public partial class Hud : CanvasLayer
         Ui.Text(h, "POWER GRID", 712, 7, 140, 18, 12, CommandTheme.Muted, true);
         var power = Ui.Text(h, "", 712, 25, 190, 25, 20, CommandTheme.Green, true);
         var meter = Ui.Meter(h, 903, 25, 126, 9, 16, CommandTheme.Green);
-        Ui.Icon(h, "chevron", 1070, 13, 32, CommandTheme.Gold);
-        Ui.Text(h, "FIELD COMMANDER", 1112, 7, 170, 18, 12, CommandTheme.Muted, true);
-        var rank = Ui.Text(h, "", 1112, 25, 200, 24, 20, CommandTheme.Text, true);
-        var clock = Ui.Text(h, "00:00", 1322, 15, 88, 30, 25, CommandTheme.Muted, true);
-        Ui.Button(h, "MENU   ESC", 1440, 12, 138, 36, () => Root.Result.TogglePause());
+        Ui.Icon(hr, "chevron", 1070, 13, 32, CommandTheme.Gold);
+        Ui.Text(hr, "FIELD COMMANDER", 1112, 7, 170, 18, 12, CommandTheme.Muted, true);
+        var rank = Ui.Text(hr, "", 1112, 25, 200, 24, 20, CommandTheme.Text, true);
+        var clock = Ui.Text(hr, "00:00", 1322, 15, 88, 30, 25, CommandTheme.Muted, true);
+        Ui.Button(hr, "MENU   ESC", 1440, 12, 138, 36, () => Root.Result.TogglePause());
+        var fps = Ui.Text(hr, "", 1322, 44, 88, 14, 10, CommandTheme.Muted, true);
+        _live.Add(() => fps.Text = GameSettings.ShowFps ? $"{Engine.GetFramesPerSecond():0} FPS" : "");
 
         _live.Add(() =>
         {
@@ -121,24 +140,28 @@ public partial class Hud : CanvasLayer
 
         _powers = new Control { Position = new Vector2(1320, 84), MouseFilter = Control.MouseFilterEnum.Ignore };
         _canvas.AddChild(_powers);
+        _right.Add((_powers, 1320));
 
         _banner = Ui.Panel(_canvas, 560, 138, 480, 67, new Color("39251ff0"), true);
         Ui.Icon(_banner, "reactor", 14, 14, 36, CommandTheme.Red);
         Ui.Text(_banner, "LOW POWER", 66, 7, 365, 24, 22, CommandTheme.Red, true);
         Ui.Text(_banner, "Production slowed and defences offline. Build more power.", 66, 36, 400, 22, 14, CommandTheme.Text);
         _banner.Visible = false;
+        _centre.Add((_banner, 560));
 
         _notice = Ui.Text(_canvas, "", 420, 220, 760, 40, 22, CommandTheme.Gold, true, HorizontalAlignment.Center);
         _hint = Ui.Text(_canvas, "", 300, 560, 1000, 26, 16, CommandTheme.Blue, true, HorizontalAlignment.Center);
+        _centre.Add((_notice, 420));
+        _centre.Add((_hint, 300));
     }
 
     private void BuildConsole()
     {
         _console = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
         _canvas.AddChild(_console);
-        Ui.Panel(_console, 0, 0, 1600, ConsoleHeight, new Color("131c1e"), false, 0, blockMouse: true);
-        Ui.Rule(_console, 0, 0, 1600, CommandTheme.Line.Lightened(.15f), 2);
-        Ui.Rule(_console, 0, 3, 1600, CommandTheme.Ink, 4);
+        _fullWidth.Add(Ui.Panel(_console, 0, 0, 1600, ConsoleHeight, new Color("131c1e"), false, 0, blockMouse: true));
+        _fullWidth.Add(Ui.Rule(_console, 0, 0, 1600, CommandTheme.Line.Lightened(.15f), 2));
+        _fullWidth.Add(Ui.Rule(_console, 0, 3, 1600, CommandTheme.Ink, 4));
 
         // Radar housing. The live minimap (with M5 fog rules) is parented into the slot by GameRoot.
         Ui.Panel(_console, 18, 20, 254, 251, CommandTheme.Raised.Darkened(.17f), true);
@@ -156,6 +179,7 @@ public partial class Hud : CanvasLayer
         _console.AddChild(_dossier);
         _console.AddChild(_cards);
         _console.AddChild(_queue);
+        _right.Add((_queue, 1254));
     }
 
     // ------------------------------------------------------------------ public API used by the rest of the game
@@ -169,7 +193,8 @@ public partial class Hud : CanvasLayer
     /// <summary>True when the pointer is over interface chrome rather than the battlefield.</summary>
     public bool IsMouseOverBar(Vector2 screen)
     {
-        var p = (screen - _canvas.Position) / _scale;
+        if (!Visible) return false;
+        var p = screen;
         if (p.Y <= HeaderHeight || p.Y >= _height - ConsoleHeight) return true;
         var pr = new Rect2(_powers.Position, _powers.Size);
         return pr.HasPoint(p);
@@ -255,7 +280,7 @@ if (d is BuildingDef { Trickle: { } inc } ib)
         _hoverKey = key;
         var lines = body.Split('\n').Length;
         var h = 58 + lines * 21;
-        _tooltip = Ui.Panel(_canvas, Math.Clamp(x, 286, 1100), _height - ConsoleHeight - h - 44, 480, h, new Color("152022f7"), true);
+        _tooltip = Ui.Panel(_canvas, Math.Clamp(x, 286, _width - 500), _height - ConsoleHeight - h - 44, 480, h, new Color("152022f7"), true);
         Ui.Text(_tooltip, title.ToUpperInvariant(), 17, 10, 440, 28, 23, CommandTheme.Text, true);
         Ui.Text(_tooltip, body, 17, 44, 446, h - 50, 15, CommandTheme.Muted, false, HorizontalAlignment.Left, wrap: true);
     }
@@ -530,16 +555,18 @@ if (mine && s.Building is { Trickle: { } tr } sb && !s.UnderConstruction)
             Ui.Rule(_queue, 16, 41, 291, CommandTheme.Line.Darkened(.25f));
             Ui.Text(_queue, "RIGHT-CLICK", 16, 52, 110, 18, 12, CommandTheme.Gold, true);
             Ui.Text(_queue, "move · attack · enter · capture", 112, 51, 205, 20, 13, CommandTheme.Muted);
-            Ui.Text(_queue, "A + CLICK", 16, 76, 110, 18, 12, CommandTheme.Gold, true);
-            Ui.Text(_queue, "attack-move", 112, 75, 205, 20, 13, CommandTheme.Muted);
+            Ui.Text(_queue, "A  /  G + CLICK", 16, 76, 110, 18, 12, CommandTheme.Gold, true);
+            Ui.Text(_queue, "attack-move · guard an area", 112, 75, 205, 20, 13, CommandTheme.Muted);
             Ui.Text(_queue, "CTRL + 1–9", 16, 100, 110, 18, 12, CommandTheme.Gold, true);
             Ui.Text(_queue, "set group · 1–9 recall · twice to jump", 112, 99, 205, 20, 13, CommandTheme.Muted);
             Ui.Text(_queue, "DOUBLE-CLICK", 16, 124, 110, 18, 12, CommandTheme.Gold, true);
             Ui.Text(_queue, "select all of a type on screen", 112, 123, 205, 20, 13, CommandTheme.Muted);
             Ui.Text(_queue, "H  /  SPACE", 16, 148, 110, 18, 12, CommandTheme.Gold, true);
             Ui.Text(_queue, "headquarters · last alert", 112, 147, 205, 20, 13, CommandTheme.Muted);
-            Ui.Text(_queue, "S  /  M  /  ESC", 16, 172, 110, 18, 12, CommandTheme.Gold, true);
-            Ui.Text(_queue, "stop · music · pause", 112, 171, 205, 20, 13, CommandTheme.Muted);
+            Ui.Text(_queue, "S  /  X  /  Q  /  E", 16, 172, 110, 18, 12, CommandTheme.Gold, true);
+            Ui.Text(_queue, "stop · scatter · all army · matching", 112, 171, 205, 20, 13, CommandTheme.Muted);
+            Ui.Text(_queue, "ESC", 16, 196, 110, 18, 12, CommandTheme.Gold, true);
+            Ui.Text(_queue, "menu, settings and the full key list", 112, 195, 205, 20, 13, CommandTheme.Muted);
             Ui.Text(_queue, "HOVER A CARD FOR COSTS, REQUIREMENTS AND TARGETS", 16, 222, 300, 16, 11, CommandTheme.Muted, true);
             return;
         }

@@ -7,6 +7,10 @@ public static class Combat
 {
     /// <summary>How far beyond weapon range a unit will notice and chase enemies.</summary>
     private const float AcquireBonus = 3f;
+    /// <summary>Guard mode: enemies within this distance of the post are engaged; the chase is abandoned past the leash.</summary>
+    public const float GuardRadius = 13f;
+    public const float GuardLeash = 19f;
+    public const float ScatterDistance = 6f;
     private const int AcquireEvery = 5;
     private const int ChaseRefreshTicks = 8;
 
@@ -24,6 +28,8 @@ public static class Combat
             if (e.Building is { NeedsPower: true } && world.Player(e.Owner).LowPower) { e.TargetId = 0; continue; }
 
             var target = ValidateTarget(e, world);
+            // Guards do not chase past their leash; they let go and walk back to their post.
+            if (target is not null && e.GuardPos is { } post && !e.ExplicitTarget && (target.Pos - post).Length > GuardLeash) { e.TargetId = 0; target = null; }
             if (target is null && (world.Tick + e.Id) % AcquireEvery == 0 && CanAutoAcquire(e))
                 target = Acquire(e, world);
 
@@ -67,6 +73,8 @@ public static class Combat
     private static Entity? Acquire(Entity e, World world)
     {
         var range = MaxRange(e, world.Rules) + AcquireBonus;
+        // A guard watches its whole area, not just what is in weapon range.
+        if (e.GuardPos is not null) range = MathF.Max(range, GuardRadius);
         Entity? best = null;
         var bestD = float.MaxValue;
         foreach (var c in world.Spatial.Query(e.Pos, range + 6f))
@@ -76,6 +84,7 @@ public static class Combat
             if (c.Building is { IsHole: true } && (world.Tick / 20) % 3 != 0) continue; // holes are low priority
             var d = c.IsBuilding ? World.DistanceToBounds(c, e.Pos) : (c.Pos - e.Pos).Length;
             if (d > range) continue;
+            if (e.GuardPos is { } post && (c.Pos - post).Length > GuardRadius + 2f) continue;
             // Prefer things that shoot back, then the closest.
             var score = d + (c.HasWeapons ? 0f : 4f);
             if (score < bestD) { bestD = score; best = c; }
@@ -104,6 +113,9 @@ public static class Combat
             e.Move = e.SuspendedMove;
             e.SuspendedMove = null;
         }
+        // A guard with nothing to shoot walks back to its post.
+        if (e.Move is null && e.GuardPos is { } post && (e.Pos - post).Length > 2.5f && !e.IsBuilding && !e.IsInside)
+            e.Move = new MoveOrder { Target = post, Kind = MoveKind.AttackMove, ArriveRadius = 1.5f };
         // Turret drifts back to the hull heading.
         if (e.Def.HasTurret && e.Move is null)
             e.TurretFacing = Angles.TurnToward(e.TurretFacing, e.Facing, Angles.DegToRad(e.Def.TurretTurnRate) * 0.5f * World.Dt);

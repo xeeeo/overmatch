@@ -9,6 +9,12 @@ public sealed record AttackMoveCommand(int Player, int[] Units, Vec2 Target) : C
 
 public sealed record AttackCommand(int Player, int[] Units, int TargetId) : Command(Player);
 
+/// <summary>Guard an area: go there, engage anything that comes within the guard radius, then return to post.</summary>
+public sealed record GuardCommand(int Player, int[] Units, Vec2 Target) : Command(Player);
+
+/// <summary>Scatter: every unit dashes a short way in its own direction, to get out from under artillery or a bomb.</summary>
+public sealed record ScatterCommand(int Player, int[] Units) : Command(Player);
+
 public sealed record StopCommand(int Player, int[] Units) : Command(Player);
 
 /// <summary>Have a builder construct a building with its footprint origin at (CellX, CellY).</summary>

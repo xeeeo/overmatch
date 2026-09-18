@@ -25,16 +25,17 @@ public partial class AudioManager : Node
 
     public override void _Ready()
     {
+        GameSettings.EnsureBuses();
         for (var i = 0; i < 20; i++)
         {
-            var p = new AudioStreamPlayer3D { MaxDistance = 140f, UnitSize = 22f, AttenuationModel = AudioStreamPlayer3D.AttenuationModelEnum.InverseDistance };
+            var p = new AudioStreamPlayer3D { Bus = "Effects", MaxDistance = 140f, UnitSize = 22f, AttenuationModel = AudioStreamPlayer3D.AttenuationModelEnum.InverseDistance };
             AddChild(p);
             _pool3d.Add(p);
         }
-        _ui = new AudioStreamPlayer { VolumeDb = -10f };
-        _voice = new AudioStreamPlayer { VolumeDb = -4f };
-        _announcer = new AudioStreamPlayer { VolumeDb = -2f };
-        _music = new AudioStreamPlayer { VolumeDb = -16f };
+        _ui = new AudioStreamPlayer { VolumeDb = -10f, Bus = "Interface" };
+        _voice = new AudioStreamPlayer { VolumeDb = -4f, Bus = "Voice" };
+        _announcer = new AudioStreamPlayer { VolumeDb = -2f, Bus = "Voice" };
+        _music = new AudioStreamPlayer { VolumeDb = -12f, Bus = "Music" };
         AddChild(_ui); AddChild(_voice); AddChild(_announcer); AddChild(_music);
 
         if (Load("music/ambient_loop") is AudioStreamWav loop)

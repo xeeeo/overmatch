@@ -21,3 +21,6 @@ Thumbs.db
 # Local
 *.log
 build/
+
+# Reference material that is not ours to redistribute
+old maps/

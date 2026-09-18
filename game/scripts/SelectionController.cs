@@ -61,13 +61,29 @@ public partial class SelectionController : Control
         {
             if (key.CtrlPressed || key.MetaPressed)
             {
-                _groups[digit] = new HashSet<int>(_selected.Where(id => Root.World.Get(id) is { IsBuilding: false }));
+                var members = new HashSet<int>(_selected.Where(id => Root.World.Get(id) is { IsBuilding: false }));
+                // A unit wears one number: joining a group leaves any other.
+                foreach (var other in _groups.Values) other.ExceptWith(members);
+                _groups[digit] = members;
                 Root.Hud.Say($"Group {digit} set ({_groups[digit].Count})");
             }
             else if (_groups.TryGetValue(digit, out var g))
             {
                 g.RemoveWhere(id => Root.World.Get(id) is null);
                 if (g.Count == 0) return true;
+                if (key.AltPressed)
+                {
+                    var seen = g.Select(id => Root.World.Get(id)!).ToList();
+                    Root.Camera.Position = MapView.ToWorld(new Vec2(seen.Average(e => e.Pos.X), seen.Average(e => e.Pos.Y)));
+                    return true;
+                }
+                if (key.ShiftPressed)
+                {
+                    foreach (var id in g) _selected.Add(id);
+                    InspectId = 0;
+                    ApplySelectionVisuals();
+                    return true;
+                }
                 var now = Time.GetTicksMsec();
                 var again = _lastGroup == digit && now - _lastGroupTime < 400;
                 _lastGroup = digit;
@@ -87,8 +103,55 @@ public partial class SelectionController : Control
             }
             return true;
         }
+        if (key.CtrlPressed || key.MetaPressed || key.AltPressed) return false;
         switch (key.Keycode)
         {
+            case Key.G:
+                if (_selected.Any(id => Root.World.Get(id) is { HasWeapons: true, IsBuilding: false })) { Arm(new Pending("guard", "", 0, "Guard", false)); Root.Hud.Say("Guard: click the area to hold"); }
+                return true;
+            case Key.X:
+                if (_selected.Count > 0) Root.World.Submit(new ScatterCommand(Player, _selected.ToArray()));
+                return true;
+            case Key.R:
+            {
+                var air = _selected.Where(id => Root.World.Get(id) is { Unit.IsAir: true }).ToArray();
+                if (air.Length > 0) Root.World.Submit(new ReturnToBaseCommand(Player, air));
+                return true;
+            }
+            case Key.V:
+                foreach (var id in _selected.Where(id => Root.World.Get(id) is { Passengers.Count: > 0 })) Root.World.Submit(new UngarrisonCommand(Player, id));
+                return true;
+            case Key.Q:
+                SelectWhere(e => e.HasWeapons && !e.IsHarvester && !e.IsBuilder, false);
+                return true;
+            case Key.W:
+                SelectWhere(e => e.Unit is { IsAir: true } && e.HasWeapons, false);
+                return true;
+            case Key.E:
+            {
+                var like = _selected.Select(id => Root.World.Get(id)).FirstOrDefault(e => e is { IsBuilding: false });
+                if (like is null) return true;
+                var now = Time.GetTicksMsec();
+                var everywhere = now - _lastMatchTime < 400;
+                _lastMatchTime = now;
+                var ids = _selected.Select(id => Root.World.Get(id)?.Def.Id).Where(d => d is not null).ToHashSet();
+                SelectWhere(e => ids.Contains(e.Def.Id), !everywhere);
+                return true;
+            }
+            case Key.I:
+            {
+                var idle = Root.World.Entities.Where(e => e.Alive && e.Owner == Player && e.IsBuilder && !e.IsInside && e.Move is null
+                    && e.BuildTargetId == 0 && e.RepairTargetId == 0 && e.HarvestState == HarvestState.Idle).OrderBy(e => e.Id).ToList();
+                if (idle.Count == 0) { Root.Hud.Say("No idle builders"); return true; }
+                var next = idle.FirstOrDefault(e => e.Id > _lastIdleId) ?? idle[0];
+                _lastIdleId = next.Id;
+                SelectOnly(next.Id);
+                Root.Camera.Position = MapView.ToWorld(next.Pos);
+                return true;
+            }
+            case Key.F9:
+                Root.Hud.Visible = !Root.Hud.Visible;
+                return true;
             case Key.H:
                 JumpToHq();
                 return true;
@@ -101,6 +164,39 @@ public partial class SelectionController : Control
                 return true;
         }
         return false;
+    }
+
+    private ulong _lastMatchTime;
+    private int _lastIdleId;
+
+    /// <summary>The control group a unit belongs to, or -1. Drawn as a number tag by the overlay.</summary>
+    public int GroupOf(int entityId)
+    {
+        foreach (var (n, g) in _groups) if (g.Contains(entityId)) return n;
+        return -1;
+    }
+
+    /// <summary>Scripted runs only: assign a control group without the keyboard.</summary>
+    public void DebugSetGroup(int n, IEnumerable<int> ids) => _groups[n] = new HashSet<int>(ids);
+
+    private void SelectWhere(Func<Entity, bool> match, bool onScreenOnly)
+    {
+        var cam = Root.Camera.Camera;
+        var rect = GetViewport().GetVisibleRect();
+        _selected.Clear();
+        InspectId = 0;
+        foreach (var e in Root.World.Entities)
+        {
+            if (!e.Alive || e.Owner != Player || e.IsBuilding || e.IsInside || !match(e)) continue;
+            if (onScreenOnly)
+            {
+                var world = MapView.ToWorld(e.Pos, 0.5f + (e.Unit?.FlightHeight ?? 0f));
+                if (cam.IsPositionBehind(world) || !rect.HasPoint(cam.UnprojectPosition(world))) continue;
+            }
+            _selected.Add(e.Id);
+        }
+        ApplySelectionVisuals();
+        if (_selected.Count > 0) Respond("select");
     }
 
     /// <summary>Double-click: every unit of the same type on screen.</summary>
@@ -235,6 +331,10 @@ public partial class SelectionController : Control
                 if (entity is not null && entity.Def.GarrisonSlots > 0 && (entity.Owner == Player || entity.Owner < 0))
                     Root.World.Submit(new GarrisonCommand(Player, _selected.Where(id => Root.World.Get(id) is { Def.IsInfantry: true }).ToArray(), entity.Id));
                 else { Root.Hud.Say("Infantry cannot enter that"); return; }
+                break;
+            case "guard":
+                Root.World.Submit(new GuardCommand(Player, _selected.ToArray(), target.Value));
+                Respond("attack");
                 break;
             case "superweapon":
                 Root.World.Submit(new FireSuperweaponCommand(Player, p.BuildingId, target.Value));

@@ -43,14 +43,19 @@ Smoke test used by Claude for visual checks: `godot-mono --path game -- --smoke=
 | Left-drag / click | select; Shift adds; double-click selects every unit of that type on screen |
 | Right-click | move, attack, enter a building or transport, capture a tech building, harvest, help build, repair a damaged building with a builder, send aircraft home to an airfield, set a rally point |
 | A then click | attack-move |
-| S | stop |
-| Ctrl+1–9 / 1–9 | set / recall a control group; double-tap to jump to it |
+| G then click | guard an area: engage intruders, then return to post |
+| S / X | stop / scatter |
+| R / V | aircraft return to base / unload passengers |
+| Q / W / E / I | select all combat units / all aircraft / matching units (E twice: everywhere) / next idle builder |
+| Ctrl+0–9 / 0–9 | set / recall a control group; double-tap to jump; Shift adds it to the selection; Alt only looks. Units wear their group number |
 | H | jump to headquarters |
 | Space | jump to the last alert |
 | Click anything not yours | inspect it |
-| WASD, screen edges, middle-drag | pan; Q/E rotate; wheel, two-finger scroll or +/- zoom |
+| Arrow keys, screen edges, middle-drag | pan; [ and ] rotate; wheel, two-finger scroll or +/- zoom |
 | Minimap | left-click to look, right-click to send the selection |
-| M | music on/off; Esc pauses |
+| M / F9 | music on/off / hide the interface; Esc pauses |
+
+Settings (title screen or pause menu): window mode and size, interface size, 3D resolution, anti-aliasing, V-sync, five volume sliders, edge scrolling, scroll speed, group tags, and the full key list. Saved to `user://settings.cfg`.
 
 Hover any build, unit, upgrade or power button to read what it costs, what it needs, and what it can attack (ground, air or both).
 

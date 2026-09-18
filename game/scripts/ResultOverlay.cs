@@ -34,7 +34,7 @@ public partial class ResultOverlay : CanvasLayer
         Ui.Clear(_canvas);
         var w = Root.World;
         var faction = w.Player(Root.LocalPlayer).Faction.Id;
-        var tall = _ended ? 548 : 472;
+        var tall = _ended ? 596 : 520;
         var p = Ui.Panel(_canvas, 560, (height - tall) / 2, 480, tall, CommandTheme.Panel, true);
         var accent = !_ended ? CommandTheme.Gold : _won ? CommandTheme.Gold : CommandTheme.Red;
         Ui.Icon(p, Ui.FactionIcon(faction), 205, 30, 70, accent);
@@ -55,7 +55,8 @@ public partial class ResultOverlay : CanvasLayer
         }
         Ui.Button(p, _ended ? "KEEP WATCHING" : "RESUME OPERATIONS", 55, y + 12, 370, 52, Close, true, 22);
         Ui.Button(p, "RETURN TO COMMAND", 55, y + 78, 370, 48, () => Root.App.ShowMenu(), false, 20);
-        Ui.Button(p, "QUIT TO DESKTOP", 55, y + 136, 370, 40, () => GetTree().Quit(), false, 16);
+        Ui.Button(p, "SETTINGS", 55, y + 136, 370, 40, () => AddChild(new SettingsPanel()), false, 16);
+        Ui.Button(p, "QUIT TO DESKTOP", 55, y + 184, 370, 40, () => GetTree().Quit(), false, 16);
         Ui.Text(p, _ended ? Ui.Clock(w.Time) + "  ELAPSED" : "ESC TO RESUME", 40, tall - 40, 400, 22, 12, CommandTheme.Muted, true, HorizontalAlignment.Center);
     }
 

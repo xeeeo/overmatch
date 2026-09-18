@@ -47,7 +47,7 @@ public partial class RtsCamera : Node3D
         var vp = GetViewport();
         var mouse = vp.GetMousePosition();
         var size = vp.GetVisibleRect().Size;
-        if (mouse.X >= 0 && mouse.Y >= 0 && mouse.X <= size.X && mouse.Y <= size.Y && !_middleDrag)
+        if (GameSettings.EdgeScroll && mouse.X >= 0 && mouse.Y >= 0 && mouse.X <= size.X && mouse.Y <= size.Y && !_middleDrag)
         {
             if (mouse.X < EdgeMargin) move.X -= 1;
             else if (mouse.X > size.X - EdgeMargin) move.X += 1;
@@ -59,7 +59,7 @@ public partial class RtsCamera : Node3D
         {
             move = move.Normalized();
             // Pan relative to the camera's yaw; speed scales with zoom so it feels constant on screen.
-            var speed = PanSpeed * (_distance / 45f) * dt;
+            var speed = PanSpeed * GameSettings.ScrollSpeed * (_distance / 45f) * dt;
             var forward = -Basis.Z;
             var right = Basis.X;
             Position += (right * move.X + forward * -move.Y) * speed;
