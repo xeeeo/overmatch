@@ -231,7 +231,7 @@ public partial class SelectionController : Control
                 return;
             }
             var capturable = Pick(screen, e => e.Building is { Capturable: true } && e.Owner != Player);
-            var capturers = infantry.Where(id => Root.World.Get(id)!.Unit!.CanCapture).ToArray();
+            var capturers = infantry.Where(id => Root.World.Get(id)?.Unit?.CanCapture == true).ToArray();
             if (capturable is not null && capturers.Length > 0)
             {
                 Root.World.Submit(new CaptureCommand(Player, capturers, capturable.Id));
