@@ -1,6 +1,6 @@
 {
   "id": "demo_charge",
-  "damage": 900,
+  "damage": 750,
   "damageType": "demolition",
   "range": 1,
   "cooldown": 1,

@@ -1,6 +1,6 @@
 {
   "id": "truck_bomb",
-  "damage": 1400,
+  "damage": 1200,
   "damageType": "demolition",
   "range": 1,
   "cooldown": 1,

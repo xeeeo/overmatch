@@ -1,11 +1,84 @@
 {
-  "infantry":      { "small_arms": 1.0, "armour_piercing": 0.25, "explosive": 1.5, "flame": 2.0, "toxin": 2.0, "sniper": 3.0, "crush": 3.0, "laser": 1.0 },
-  "light_vehicle": { "small_arms": 0.35, "armour_piercing": 1.25, "explosive": 1.0, "flame": 0.5, "toxin": 0.1, "sniper": 0.1, "laser": 1.0 },
-  "tank":          { "small_arms": 0.1, "armour_piercing": 1.0, "explosive": 0.6, "flame": 0.3, "toxin": 0.0, "sniper": 0.0, "laser": 1.0 },
-  "heavy_tank":    { "small_arms": 0.05, "armour_piercing": 0.8, "explosive": 0.5, "flame": 0.2, "toxin": 0.0, "sniper": 0.0, "laser": 0.9 },
-  "aircraft":      { "small_arms": 0.2, "armour_piercing": 0.0, "explosive": 0.0, "flame": 0.0, "toxin": 0.0, "sniper": 0.0, "laser": 1.0 },
-  "drone":         { "small_arms": 1.0, "armour_piercing": 0.0, "explosive": 0.5, "flame": 0.0, "toxin": 0.0, "sniper": 0.5, "laser": 1.5, "jam": 10.0 },
-  "harvester":     { "small_arms": 0.3, "armour_piercing": 1.0, "explosive": 0.8, "flame": 0.5, "toxin": 0.1, "sniper": 0.0 },
-  "structure":     { "small_arms": 0.1, "armour_piercing": 0.5, "explosive": 1.0, "flame": 0.6, "toxin": 0.0, "sniper": 0.0, "demolition": 3.0 },
-  "fortification": { "small_arms": 0.02, "armour_piercing": 0.3, "explosive": 0.8, "flame": 0.3, "toxin": 0.0, "sniper": 0.0, "demolition": 3.0 }
+  "infantry": {
+    "small_arms": 1.0,
+    "armour_piercing": 0.25,
+    "explosive": 1.5,
+    "flame": 2.0,
+    "toxin": 2.0,
+    "sniper": 3.0,
+    "crush": 3.0,
+    "laser": 1.0
+  },
+  "light_vehicle": {
+    "small_arms": 0.35,
+    "armour_piercing": 1.25,
+    "explosive": 1.0,
+    "flame": 0.5,
+    "toxin": 0.1,
+    "sniper": 0.1,
+    "laser": 1.0
+  },
+  "tank": {
+    "small_arms": 0.1,
+    "armour_piercing": 1.0,
+    "explosive": 0.6,
+    "flame": 0.3,
+    "toxin": 0.0,
+    "sniper": 0.0,
+    "laser": 1.0
+  },
+  "heavy_tank": {
+    "small_arms": 0.05,
+    "armour_piercing": 0.8,
+    "explosive": 0.5,
+    "flame": 0.2,
+    "toxin": 0.0,
+    "sniper": 0.0,
+    "laser": 0.9
+  },
+  "aircraft": {
+    "small_arms": 0.2,
+    "armour_piercing": 0.0,
+    "explosive": 0.0,
+    "flame": 0.0,
+    "toxin": 0.0,
+    "sniper": 0.0,
+    "laser": 1.0
+  },
+  "drone": {
+    "small_arms": 1.0,
+    "armour_piercing": 0.0,
+    "explosive": 0.5,
+    "flame": 0.0,
+    "toxin": 0.0,
+    "sniper": 0.5,
+    "laser": 1.5,
+    "jam": 10.0
+  },
+  "harvester": {
+    "small_arms": 0.3,
+    "armour_piercing": 1.0,
+    "explosive": 0.8,
+    "flame": 0.5,
+    "toxin": 0.1,
+    "sniper": 0.0
+  },
+  "structure": {
+    "small_arms": 0.1,
+    "armour_piercing": 0.5,
+    "explosive": 1.0,
+    "flame": 0.6,
+    "toxin": 0.0,
+    "sniper": 0.0,
+    "demolition": 2.0
+  },
+  "fortification": {
+    "small_arms": 0.02,
+    "armour_piercing": 0.3,
+    "explosive": 0.8,
+    "flame": 0.3,
+    "toxin": 0.0,
+    "sniper": 0.0,
+    "demolition": 2.0
+  }
 }
