@@ -71,18 +71,40 @@ public partial class RtsCamera : Node3D
 
     public override void _UnhandledInput(InputEvent @event)
     {
-        if (@event is InputEventMouseButton mb)
+        switch (@event)
         {
-            if (mb.ButtonIndex == MouseButton.WheelUp && mb.Pressed) _targetDistance = Mathf.Clamp(_targetDistance - ZoomStep, MinDistance, MaxDistance);
-            else if (mb.ButtonIndex == MouseButton.WheelDown && mb.Pressed) _targetDistance = Mathf.Clamp(_targetDistance + ZoomStep, MinDistance, MaxDistance);
-            else if (mb.ButtonIndex == MouseButton.Middle) _middleDrag = mb.Pressed;
-        }
-        else if (@event is InputEventMouseMotion mm && _middleDrag)
-        {
-            var speed = 0.06f * (_distance / 45f);
-            Position += (Basis.X * -mm.Relative.X + -Basis.Z * mm.Relative.Y) * speed;
+            // Mouse wheel. `Factor` is fractional for precise-scrolling devices, 1 for click wheels.
+            case InputEventMouseButton { ButtonIndex: MouseButton.WheelUp, Pressed: true } up:
+                Zoom(-ZoomStep * Mathf.Max(up.Factor, 0.2f));
+                break;
+            case InputEventMouseButton { ButtonIndex: MouseButton.WheelDown, Pressed: true } down:
+                Zoom(ZoomStep * Mathf.Max(down.Factor, 0.2f));
+                break;
+            case InputEventMouseButton { ButtonIndex: MouseButton.Middle } mid:
+                _middleDrag = mid.Pressed;
+                break;
+            // macOS trackpad two-finger scroll arrives as a pan gesture rather than wheel clicks.
+            case InputEventPanGesture pan:
+                Zoom(pan.Delta.Y * ZoomStep * 0.25f);
+                break;
+            // Pinch.
+            case InputEventMagnifyGesture mag:
+                Zoom((1f - mag.Factor) * _distance);
+                break;
+            case InputEventMouseMotion mm when _middleDrag:
+            {
+                var speed = 0.06f * (_distance / 45f);
+                Position += (Basis.X * -mm.Relative.X + -Basis.Z * mm.Relative.Y) * speed;
+                break;
+            }
+            case InputEventKey { Pressed: true } key:
+                if (key.Keycode is Key.Equal or Key.Plus or Key.KpAdd) Zoom(-ZoomStep);
+                else if (key.Keycode is Key.Minus or Key.KpSubtract) Zoom(ZoomStep);
+                break;
         }
     }
+
+    private void Zoom(float delta) => _targetDistance = Mathf.Clamp(_targetDistance + delta, MinDistance, MaxDistance);
 
     private void ApplyCameraTransform()
     {

@@ -114,7 +114,7 @@ public partial class GameRoot : Node3D
         }
 
         _hud.Text = $"OVERMATCH  pre-alpha M0   tick {World.Tick}   {Engine.GetFramesPerSecond()} fps\n" +
-                    "Left-drag: select   Shift: add   Right-click: move   Ctrl+A: all   S: stop   WASD/edges: pan   Q/E: rotate   Wheel: zoom";
+                    "Left-drag: select   Shift: add   Right-click: move   Ctrl+A: all   S: stop   WASD/edges: pan   Q/E: rotate   Wheel / two-finger scroll / +-: zoom";
     }
 
     private static Color PlayerColour(int owner, FactionDef? faction)
