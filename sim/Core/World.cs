@@ -416,6 +416,27 @@ public sealed class World
                     if (u.IsBuilder) { ClearJobs(u); u.BuildTargetId = site.Id; u.Move = null; }
                 break;
             }
+            case RepairCommand rp:
+            {
+                var target = Get(rp.BuildingId);
+                if (target is null || target.Owner != rp.Player || !target.IsBuilding || target.UnderConstruction || target.Hp >= target.MaxHp) break;
+                foreach (var u in OwnedUnits(rp.Player, rp.Units))
+                    if (u.IsBuilder) { ClearJobs(u); u.RepairTargetId = target.Id; u.Move = null; }
+                break;
+            }
+            case ReturnToBaseCommand rtb:
+            {
+                var any = false;
+                foreach (var u in OwnedUnits(rtb.Player, rtb.Units))
+                {
+                    if (u.Unit is not { IsAir: true } || u.Def.Tags.Contains("drone")) continue;
+                    if (Effects.NearestPad(this, u) is null) { if (!any) Emit(new OrderRejectedEvent(rtb.Player, "no_airfield")); any = true; continue; }
+                    ClearJobs(u); u.TargetId = 0; u.Move = null;
+                    u.ReturningToBase = true;
+                    if (u.Unit.Ammo > 0 && u.Ammo < u.Unit.Ammo) { u.Rearming = true; u.RearmTimer = u.Unit.RearmTime; }
+                }
+                break;
+            }
             case ProduceCommand p:
                 Production.Enqueue(this, p);
                 break;
@@ -496,6 +517,8 @@ public sealed class World
     private static void ClearJobs(Entity u)
     {
         u.BuildTargetId = 0;
+        u.RepairTargetId = 0;
+        u.ReturningToBase = false;
         u.EnterTargetId = 0;
         u.CaptureTargetId = 0;
         u.CaptureProgress = 0f;

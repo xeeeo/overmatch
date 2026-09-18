@@ -30,5 +30,6 @@
   "tags": [
     "structure"
   ],
-  "description": "Builds vehicles."
+  "description": "Builds vehicles. Repairs vehicles parked beside it.",
+  "auras": [{ "type": "heal", "radius": 7, "amount": 8, "targets": "vehicle" }]
 }

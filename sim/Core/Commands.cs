@@ -32,6 +32,12 @@ public sealed record HarvestCommand(int Player, int[] Units, int PileId) : Comma
 public sealed record AssistBuildCommand(int Player, int[] Units, int BuildingId) : Command(Player);
 
 /// <summary>Use a unit ability. Target point or entity depending on the ability.</summary>
+/// <summary>Builders repair a finished, damaged building of their own. Free, like the original.</summary>
+public sealed record RepairCommand(int Player, int[] Units, int BuildingId) : Command(Player);
+
+/// <summary>Aircraft fly to the nearest own airfield to be repaired (and rearmed, if they carry ammo).</summary>
+public sealed record ReturnToBaseCommand(int Player, int[] Units) : Command(Player);
+
 public sealed record AbilityCommand(int Player, int[] Units, string AbilityId, Vec2 Target, int TargetId) : Command(Player);
 
 /// <summary>Infantry enter a garrisonable building, transport or tunnel.</summary>

@@ -32,5 +32,6 @@
     "directorate_uranium_shells",
     "directorate_flak_autoloaders"
   ],
-  "description": "Builds vehicles."
+  "description": "Builds vehicles. Repairs vehicles parked beside it.",
+  "auras": [{ "type": "heal", "radius": 7, "amount": 8, "targets": "vehicle" }]
 }

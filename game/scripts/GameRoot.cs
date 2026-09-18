@@ -168,7 +168,7 @@ public partial class GameRoot : Node3D
                 Result.TogglePause();
             }
             // An income building, photographed just after it pays so the countdown and the cash popup are both checked.
-            if (_uiStage == 5 && _pauseShotFrames == 0 && !Paused)
+            if (_uiStage == 22 && !Paused)
             {
                 _uiStage = 6;
                 var me = w.Player(LocalPlayer);
@@ -191,7 +191,44 @@ public partial class GameRoot : Node3D
             }
             else if (_uiStage == 7 && w.Events.OfType<IncomeEvent>().Any(i => i.BuildingId == _incomeId)) { _uiStage = 8; _incomeShotFrames = 14; }
             if (_incomeShotFrames > 0 && --_incomeShotFrames == 0)
+            {
                 GetViewport().GetTexture().GetImage().SavePng(_smokePath!.Replace(".png", "_income.png"));
+            }
+            // A damaged aircraft ordered home, photographed while the airfield repairs it.
+            if (_uiStage == 5 && _pauseShotFrames == 0 && !Paused)
+            {
+                _uiStage = 20;
+                var me = w.Player(LocalPlayer);
+                var field = w.Rules.Buildings.Values.FirstOrDefault(b => b.Faction == me.Faction.Id && b.Pads > 0);
+                var craft = w.Rules.Units.Values.FirstOrDefault(u => u.Faction == me.Faction.Id && u.IsAir && u.Weapons.Count > 0 && !u.Tags.Contains("drone"));
+                var spawn = w.MapDef.Spawns[LocalPlayer];
+                if (field is not null && craft is not null)
+                    for (var r = 10; r < 24 && _repairId == 0; r++)
+                        for (var a = 0; a < 16 && _repairId == 0; a++)
+                        {
+                            var cx = (int)(spawn.X + r * Mathf.Cos(a * Mathf.Tau / 16f));
+                            var cy = (int)(spawn.Y + r * Mathf.Sin(a * Mathf.Tau / 16f));
+                            if (!w.CanPlace(field, cx, cy, out _)) continue;
+                            var pad = w.PlaceBuilding(field.Id, LocalPlayer, cx, cy);
+                            var plane = w.Spawn(craft.Id, LocalPlayer, pad.Pos + new Vec2(9, 3));
+                            plane.Hp = plane.MaxHp * 0.3f;
+                            _repairId = plane.Id;
+                            w.Submit(new ReturnToBaseCommand(LocalPlayer, new[] { plane.Id }));
+                        }
+                if (_repairId == 0) _uiStage = 22;
+            }
+            else if (_uiStage == 20 && _repairId != 0 && w.Get(_repairId) is { BeingRepaired: true } fixing && Views.ContainsKey(_repairId))
+            {
+                _uiStage = 21;
+                Selection.SelectOnly(_repairId);
+                Camera.Position = MapView.ToWorld(fixing.Pos);
+                _repairShotFrames = 10;
+            }
+            if (_repairShotFrames > 0 && --_repairShotFrames == 0)
+            {
+                GetViewport().GetTexture().GetImage().SavePng(_smokePath!.Replace(".png", "_repair.png"));
+                _uiStage = 22;
+            }
             if (w.Tick / 600 != _lastLogged)
             {
                 _lastLogged = w.Tick / 600;
@@ -277,6 +314,8 @@ public partial class GameRoot : Node3D
     private int _pauseShotFrames;
     private int _incomeId;
     private int _incomeShotFrames;
+    private int _repairId;
+    private int _repairShotFrames;
 
     public override void _Process(double delta)
     {
@@ -348,6 +387,7 @@ public partial class GameRoot : Node3D
                         "insufficient funds" => "Insufficient funds",
                         "occupied" => "Cannot build there",
                         "terrain" => "Cannot build on that terrain",
+                        "no_airfield" => "No airfield to return to",
                         _ => r.Reason,
                     });
                     break;

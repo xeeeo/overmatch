@@ -35,6 +35,8 @@ public sealed class AiProfile
     public float IncomeMult { get; set; } = 1f;
     /// <summary>Attack harvesters and expansions before the main base.</summary>
     public bool Harass { get; set; }
+    /// <summary>Send badly damaged aircraft home to the airfield for repair. Hard and Brutal only: it makes helicopters very hard to finish off.</summary>
+    public bool RetreatAircraft { get; set; }
     public bool Expand { get; set; } = true;
     /// <summary>How far from own buildings enemies trigger a defensive response.</summary>
     public float DefenceRadius { get; set; } = 24f;

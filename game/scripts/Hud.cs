@@ -356,7 +356,7 @@ if (d is BuildingDef { Trickle: { } inc } ib)
             meter.Fraction = f;
             var c = f > 0.6f ? CommandTheme.Green : f > 0.3f ? CommandTheme.Gold : CommandTheme.Red;
             meter.SetColour(c);
-            status.Text = s.UnderConstruction ? $"BUILDING {s.BuildProgress * 100:0}%" : s.Disabled ? "DISABLED" : s.Rearming ? "REARMING" : f < 0.3f ? "CRITICAL" : s.IsBuilding ? "OPERATIONAL" : "READY";
+            status.Text = s.UnderConstruction ? $"BUILDING {s.BuildProgress * 100:0}%" : s.Disabled ? "DISABLED" : s.Rearming ? "REARMING" : s.BeingRepaired ? "REPAIRING" : s.ReturningToBase ? "RETURNING" : f < 0.3f ? "CRITICAL" : s.IsBuilding ? "OPERATIONAL" : "READY";
             status.AddThemeColorOverride("font_color", s.Disabled ? CommandTheme.Blue : c);
             var bits = new List<string>();
             if (s.Level > 0) bits.Add("VETERAN " + new string('★', s.Level));
@@ -400,6 +400,8 @@ if (mine && s.Building is { Trickle: { } tr } sb && !s.UnderConstruction)
         {
             Mini("stop", "STOP", () => w.Submit(new StopCommand(me, Sel())), "Halt and drop current orders. Hotkey S.");
             if (s.HasWeapons) Mini("attack", "A-MOVE", () => Root.Selection.ArmAttackMove(), "Attack-move: advance and fight anything on the way. Hotkey A, then click.");
+            if (s.Unit is { IsAir: true } && !s.Def.Tags.Contains("drone"))
+                Mini("repair", "TO BASE", () => w.Submit(new ReturnToBaseCommand(me, Sel())), "Fly to the nearest airfield. Aircraft holding over an airfield are repaired, and jets rearm. Right-clicking an airfield does the same.");
             if (s.Passengers.Count > 0 || (s.Def.GarrisonSlots > 0 && !s.Def.IsInfantry)) Mini("rally", "UNLOAD", () => w.Submit(new UngarrisonCommand(me, s.Id)), "Passengers out.");
         }
     }

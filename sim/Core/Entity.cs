@@ -74,6 +74,13 @@ public sealed class Entity
     public int CaptureTargetId { get; set; }
     public float CaptureProgress { get; set; }
     public int Ammo { get; set; }
+    /// <summary>True while a heal aura or a builder is restoring this entity. Presentation only.</summary>
+    public bool BeingRepaired { get; set; }
+    /// <summary>Builder job: the completed building being repaired.</summary>
+    public int RepairTargetId { get; set; }
+    /// <summary>Aircraft ordered home. Stays on the pad until fixed or given another order.</summary>
+    public bool ReturningToBase { get; set; }
+    public int LastDamagedTick { get; set; } = -100000;
     public bool Rearming { get; set; }
     public float RearmTimer { get; set; }
     public int SalvageLevel { get; set; }

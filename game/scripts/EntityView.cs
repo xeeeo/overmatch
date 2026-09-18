@@ -158,7 +158,8 @@ public partial class EntityView : Node3D
     /// <summary>Battle damage reads at a glance: smoke under half health, fire under a quarter.</summary>
     private void UpdateDamageLook()
     {
-        if (Entity.IsInfantryLike()) return;
+        // A unit can arrive already damaged; emitters need the tree, so wait for the first frame inside it.
+        if (Entity.IsInfantryLike() || !IsInsideTree()) return;
         var f = Entity.HpFraction;
         var wantSmoke = f < 0.5f && !Entity.UnderConstruction;
         var wantFire = f < 0.25f && !Entity.UnderConstruction;

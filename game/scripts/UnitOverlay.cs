@@ -47,7 +47,7 @@ public partial class UnitOverlay : Control
                     if (u.CaptureTargetId == e.Id && u.CaptureProgress > capture) capture = u.CaptureProgress;
             // Income buildings the player owns always show a countdown to the next payout.
             var income = building && e.Owner == Root.LocalPlayer && e.Building is { Trickle: not null } && !e.UnderConstruction;
-            if (!view.Selected && frac >= 0.999f && !e.UnderConstruction && capture <= 0f && e.Level == 0 && !income && Root.Selection.InspectId != e.Id) continue;
+            if (!view.Selected && frac >= 0.999f && !e.UnderConstruction && capture <= 0f && e.Level == 0 && !income && !e.BeingRepaired && Root.Selection.InspectId != e.Id) continue;
             var lift = building ? e.Radius * 0.9f + 1.5f : 2.1f + (e.Unit?.FlightHeight ?? 0f);
             var world = view.Position + new Vector3(0, lift - (e.Unit?.FlightHeight ?? 0f), 0);
             if (cam.IsPositionBehind(world)) continue;
@@ -58,6 +58,15 @@ public partial class UnitOverlay : Control
             DrawRect(rect, new Color(0, 0, 0, 0.7f));
             var colour = frac > 0.6f ? new Color(0.3f, 0.9f, 0.3f) : frac > 0.3f ? new Color(0.95f, 0.8f, 0.2f) : new Color(0.95f, 0.25f, 0.2f);
             DrawRect(new Rect2(rect.Position + new Vector2(1, 1), new Vector2((w - 2) * frac, h - 2)), colour);
+            if (e.BeingRepaired && frac < 0.999f)
+            {
+                // A pulsing green cross: this one is being repaired.
+                var pulse = 0.6f + 0.4f * Mathf.Sin(Time.GetTicksMsec() / 160f);
+                var cx = s.X + w / 2f + (income ? 50f : 9f);
+                var green = new Color(0.35f, 1f, 0.45f, pulse);
+                DrawRect(new Rect2(cx - 1.5f, s.Y - 8f, 3f, 11f), green);
+                DrawRect(new Rect2(cx - 5.5f, s.Y - 4f, 11f, 3f), green);
+            }
             // Veterancy chevrons.
             for (var c = 0; c < e.Level; c++)
             {

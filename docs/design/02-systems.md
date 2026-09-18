@@ -102,3 +102,10 @@ A player is eliminated when they own no buildings and no builders (checked once 
 - **Suicide weapons**: Saboteur, Bomb Truck, IED, FPV and loitering drones detonate on contact. **Death damage**: Reactors explode and irradiate. **Crush**: the Colossus kills infantry it drives over.
 - **Neutral map objects**: civilian houses/blocks to garrison, oil derricks to capture. Neutral owner is -1 and is never auto-targeted.
 - The AI buys powers in faction order. It uses offensive powers only to support a wave that has reached its target or to hit intruders at its own base, never as a cold opening strike. It fires superweapons at the enemy HQ. Hard and Brutal build the superweapon. Waves reinforce: fresh units join or relaunch the attack whenever enough gather, so a lingering wave cannot leave the AI passive.
+
+## Repair (as built, play-test pass)
+
+- **Repair bays** are heal auras with a `targets` filter (`air`, `vehicle`, `infantry`). Airfields repair aircraft holding over them at 10 hp/s, vehicle factories repair vehicles beside them at 8 hp/s, barracks and the Safehouse heal infantry at 5 hp/s. All data, in the building JSON.
+- **Return to base**: `ReturnToBaseCommand` sends aircraft (not drones) to the nearest own airfield, where they hold until repaired; jets short of ammo rearm on the same trip. Any new order cancels it. In the game: the TO BASE button or right-click an airfield.
+- **Builders repair buildings** for free with `RepairCommand` (right-click a damaged building). A full repair takes 60 s or 1.5x the build time, whichever is longer, and work stops for 6 s after each hit, so a building cannot be held up under fire.
+- **AI**: a builder with nothing else to do patches the worst building under 75%. Hard and Brutal (`retreatAircraft`) also pull aircraft under 35% back to the airfield. Medium does not: in the harness it made Coalition helicopters nearly unkillable for the Network AI (78% win rate).

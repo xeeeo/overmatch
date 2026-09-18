@@ -41,7 +41,7 @@ Smoke test used by Claude for visual checks: `godot-mono --path game -- --smoke=
 | | |
 |---|---|
 | Left-drag / click | select; Shift adds; double-click selects every unit of that type on screen |
-| Right-click | move, attack, enter a building or transport, capture a tech building, harvest, help build, set a rally point |
+| Right-click | move, attack, enter a building or transport, capture a tech building, harvest, help build, repair a damaged building with a builder, send aircraft home to an airfield, set a rally point |
 | A then click | attack-move |
 | S | stop |
 | Ctrl+1–9 / 1–9 | set / recall a control group; double-tap to jump to it |

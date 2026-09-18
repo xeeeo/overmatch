@@ -54,6 +54,7 @@ public sealed class AiController
 
         ManageBuilders(hq);
         ManageBase(hq);
+        ManageRepairs();
         ManageHarvesters();
         ManageProduction();
         ManageUpgrades();
@@ -161,8 +162,8 @@ public sealed class AiController
     private bool Constructing(string buildingId) => Mine.Any(e => e.Building?.Id == buildingId && e.UnderConstruction);
     /// <summary>A builder not already on a site. Prefers one that is idle over one that is harvesting; never one carrying cargo home.</summary>
     private Entity? IdleBuilder() =>
-        Mine.FirstOrDefault(e => e.IsBuilder && e.BuildTargetId == 0 && !e.IsInside && !_assigned.Contains(e.Id) && e.Move is null && e.HarvestState == HarvestState.Idle)
-        ?? Mine.FirstOrDefault(e => e.IsBuilder && e.BuildTargetId == 0 && !e.IsInside && !_assigned.Contains(e.Id) && e.HarvestState is HarvestState.Idle or HarvestState.ToPile or HarvestState.Loading);
+        Mine.FirstOrDefault(e => e.IsBuilder && e.BuildTargetId == 0 && e.RepairTargetId == 0 && !e.IsInside && !_assigned.Contains(e.Id) && e.Move is null && e.HarvestState == HarvestState.Idle)
+        ?? Mine.FirstOrDefault(e => e.IsBuilder && e.BuildTargetId == 0 && e.RepairTargetId == 0 && !e.IsInside && !_assigned.Contains(e.Id) && e.HarvestState is HarvestState.Idle or HarvestState.ToPile or HarvestState.Loading);
     private bool CanAfford(int cost) => Me.Cash >= cost + _p.CashReserve;
 
     private IEnumerable<Entity> Producers(string unitId) => Mine.Where(e => e.Operational && e.Building?.Produces.Contains(unitId) == true);
@@ -296,7 +297,7 @@ public sealed class AiController
         // Idle harvesters go back to work, but only when there is somewhere to unload, and never a builder on (or just sent to) a site.
         var hasCenter = Mine.Any(e => e.Operational && e.Building is { SupplyCenter: true });
         if (hasCenter)
-            foreach (var h in Mine.Where(e => e.IsHarvester && e.HarvestState == HarvestState.Idle && e.Move is null && e.BuildTargetId == 0 && !e.IsInside && !_assigned.Contains(e.Id)))
+            foreach (var h in Mine.Where(e => e.IsHarvester && e.HarvestState == HarvestState.Idle && e.Move is null && e.BuildTargetId == 0 && e.RepairTargetId == 0 && !e.IsInside && !_assigned.Contains(e.Id)))
                 if (Economy.NearestPile(_w, h.Pos, 60f) is not null) { _w.Submit(new HarvestCommand(Player, new[] { h.Id }, 0)); _assigned.Add(h.Id); }
         if (have >= target || _w.Piles.All(p => p.Depleted)) return;
         var producer = Producers(_p.HarvesterUnit).FirstOrDefault(e => e.Queue is { Items.Count: 0 });
@@ -352,6 +353,28 @@ public sealed class AiController
         }
     }
 
+    /// <summary>A spare builder patches up the worst damaged building; badly hurt aircraft go home to the airfield.</summary>
+    private void ManageRepairs()
+    {
+        var worst = Mine.Where(e => e.IsBuilding && !e.UnderConstruction && e.Building is not { IsHole: true } && e.HpFraction < 0.75f
+                && !Mine.Any(b => b.RepairTargetId == e.Id))
+            .OrderBy(e => e.HpFraction).FirstOrDefault();
+        // Only a builder with nothing else to do: pulling a Network worker off the supply run costs more than the repair is worth.
+        var fixer = worst is null ? null : Mine.FirstOrDefault(e => e.IsBuilder && e.BuildTargetId == 0 && e.RepairTargetId == 0 && !e.IsInside
+            && !_assigned.Contains(e.Id) && e.Move is null && e.HarvestState == HarvestState.Idle);
+        if (worst is not null && fixer is not null)
+        {
+            _w.Submit(new RepairCommand(Player, new[] { fixer.Id }, worst.Id));
+            _assigned.Add(fixer.Id);
+        }
+        if (!_p.RetreatAircraft) return;
+        var limping = Mine.Where(e => e.Unit is { IsAir: true } && IsArmyUnit(e) && !e.Def.Tags.Contains("drone") && !e.ReturningToBase
+            && e.HpFraction < 0.35f && Effects.NearestPad(_w, e) is not null).Select(e => e.Id).ToArray();
+        if (limping.Length == 0) return;
+        _w.Submit(new ReturnToBaseCommand(Player, limping));
+        _wave.RemoveAll(limping.Contains);
+    }
+
     private void ManageDefence(Entity hq)
     {
         if (_w.Time - _lastDefenceTime < 4f) return;
@@ -369,7 +392,7 @@ public sealed class AiController
         }
         if (threat is null) return;
         _lastDefenceTime = _w.Time;
-        var defenders = Mine.Where(e => IsArmyUnit(e) && !_wave.Contains(e.Id)).Select(e => e.Id).ToArray();
+        var defenders = Mine.Where(e => IsArmyUnit(e) && !e.ReturningToBase && !_wave.Contains(e.Id)).Select(e => e.Id).ToArray();
         if (defenders.Length == 0) return;
         _w.Submit(new AttackMoveCommand(Player, defenders, threat.Pos));
         Status = "defending";
@@ -378,7 +401,7 @@ public sealed class AiController
     private void ManageAttack(Entity hq)
     {
         var now = _w.Time;
-        var home = Mine.Where(e => IsArmyUnit(e) && !_wave.Contains(e.Id)).ToList();
+        var home = Mine.Where(e => IsArmyUnit(e) && !e.ReturningToBase && !_wave.Contains(e.Id)).ToList();
 
         if (_wave.Count > 0)
         {

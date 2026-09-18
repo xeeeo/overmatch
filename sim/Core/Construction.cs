@@ -42,16 +42,47 @@ public static class Construction
         player.Cash -= def.Cost;
         var site = world.PlaceBuilding(def.Id, cmd.Player, cmd.CellX, cmd.CellY, complete: false);
         builder.BuildTargetId = site.Id;
+        builder.RepairTargetId = 0;
         builder.Move = null;
         builder.TargetId = 0;
         builder.HarvestState = HarvestState.Idle;
         world.Emit(new ConstructionStartedEvent(site.Id, cmd.Player));
     }
 
+    /// <summary>Builders standing at a damaged, finished building of their own restore it for free.</summary>
+    private static void Repairs(World world)
+    {
+        var dt = World.Dt;
+        foreach (var e in world.Entities) if (e.IsBuilding) e.BeingRepaired = false;
+        foreach (var b in world.Entities)
+        {
+            if (!b.Alive || b.RepairTargetId == 0) continue;
+            var target = world.Get(b.RepairTargetId);
+            if (target is null || !target.Alive || target.Owner != b.Owner || target.UnderConstruction || target.Hp >= target.MaxHp)
+            {
+                b.RepairTargetId = 0;
+                continue;
+            }
+            if (World.DistanceToBounds(target, b.Pos) > WorkRange + b.Radius)
+            {
+                if (b.Move is null || b.Move.Kind != MoveKind.Work || (world.Tick + b.Id) % 20 == 0)
+                    b.Move = new MoveOrder { Target = World.ApproachPoint(target, b.Pos, b.Radius + 0.4f), Kind = MoveKind.Work, ArriveRadius = 0.4f };
+                continue;
+            }
+            if (b.Move is { Kind: MoveKind.Work }) b.Move = null;
+            b.Facing = Angles.TurnToward(b.Facing, (target.Pos - b.Pos).Angle, Angles.DegToRad(b.Unit!.TurnRate) * dt);
+            // No patching a building while it is being shot at; the builder waits for a lull.
+            if (world.Tick - target.LastDamagedTick < RepairRules.UnderFireDelay * World.TicksPerSecond) continue;
+            target.Hp = MathF.Min(target.MaxHp, target.Hp + target.MaxHp * dt / MathF.Max(RepairRules.MinFullRepairTime, target.Def.BuildTime * 1.5f));
+            target.BeingRepaired = true;
+        }
+    }
+
     public static void Update(World world)
     {
         var dt = World.Dt;
         Holes(world);
+        Repairs(world);
         // Progress contributed by each builder standing at its site.
         foreach (var b in world.Entities)
         {
@@ -84,6 +115,14 @@ public static class Construction
             }
         }
     }
+}
+
+public static class RepairRules
+{
+    /// <summary>A lone builder restores a building from nothing in this many seconds, or its build time if longer.</summary>
+    public const float MinFullRepairTime = 60f;
+    /// <summary>Seconds after the last hit before repair work resumes.</summary>
+    public const float UnderFireDelay = 6f;
 }
 
 public static class HoleRules

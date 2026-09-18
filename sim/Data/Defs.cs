@@ -57,6 +57,16 @@ public sealed class AuraDef
     public string Type { get; set; } = "heal";
     public float Radius { get; set; } = 6f;
     public float Amount { get; set; } = 5f;
+    /// <summary>Heal auras only: "all", "air", "vehicle" or "infantry". Repair bays are heal auras with a filter.</summary>
+    public string Targets { get; set; } = "all";
+
+    public bool Affects(ObjectDef d) => Targets switch
+    {
+        "air" => d.IsAir,
+        "infantry" => d.IsInfantry,
+        "vehicle" => !d.IsAir && !d.IsInfantry,
+        _ => true,
+    };
 }
 
 public sealed class AbilityDef

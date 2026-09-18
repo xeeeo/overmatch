@@ -27,6 +27,7 @@
   "tags": [
     "structure"
   ],
-  "description": "Builds and rearms aircraft.",
-  "pads": 4
+  "description": "Builds and rearms aircraft. Repairs aircraft that hold over it.",
+  "pads": 4,
+  "auras": [{ "type": "heal", "radius": 8, "amount": 10, "targets": "air" }]
 }

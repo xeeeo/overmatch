@@ -262,6 +262,10 @@ public partial class SelectionController : Control
             return $"Right-click: enter {target.Def.Name}";
         if (target.Owner != Player && target.Owner >= 0) return $"Right-click: attack {target.Def.Name}";
         if (target.UnderConstruction && target.Owner == Player && _selected.Any(id => Root.World.Get(id) is { IsBuilder: true })) return "Right-click: help build";
+        if (target.Owner == Player && target.IsBuilding && target.Hp < target.MaxHp && _selected.Any(id => Root.World.Get(id) is { IsBuilder: true })) return $"Right-click: repair {target.Def.Name}";
+        if (target.Owner == Player && target.Building is { Pads: > 0 } && target.Operational && _selected.Any(id => Root.World.Get(id) is { Unit.IsAir: true })) return "Right-click: return to base for repair and rearm";
+        if (target.Owner == Player && target.Operational && target.Def.Auras.FirstOrDefault(a => a.Type == "heal" && a.Targets != "all") is { } bay
+            && _selected.Any(id => Root.World.Get(id) is { } u && u.Hp < u.MaxHp && bay.Affects(u.Def))) return $"{target.Def.Name}: damaged units beside it are repaired";
         return "";
     }
 
@@ -336,6 +340,21 @@ public partial class SelectionController : Control
             {
                 Root.World.Submit(new AssistBuildCommand(Player, builders, site.Id));
                 Root.ShowMarker(g0, new Color(0.4f, 0.8f, 1f));
+                return;
+            }
+            var hurt = Pick(screen, e => e.Owner == Player && e.IsBuilding && !e.UnderConstruction && e.Hp < e.MaxHp);
+            if (hurt is not null && builders.Length > 0)
+            {
+                Root.World.Submit(new RepairCommand(Player, builders, hurt.Id));
+                Root.ShowMarker(g0, new Color(0.3f, 0.9f, 0.3f));
+                return;
+            }
+            var airfield = Pick(screen, e => e.Owner == Player && e.Operational && e.Building is { Pads: > 0 });
+            var aircraft = _selected.Where(id => Root.World.Get(id) is { Unit.IsAir: true }).ToArray();
+            if (airfield is not null && aircraft.Length > 0)
+            {
+                Root.World.Submit(new ReturnToBaseCommand(Player, aircraft));
+                Root.ShowMarker(g0, new Color(0.3f, 0.9f, 0.3f));
                 return;
             }
         }

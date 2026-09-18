@@ -24,3 +24,13 @@ Average match 19–21 minutes; 18 of 108 hit the 30-minute limit and were scored
 - **IEDs counted as army.** The Network AI's IED Belt mines filled its army cap and were "sent to attack". Mines, escorts and timed units no longer count.
 
 This is AI-vs-AI balance. It says nothing yet about how the factions feel in human hands; that needs play.
+
+## 2026-09-18, after adding repair (144 matches, same command)
+
+| win % vs | Coalition | Directorate | Network | overall |
+|---|---|---|---|---|
+| Coalition | – | 63 | 40 | 51 |
+| Directorate | 38 | – | 57 | 47 |
+| Network | 60 | 43 | – | 52 |
+
+14 timeouts. Getting here took three corrections, each found by ablation: free building repair under fire stalled sieges (Coalition 61%), fast airfield repair plus AI retreat made helicopters unkillable for Network (Coalition 78% against it), so repair now pauses under fire, rates are modest, and only Hard and Brutal retreat aircraft.

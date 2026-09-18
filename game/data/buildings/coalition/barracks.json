@@ -2,4 +2,6 @@
   "footprint": [3, 3], "hp": 1200, "armour": "structure", "vision": 6, "power": -1,
   "produces": ["coalition_rifleman", "coalition_rocket_trooper", "coalition_pathfinder"],
   "upgrades": ["coalition_advanced_training"], "model": "coalition/barracks", "tags": ["structure"],
-  "description": "Trains infantry." }
+  "description": "Trains infantry. Heals infantry standing beside it.",
+  "auras": [{ "type": "heal", "radius": 6, "amount": 5, "targets": "infantry" }]
+}

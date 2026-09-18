@@ -48,5 +48,6 @@
   "reactionDelay": 0.5,
   "incomeMult": 1.5,
   "harass": true,
+  "retreatAircraft": true,
   "expand": true
 }

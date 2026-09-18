@@ -23,5 +23,6 @@
   "produces": [
     "directorate_talon"
   ],
-  "description": "Builds and rearms Talon bombers."
+  "description": "Builds and rearms Talon bombers. Repairs aircraft that hold over it.",
+  "auras": [{ "type": "heal", "radius": 8, "amount": 10, "targets": "air" }]
 }

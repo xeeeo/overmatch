@@ -29,5 +29,6 @@
     "network_camouflage",
     "network_better_rifles"
   ],
-  "description": "Trains infantry. Stealthed."
+  "description": "Trains infantry. Stealthed. Heals infantry standing beside it.",
+  "auras": [{ "type": "heal", "radius": 6, "amount": 5, "targets": "infantry" }]
 }

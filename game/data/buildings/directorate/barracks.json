@@ -24,5 +24,6 @@
   "upgrades": [
     "directorate_conscript_training"
   ],
-  "description": "Trains infantry."
+  "description": "Trains infantry. Heals infantry standing beside it.",
+  "auras": [{ "type": "heal", "radius": 6, "amount": 5, "targets": "infantry" }]
 }

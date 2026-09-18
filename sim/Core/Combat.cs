@@ -278,6 +278,7 @@ public static class Combat
         var amount = baseDamage * world.Rules.Armour.Multiplier(target.Def.Armour, weapon.DamageType);
         if (attacker is not null && attacker.Owner >= 0) amount *= world.Player(attacker.Owner).WeaponDamageMult(weapon.Id) * attacker.DamageMult;
         target.Hp -= amount;
+        target.LastDamagedTick = world.Tick;
         world.Emit(new DamagedEvent(target.Id, amount, attackerId));
         if (target.Hp <= 0f) Kill(world, target, attacker);
     }
@@ -289,6 +290,7 @@ public static class Combat
         var amount = baseDamage * world.Rules.Armour.Multiplier(target.Def.Armour, damageType);
         if (amount <= 0f) return;
         target.Hp -= amount;
+        target.LastDamagedTick = world.Tick;
         world.Emit(new DamagedEvent(target.Id, amount, attacker?.Id ?? 0));
         if (target.Hp <= 0f) Kill(world, target, attacker, owner: owner);
     }

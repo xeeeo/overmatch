@@ -99,7 +99,7 @@ public static class Effects
     private static void Auras(World world)
     {
         var dt = World.Dt * AuraInterval;
-        foreach (var e in world.Entities) e.HordeMult = 1f;
+        foreach (var e in world.Entities) { e.HordeMult = 1f; if (!e.IsBuilding) e.BeingRepaired = false; }
         foreach (var src in world.Entities)
         {
             if (!src.Operational || src.IsInside) continue;
@@ -117,8 +117,11 @@ public static class Effects
                 {
                     case "heal":
                         foreach (var o in world.Spatial.Query(src.Pos, aura.Radius))
-                            if (o.Owner == src.Owner && o.Alive && !o.IsBuilding && o.Hp < o.MaxHp)
+                            if (o.Owner == src.Owner && o.Alive && !o.IsBuilding && !o.IsInside && o.Hp < o.MaxHp && aura.Affects(o.Def))
+                            {
                                 o.Hp = MathF.Min(o.MaxHp, o.Hp + aura.Amount * dt);
+                                o.BeingRepaired = true;
+                            }
                         break;
                     case "jam":
                         foreach (var o in world.Spatial.Query(src.Pos, aura.Radius).ToArray())
@@ -220,11 +223,19 @@ public static class Effects
     {
         foreach (var e in world.Entities)
         {
-            if (!e.Alive || e.Unit is not { Ammo: > 0 } u) continue;
-            if (!e.Rearming) continue;
+            if (!e.Alive || e.Unit is not { IsAir: true } u) continue;
+            if (e.ReturningToBase && !e.Rearming)
+            {
+                // Ordered home for repairs: hold over the nearest airfield until fixed.
+                var home = NearestPad(world, e);
+                if (home is null || e.Hp >= e.MaxHp) { e.ReturningToBase = false; continue; }
+                if ((home.Pos - e.Pos).Length > 2.5f && (e.Move is null || e.Move.Kind != MoveKind.Work))
+                    e.Move = new MoveOrder { Target = home.Pos, Kind = MoveKind.Work, ArriveRadius = 1.5f };
+                continue;
+            }
+            if (u.Ammo <= 0 || !e.Rearming) continue;
             // Fly to the nearest own airfield pad; wait; refill.
-            var pad = world.Entities.Where(b => b.Owner == e.Owner && b.Operational && b.Building is { Pads: > 0 })
-                .OrderBy(b => (b.Pos - e.Pos).LengthSq).FirstOrDefault();
+            var pad = NearestPad(world, e);
             if (pad is null) { e.Rearming = false; e.Ammo = u.Ammo; continue; }
             if ((pad.Pos - e.Pos).Length > 2.5f)
             {
@@ -237,6 +248,10 @@ public static class Effects
             if (e.RearmTimer <= 0f) { e.Ammo = u.Ammo; e.Rearming = false; }
         }
     }
+
+    public static Entity? NearestPad(World world, Entity e) =>
+        world.Entities.Where(b => b.Owner == e.Owner && b.Alive && b.Operational && b.Building is { Pads: > 0 })
+            .OrderBy(b => (b.Pos - e.Pos).LengthSq).FirstOrDefault();
 
     /// <summary>Apply a power/ability/superweapon effect at a point for a player.</summary>
     public static void Apply(World world, EffectSpec fx, int owner, Vec2 at, Entity? source, string kind)
