@@ -1,78 +1,84 @@
 using Godot;
+using Overmatch.Game.UiReview;
 
 namespace Overmatch.Game;
 
-/// <summary>Victory/defeat banner and the Esc pause menu.</summary>
+/// <summary>Pause menu and the victory/defeat debrief, in the command-console style.</summary>
 public partial class ResultOverlay : CanvasLayer
 {
     public GameRoot Root { get; set; } = null!;
 
-    private Control _panel = null!;
-    private Label _title = null!;
-    private Label _sub = null!;
-    private Button _continue = null!;
+    private ColorRect _shade = null!;
+    private Control _canvas = null!;
     private bool _paused;
     private bool _ended;
+    private bool _won;
+    private string _detail = "";
+
+    public bool IsOpen => _shade.Visible;
 
     public override void _Ready()
     {
         Layer = 5;
-        var shade = new ColorRect { Color = new Color(0, 0, 0, 0.55f), Visible = false };
-        shade.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        AddChild(shade);
-        _panel = shade;
-
-        var centre = new CenterContainer();
-        centre.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        shade.AddChild(centre);
-        var box = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
-        box.AddThemeConstantOverride("separation", 12);
-        centre.AddChild(box);
-        _title = new Label { HorizontalAlignment = HorizontalAlignment.Center };
-        _title.AddThemeFontSizeOverride("font_size", 56);
-        box.AddChild(_title);
-        _sub = new Label { HorizontalAlignment = HorizontalAlignment.Center, Modulate = new Color(1, 1, 1, 0.75f) };
-        box.AddChild(_sub);
-        box.AddChild(new Control { CustomMinimumSize = new Vector2(0, 10) });
-        _continue = MakeButton("Continue", () => Hide());
-        box.AddChild(_continue);
-        box.AddChild(MakeButton("Quit to menu", () => Root.App.ShowMenu()));
-        box.AddChild(MakeButton("Quit game", () => GetTree().Quit()));
+        _shade = new ColorRect { Color = new Color(0.015f, .025f, .028f, .8f), Visible = false, MouseFilter = Control.MouseFilterEnum.Stop };
+        _shade.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        AddChild(_shade);
+        _canvas = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
+        _shade.AddChild(_canvas);
+        GetViewport().SizeChanged += () => { if (_shade.Visible) Build(); };
     }
 
-    private static Button MakeButton(string text, Action onPress)
+    private void Build()
     {
-        var b = new Button { Text = text, CustomMinimumSize = new Vector2(220, 40) };
-        b.Pressed += onPress;
-        return b;
+        var (_, height) = Ui.Fit(_canvas, GetViewport().GetVisibleRect().Size);
+        Ui.Clear(_canvas);
+        var w = Root.World;
+        var faction = w.Player(Root.LocalPlayer).Faction.Id;
+        var tall = _ended ? 548 : 472;
+        var p = Ui.Panel(_canvas, 560, (height - tall) / 2, 480, tall, CommandTheme.Panel, true);
+        var accent = !_ended ? CommandTheme.Gold : _won ? CommandTheme.Gold : CommandTheme.Red;
+        Ui.Icon(p, Ui.FactionIcon(faction), 205, 30, 70, accent);
+        Ui.Text(p, !_ended ? "OPERATIONS PAUSED" : _won ? "VICTORY" : "DEFEAT", 40, 112, 400, 56, _ended ? 52 : 40, _ended ? accent : CommandTheme.Text, true, HorizontalAlignment.Center);
+        Ui.Text(p, _ended ? _detail : "Stand by for orders, Commander.", 30, 178, 420, 25, 18, CommandTheme.Muted, false, HorizontalAlignment.Center);
+        var y = 226f;
+        if (_ended)
+        {
+            var me = w.Player(Root.LocalPlayer);
+            Ui.Rule(p, 55, y, 370, CommandTheme.Line.Darkened(.25f));
+            Ui.Text(p, "DESTROYED", 55, y + 10, 120, 18, 12, CommandTheme.Muted, true);
+            Ui.Text(p, me.UnitsKilled.ToString("N0"), 55, y + 28, 120, 28, 24, CommandTheme.Text, true);
+            Ui.Text(p, "LOST", 180, y + 10, 120, 18, 12, CommandTheme.Muted, true);
+            Ui.Text(p, me.UnitsLost.ToString("N0"), 180, y + 28, 120, 28, 24, CommandTheme.Text, true);
+            Ui.Text(p, "INCOME", 305, y + 10, 120, 18, 12, CommandTheme.Muted, true);
+            Ui.Text(p, $"$ {me.TotalEarned:N0}", 305, y + 28, 130, 28, 24, CommandTheme.Gold, true);
+            y += 76;
+        }
+        Ui.Button(p, _ended ? "KEEP WATCHING" : "RESUME OPERATIONS", 55, y + 12, 370, 52, Close, true, 22);
+        Ui.Button(p, "RETURN TO COMMAND", 55, y + 78, 370, 48, () => Root.App.ShowMenu(), false, 20);
+        Ui.Button(p, "QUIT TO DESKTOP", 55, y + 136, 370, 40, () => GetTree().Quit(), false, 16);
+        Ui.Text(p, _ended ? Ui.Clock(w.Time) + "  ELAPSED" : "ESC TO RESUME", 40, tall - 40, 400, 22, 12, CommandTheme.Muted, true, HorizontalAlignment.Center);
     }
 
     public void ShowResult(bool won, string detail)
     {
         _ended = true;
-        _title.Text = won ? "VICTORY" : "DEFEAT";
-        _title.Modulate = won ? new Color(0.95f, 0.85f, 0.45f) : new Color(0.9f, 0.35f, 0.3f);
-        _sub.Text = detail;
-        _continue.Text = "Keep watching";
-        _panel.Visible = true;
+        _won = won;
+        _detail = detail;
+        _shade.Visible = true;
+        Build();
     }
 
     public void TogglePause()
     {
-        if (_ended && _panel.Visible) { Hide(); return; }
-        if (_panel.Visible) { Hide(); return; }
-        _paused = true;
-        Root.Paused = true;
-        _title.Text = "PAUSED";
-        _title.Modulate = Colors.White;
-        _sub.Text = "";
-        _continue.Text = "Resume";
-        _panel.Visible = true;
+        if (_shade.Visible) { Close(); return; }
+        if (!_ended) { _paused = true; Root.Paused = true; }
+        _shade.Visible = true;
+        Build();
     }
 
-    private void Hide()
+    private void Close()
     {
-        _panel.Visible = false;
+        _shade.Visible = false;
         if (_paused) { _paused = false; Root.Paused = false; }
     }
 

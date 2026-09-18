@@ -39,6 +39,14 @@ public partial class SelectionController : Control
         Respond("move");
     }
 
+    public void JumpToHq()
+    {
+        var hq = Root.World.Entities.FirstOrDefault(e => e.Owner == Player && e.Building is { Hq: true }) ?? Root.World.Entities.FirstOrDefault(e => e.Owner == Player && e.IsBuilding);
+        if (hq is null) return;
+        Root.Camera.Position = MapView.ToWorld(hq.Pos);
+        SelectOnly(hq.Id);
+    }
+
     private void Respond(string ev)
     {
         var first = _selected.Select(id => Root.World.Get(id)).FirstOrDefault(e => e is not null);
@@ -82,8 +90,7 @@ public partial class SelectionController : Control
         switch (key.Keycode)
         {
             case Key.H:
-                var hq = Root.World.Entities.FirstOrDefault(e => e.Owner == Player && e.Building is { Hq: true }) ?? Root.World.Entities.FirstOrDefault(e => e.Owner == Player && e.IsBuilding);
-                if (hq is not null) { Root.Camera.Position = MapView.ToWorld(hq.Pos); SelectOnly(hq.Id); }
+                JumpToHq();
                 return true;
             case Key.Space:
                 if (Root.LastAlert is { } a) Root.Camera.Position = MapView.ToWorld(a);

@@ -13,6 +13,8 @@ public partial class App : Node
     private string _faction = "coalition";
     private string _enemy = "coalition";
     private string _mapId = "plain";
+    private string? _menuShot;
+    private int _frames;
 
     public override void _Ready()
     {
@@ -24,6 +26,7 @@ public partial class App : Node
             else if (arg.StartsWith("--faction=")) _faction = arg["--faction=".Length..];
             else if (arg.StartsWith("--enemy=")) _enemy = arg["--enemy=".Length..];
             else if (arg.StartsWith("--map=")) _mapId = arg["--map=".Length..];
+            else if (arg.StartsWith("--menu-shot=")) _menuShot = arg["--menu-shot=".Length..];
         }
         if (_smokePath is not null || _autoDifficulty is not null)
         {
@@ -35,6 +38,16 @@ public partial class App : Node
         }
         else
             ShowMenu();
+    }
+
+    /// <summary>`--menu-shot=/path.png` photographs the title screen and the skirmish setup, then quits.</summary>
+    public override void _Process(double delta)
+    {
+        if (_menuShot is null) return;
+        _frames++;
+        if (_frames == 40) GetViewport().GetTexture().GetImage().SavePng(_menuShot.Replace(".png", "_title.png"));
+        if (_frames == 41) { _menu?.QueueFree(); _menu = new MainMenu { App = this, StartOnSetup = true }; AddChild(_menu); }
+        if (_frames == 80) { GetViewport().GetTexture().GetImage().SavePng(_menuShot); GD.Print("[Menu] screenshots saved"); GetTree().Quit(); }
     }
 
     public void ShowMenu()

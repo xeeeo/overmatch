@@ -141,6 +141,30 @@ public partial class GameRoot : Node3D
             {
                 _uiStage = 3;
                 GetViewport().GetTexture().GetImage().SavePng(_smokePath!.Replace(".png", "_ui.png"));
+                // Now a production building with a live queue.
+                var hq = w.Entities.FirstOrDefault(e => e.Owner == LocalPlayer && e.Building is { Hq: true });
+                if (hq is not null)
+                {
+                    Selection.SelectOnly(hq.Id);
+                    var unit = hq.Building!.Produces.FirstOrDefault();
+                    if (unit is not null) for (var q = 0; q < 3; q++) w.Submit(new ProduceCommand(LocalPlayer, hq.Id, unit));
+                }
+            }
+            else if (_uiStage == 3 && minutes >= 1.35f)
+            {
+                _uiStage = 4;
+                GetViewport().GetTexture().GetImage().SavePng(_smokePath!.Replace(".png", "_queue.png"));
+                Result.TogglePause();
+            }
+            else if (_uiStage == 4)
+            {
+                _uiStage = 5;
+                _pauseShotFrames = 8;
+            }
+            if (_pauseShotFrames > 0 && --_pauseShotFrames == 0)
+            {
+                GetViewport().GetTexture().GetImage().SavePng(_smokePath!.Replace(".png", "_pause.png"));
+                Result.TogglePause();
             }
             if (w.Tick / 600 != _lastLogged)
             {
@@ -224,6 +248,7 @@ public partial class GameRoot : Node3D
     private int _smokeTick;
     private int _lastLogged = -1;
     private int _uiStage;
+    private int _pauseShotFrames;
 
     public override void _Process(double delta)
     {

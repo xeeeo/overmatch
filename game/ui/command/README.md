@@ -1,4 +1,8 @@
-# Command console — UI review 01
+# Command console
+
+> **Status: adopted.** The live HUD (`game/scripts/Hud.cs`), minimap, menus (`MainMenu.cs`) and pause/result overlay (`ResultOverlay.cs`) are now built on this design system with real match state behind every element. `Ui.cs` holds the shared builders and `PortraitCache.cs` renders each model once for cards, dossier and queue. The review scene below remains as a design fixture; the radar in the live game is `game/scripts/Minimap.cs` with fog-of-war rules.
+
+## UI review 01 (original notes)
 
 An original Generals-inspired command console for Overmatch: graphite panel housings,
 amber command accents, condensed typography, recognisable model portraits and a

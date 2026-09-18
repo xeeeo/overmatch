@@ -97,7 +97,7 @@ public partial class Minimap : Control
     public override void _Draw()
     {
         var r = MapRect();
-        DrawRect(new Rect2(Vector2.Zero, Size), new Color(0.03f, 0.04f, 0.04f));
+        DrawRect(new Rect2(Vector2.Zero, Size), new Color("0c1315"));
         DrawTextureRect(_terrain, r, false);
         var w = Root.World;
         var scale = r.Size.X / w.Grid.Width;
@@ -125,7 +125,8 @@ public partial class Minimap : Control
 
         // Camera footprint on the ground.
         var vp = GetViewport().GetVisibleRect().Size;
-        var corners = new[] { new Vector2(0, 0), new Vector2(vp.X, 0), new Vector2(vp.X, vp.Y - Hud.BarHeight), new Vector2(0, vp.Y - Hud.BarHeight) };
+        var bottom = Root.Hud.ConsoleTopScreenY;
+        var corners = new[] { new Vector2(0, 0), new Vector2(vp.X, 0), new Vector2(vp.X, bottom), new Vector2(0, bottom) };
         var pts = new List<Vector2>();
         foreach (var c in corners)
             if (Root.Camera.GroundPoint(c) is { } g) pts.Add(ToMini(MapView.ToSim(g)));
@@ -140,7 +141,7 @@ public partial class Minimap : Control
             var phase = 1f - (ttl % 1f);
             DrawArc(ToMini(pos), 3f + phase * 9f, 0, Mathf.Tau, 20, new Color(1f, 0.3f, 0.25f, 1f - phase), 2f);
         }
-        DrawRect(r, new Color(0.7f, 0.75f, 0.7f, 0.6f), false, 1f);
+        DrawRect(r, Overmatch.Game.UiReview.CommandTheme.Line, false, 1f);
     }
 
     public override void _GuiInput(InputEvent @event)

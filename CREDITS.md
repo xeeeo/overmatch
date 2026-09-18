@@ -9,7 +9,11 @@ All original art, audio and game data is © the Overmatch contributors, CC BY 4.
 
 | Asset | Author | Licence | Used for |
 |---|---|---|---|
-| _(none yet)_ | | | |
+| Barlow Regular, Barlow Condensed SemiBold | Jeremy Tribby ([google/fonts](https://github.com/google/fonts/tree/main/ofl/barlow)) | SIL Open Font License 1.1 (texts in `game/ui/command/assets/fonts/`) | Interface typography |
+
+## Tools used to generate assets
+
+- Blender (models), espeak-ng (voice lines; GPL-3.0 program, output unencumbered), and the Python scripts under `tools/`.
 
 ## Inspiration
 
