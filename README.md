@@ -27,9 +27,14 @@ Requirements:
 - [Blender 5.2 LTS](https://www.blender.org/download/lts/) (only to regenerate models)
 
 ```bash
-dotnet test sim.tests          # simulation unit tests
-godot --path game              # run the game
+dotnet test sim.tests                     # simulation unit tests
+dotnet build game/Overmatch.csproj        # compile the game assembly
+godot-mono --path game                    # run the game (godot-mono is the Homebrew cask name; use your Godot .NET binary)
+blender -b -P tools/blender/build_models.py   # regenerate all models (optional)
+godot-mono --headless --path game --export-release macOS   # export (see game/export_presets.cfg)
 ```
+
+Smoke test used by CI and by Claude for visual checks: `godot-mono --path game -- --smoke=/tmp/out.png` issues a scripted move order, saves a screenshot and quits.
 
 ## Repository layout
 

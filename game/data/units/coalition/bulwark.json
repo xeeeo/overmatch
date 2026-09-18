@@ -1,0 +1,18 @@
+{
+  "id": "coalition_bulwark",
+  "name": "Bulwark MBT",
+  "faction": "coalition",
+  "cost": 900,
+  "buildTime": 12,
+  "builtAt": "coalition_motor_pool",
+  "locomotor": "tracked",
+  "speed": 4.0,
+  "turnRate": 150,
+  "radius": 0.9,
+  "hp": 420,
+  "armour": "tank",
+  "vision": 9,
+  "weapons": [],
+  "model": "coalition/bulwark",
+  "tags": ["vehicle", "tank"]
+}

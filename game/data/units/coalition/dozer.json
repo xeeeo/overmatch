@@ -1,0 +1,18 @@
+{
+  "id": "coalition_dozer",
+  "name": "Dozer",
+  "faction": "coalition",
+  "cost": 1000,
+  "buildTime": 10,
+  "builtAt": "coalition_command_post",
+  "locomotor": "tracked",
+  "speed": 3.0,
+  "turnRate": 120,
+  "radius": 0.8,
+  "hp": 300,
+  "armour": "light_vehicle",
+  "vision": 7,
+  "weapons": [],
+  "model": "coalition/dozer",
+  "tags": ["vehicle", "builder"]
+}

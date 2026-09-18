@@ -1,0 +1,106 @@
+using Godot;
+
+namespace Overmatch.Game;
+
+/// <summary>Classic RTS camera: a pivot on the ground that pans, rotates and zooms; the Camera3D looks down at it from a fixed pitch.</summary>
+public partial class RtsCamera : Node3D
+{
+    [Export] public float PanSpeed = 40f;
+    [Export] public float EdgeMargin = 12f;
+    [Export] public float RotateSpeed = 90f;
+    [Export] public float MinDistance = 15f;
+    [Export] public float MaxDistance = 90f;
+    [Export] public float ZoomStep = 6f;
+    [Export] public float Pitch = -52f;
+    [Export] public Vector2 Bounds = new(200, 200);
+
+    public Camera3D Camera { get; private set; } = null!;
+
+    private float _distance = 32f;
+    private float _targetDistance = 32f;
+    private bool _middleDrag;
+
+    public override void _Ready()
+    {
+        Camera = new Camera3D { Fov = 45f, Far = 600f, Current = true };
+        AddChild(Camera);
+        ApplyCameraTransform();
+    }
+
+    public override void _Process(double delta)
+    {
+        var dt = (float)delta;
+        var move = Vector2.Zero;
+        if (Input.IsActionPressed("camera_forward")) move.Y -= 1;
+        if (Input.IsActionPressed("camera_back")) move.Y += 1;
+        if (Input.IsActionPressed("camera_left")) move.X -= 1;
+        if (Input.IsActionPressed("camera_right")) move.X += 1;
+
+        // Edge scrolling, only when the window has focus and the mouse is inside.
+        var vp = GetViewport();
+        var mouse = vp.GetMousePosition();
+        var size = vp.GetVisibleRect().Size;
+        if (mouse.X >= 0 && mouse.Y >= 0 && mouse.X <= size.X && mouse.Y <= size.Y && !_middleDrag)
+        {
+            if (mouse.X < EdgeMargin) move.X -= 1;
+            else if (mouse.X > size.X - EdgeMargin) move.X += 1;
+            if (mouse.Y < EdgeMargin) move.Y -= 1;
+            else if (mouse.Y > size.Y - EdgeMargin) move.Y += 1;
+        }
+
+        if (move != Vector2.Zero)
+        {
+            move = move.Normalized();
+            // Pan relative to the camera's yaw; speed scales with zoom so it feels constant on screen.
+            var speed = PanSpeed * (_distance / 45f) * dt;
+            var forward = -Basis.Z;
+            var right = Basis.X;
+            Position += (right * move.X + forward * -move.Y) * speed;
+        }
+
+        if (Input.IsActionPressed("camera_rotate_left")) RotateY(Mathf.DegToRad(RotateSpeed * dt));
+        if (Input.IsActionPressed("camera_rotate_right")) RotateY(Mathf.DegToRad(-RotateSpeed * dt));
+
+        Position = new Vector3(
+            Mathf.Clamp(Position.X, -Bounds.X / 2f, Bounds.X / 2f), 0f,
+            Mathf.Clamp(Position.Z, -Bounds.Y / 2f, Bounds.Y / 2f));
+
+        _distance = Mathf.Lerp(_distance, _targetDistance, Mathf.Min(1f, 10f * dt));
+        ApplyCameraTransform();
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventMouseButton mb)
+        {
+            if (mb.ButtonIndex == MouseButton.WheelUp && mb.Pressed) _targetDistance = Mathf.Clamp(_targetDistance - ZoomStep, MinDistance, MaxDistance);
+            else if (mb.ButtonIndex == MouseButton.WheelDown && mb.Pressed) _targetDistance = Mathf.Clamp(_targetDistance + ZoomStep, MinDistance, MaxDistance);
+            else if (mb.ButtonIndex == MouseButton.Middle) _middleDrag = mb.Pressed;
+        }
+        else if (@event is InputEventMouseMotion mm && _middleDrag)
+        {
+            var speed = 0.06f * (_distance / 45f);
+            Position += (Basis.X * -mm.Relative.X + -Basis.Z * mm.Relative.Y) * speed;
+        }
+    }
+
+    private void ApplyCameraTransform()
+    {
+        var pitch = Mathf.DegToRad(Pitch);
+        // Camera sits behind (+Z local) and above the pivot, looking down at it.
+        var offset = new Vector3(0f, -Mathf.Sin(pitch) * _distance, Mathf.Cos(pitch) * _distance);
+        Camera.Position = offset;
+        Camera.LookAt(GlobalPosition, Vector3.Up);
+    }
+
+    /// <summary>Intersect the mouse ray with the ground plane (y = 0). Returns null if looking at the sky.</summary>
+    public Vector3? GroundPoint(Vector2 screenPos)
+    {
+        var origin = Camera.ProjectRayOrigin(screenPos);
+        var dir = Camera.ProjectRayNormal(screenPos);
+        if (Mathf.Abs(dir.Y) < 1e-5f) return null;
+        var t = -origin.Y / dir.Y;
+        if (t < 0) return null;
+        return origin + dir * t;
+    }
+}

@@ -1,0 +1,102 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  GODOT_VERSION: 4.7.2
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: 1
+
+jobs:
+  test:
+    name: sim tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet test sim.tests --logger "trx" --results-directory test-results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results
+
+  export:
+    name: export ${{ matrix.preset }}
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: macOS
+            os: macos-latest
+            godot_zip: Godot_v4.7.2-stable_mono_macos.universal.zip
+            godot_bin: Godot_mono.app/Contents/MacOS/Godot
+            artifact: build/macos
+          - preset: Windows
+            os: ubuntu-latest
+            godot_zip: Godot_v4.7.2-stable_mono_linux_x86_64.zip
+            godot_bin: Godot_v4.7.2-stable_mono_linux_x86_64/Godot_v4.7.2-stable_mono_linux.x86_64
+            artifact: build/windows
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache Godot and export templates
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            godot
+            templates
+          key: godot-${{ env.GODOT_VERSION }}-mono-${{ matrix.os }}-v1
+
+      - name: Download Godot and export templates
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          mkdir -p godot templates
+          curl -sSL -o godot.zip "$BASE/${{ matrix.godot_zip }}"
+          unzip -q godot.zip -d godot
+          curl -sSL -o templates.tpz "$BASE/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz"
+          unzip -q templates.tpz -d templates
+
+      - name: Install export templates
+        run: |
+          set -euo pipefail
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            DEST="$HOME/Library/Application Support/Godot/export_templates/${GODOT_VERSION}.stable.mono"
+          else
+            DEST="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono"
+          fi
+          mkdir -p "$DEST"
+          cp -R templates/templates/. "$DEST"/
+
+      - name: Import project
+        run: |
+          set -euo pipefail
+          GODOT="$PWD/godot/${{ matrix.godot_bin }}"
+          chmod +x "$GODOT"
+          "$GODOT" --headless --import --path game || true
+
+      - name: Export ${{ matrix.preset }}
+        run: |
+          set -euo pipefail
+          GODOT="$PWD/godot/${{ matrix.godot_bin }}"
+          mkdir -p ${{ matrix.artifact }}
+          "$GODOT" --headless --path game --export-release "${{ matrix.preset }}"
+          ls -la ${{ matrix.artifact }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: overmatch-${{ matrix.preset }}
+          path: ${{ matrix.artifact }}
