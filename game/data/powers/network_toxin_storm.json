@@ -1,0 +1,26 @@
+{
+  "id": "network_toxin_storm",
+  "faction": "network",
+  "name": "Toxin Storm",
+  "rank": 5,
+  "cooldown": 240,
+  "target": "point",
+  "effect": {
+    "type": "strike",
+    "damage": 200,
+    "damageType": "toxin",
+    "radius": 5,
+    "falloff": 0.4,
+    "impacts": 6,
+    "interval": 3,
+    "delay": 3,
+    "scatter": 5,
+    "hazard": {
+      "radius": 5,
+      "dps": 20,
+      "damageType": "toxin",
+      "duration": 30
+    }
+  },
+  "description": "Toxin bombs and a lingering cloud."
+}

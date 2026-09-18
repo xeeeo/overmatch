@@ -1,0 +1,24 @@
+{
+  "id": "network_sprayer",
+  "faction": "network",
+  "model": "network/sprayer",
+  "name": "Sprayer",
+  "cost": 700,
+  "buildTime": 10,
+  "builtAt": "network_arms_dealer",
+  "locomotor": "tracked",
+  "speed": 3.4,
+  "turnRate": 140,
+  "radius": 1.0,
+  "hp": 300,
+  "armour": "light_vehicle",
+  "vision": 8,
+  "weapons": [
+    "toxin_spray"
+  ],
+  "xpValue": 30,
+  "tags": [
+    "vehicle"
+  ],
+  "description": "Toxin tractor. Poisons the ground and clears garrisons."
+}

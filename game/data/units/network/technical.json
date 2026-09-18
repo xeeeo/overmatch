@@ -1,0 +1,28 @@
+{
+  "id": "network_technical",
+  "faction": "network",
+  "model": "network/technical",
+  "name": "Technical",
+  "cost": 500,
+  "buildTime": 8,
+  "builtAt": "network_arms_dealer",
+  "locomotor": "wheeled",
+  "speed": 7.0,
+  "turnRate": 260,
+  "radius": 0.9,
+  "hp": 220,
+  "armour": "light_vehicle",
+  "vision": 9,
+  "weapons": [
+    "technical_mg"
+  ],
+  "turretTurnRate": 400,
+  "garrisonSlots": 5,
+  "salvager": true,
+  "xpValue": 20,
+  "tags": [
+    "vehicle",
+    "transport"
+  ],
+  "description": "Pickup with a gun. Carries 5. Salvages wrecks."
+}

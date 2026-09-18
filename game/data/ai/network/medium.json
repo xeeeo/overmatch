@@ -1,0 +1,53 @@
+{
+  "faction": "network",
+  "buildOrder": [
+    "network_supply_stash",
+    "network_safehouse",
+    "network_arms_dealer",
+    "network_tunnel_network",
+    "network_black_market",
+    "network_compound",
+    "network_drone_workshop"
+  ],
+  "powerBuilding": "",
+  "supplyBuilding": "network_supply_stash",
+  "defenceBuilding": "network_stinger_site",
+  "harvesterUnit": "network_worker",
+  "builderUnit": "network_worker",
+  "composition": {
+    "network_marauder": 5,
+    "network_rebel": 3,
+    "network_rpg_trooper": 3,
+    "network_technical": 2,
+    "network_raider_quad": 1,
+    "network_rocket_buggy": 1,
+    "network_sprayer": 1,
+    "network_fpv_operator": 2,
+    "network_angry_mob": 1,
+    "network_radar_van": 1
+  },
+  "upgradeOrder": [
+    "network_better_rifles",
+    "network_junk_repair",
+    "network_camouflage",
+    "network_fortified_structures",
+    "network_toxin_shells",
+    "network_drone_swarm"
+  ],
+  "difficulty": "medium",
+  "name": "Medium",
+  "targetBuilders": 2,
+  "targetHarvesters": 5,
+  "maxHarvesters": 8,
+  "defences": 2,
+  "waveSize": 8,
+  "maxArmy": 24,
+  "firstWaveAt": 300,
+  "waveInterval": 120,
+  "retreatFraction": 0.3,
+  "cashReserve": 200,
+  "reactionDelay": 1.5,
+  "incomeMult": 1.0,
+  "harass": false,
+  "expand": true
+}

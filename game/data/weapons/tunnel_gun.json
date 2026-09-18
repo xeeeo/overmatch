@@ -1,0 +1,15 @@
+{
+  "id": "tunnel_gun",
+  "damage": 14,
+  "damageType": "small_arms",
+  "range": 8,
+  "cooldown": 0.3,
+  "projectile": {
+    "kind": "instant"
+  },
+  "targets": [
+    "ground",
+    "air"
+  ],
+  "aimTolerance": 20
+}

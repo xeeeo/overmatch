@@ -1,0 +1,34 @@
+{
+  "id": "directorate_troop_crawler",
+  "faction": "directorate",
+  "model": "directorate/troop_crawler",
+  "name": "Troop Crawler",
+  "cost": 1000,
+  "buildTime": 12,
+  "builtAt": "directorate_vehicle_plant",
+  "locomotor": "tracked",
+  "speed": 4.0,
+  "turnRate": 160,
+  "radius": 1.1,
+  "hp": 500,
+  "armour": "light_vehicle",
+  "vision": 9,
+  "detector": 8,
+  "garrisonSlots": 8,
+  "weapons": [
+    "crawler_mg"
+  ],
+  "auras": [
+    {
+      "type": "heal",
+      "radius": 3,
+      "amount": 3
+    }
+  ],
+  "xpValue": 40,
+  "tags": [
+    "vehicle",
+    "transport"
+  ],
+  "description": "Carries 8 infantry. Detects stealth. Heals passengers' escorts."
+}

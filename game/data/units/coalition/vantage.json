@@ -1,0 +1,4 @@
+{ "id": "coalition_vantage", "name": "Vantage", "faction": "coalition", "cost": 1400, "buildTime": 16, "builtAt": "coalition_airfield",
+  "locomotor": "air", "speed": 14.0, "turnRate": 200, "radius": 1.0, "flightHeight": 8.0, "hp": 260, "armour": "aircraft", "vision": 12,
+  "weapons": ["vantage_missiles"], "ammo": 4, "rearmTime": 10, "xpValue": 55, "model": "coalition/vantage", "tags": ["aircraft", "jet"],
+  "description": "Multirole jet. Four missiles, then it returns to the Airfield to rearm." }

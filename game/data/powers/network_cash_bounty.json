@@ -1,0 +1,13 @@
+{
+  "id": "network_cash_bounty",
+  "faction": "network",
+  "name": "Cash Bounty",
+  "rank": 1,
+  "cooldown": 1,
+  "target": "none",
+  "effect": {
+    "type": "bounty",
+    "amount": 0.12
+  },
+  "description": "Earn 12% of every kill's cost. Permanent."
+}

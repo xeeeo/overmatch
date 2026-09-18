@@ -1,0 +1,24 @@
+{
+  "id": "directorate_supply_depot",
+  "faction": "directorate",
+  "model": "directorate/supply_depot",
+  "tags": [
+    "structure"
+  ],
+  "name": "Supply Depot",
+  "cost": 1800,
+  "buildTime": 25,
+  "footprint": [
+    4,
+    4
+  ],
+  "hp": 2200,
+  "armour": "structure",
+  "vision": 8,
+  "power": -2,
+  "supplyCenter": true,
+  "produces": [
+    "directorate_supply_truck"
+  ],
+  "description": "Unloads Supply Trucks. Builds trucks."
+}

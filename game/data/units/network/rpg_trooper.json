@@ -1,0 +1,25 @@
+{
+  "id": "network_rpg_trooper",
+  "faction": "network",
+  "model": "network/rpg_trooper",
+  "name": "RPG Trooper",
+  "cost": 300,
+  "buildTime": 6,
+  "builtAt": "network_safehouse",
+  "locomotor": "infantry",
+  "speed": 2.5,
+  "turnRate": 720,
+  "radius": 0.35,
+  "hp": 100,
+  "armour": "infantry",
+  "vision": 8,
+  "weapons": [
+    "rpg_launcher"
+  ],
+  "canCapture": true,
+  "xpValue": 15,
+  "tags": [
+    "infantry"
+  ],
+  "description": "Anti-tank and anti-air."
+}

@@ -1,0 +1,1 @@
+{ "id": "flashbang", "damage": 15, "damageType": "explosive", "range": 6, "cooldown": 1, "projectile": { "kind": "shell", "speed": 18, "arc": true }, "targets": ["ground"], "clearsGarrison": true, "status": { "type": "disabled", "duration": 4 }, "aimTolerance": 30 }

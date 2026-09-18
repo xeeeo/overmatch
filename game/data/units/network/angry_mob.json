@@ -1,0 +1,26 @@
+{
+  "id": "network_angry_mob",
+  "faction": "network",
+  "model": "network/angry_mob",
+  "name": "Angry Mob",
+  "cost": 800,
+  "buildTime": 12,
+  "builtAt": "network_safehouse",
+  "locomotor": "infantry",
+  "speed": 2.6,
+  "turnRate": 720,
+  "radius": 0.9,
+  "hp": 450,
+  "armour": "infantry",
+  "vision": 8,
+  "weapons": [
+    "mob_guns",
+    "mob_molotov"
+  ],
+  "xpValue": 40,
+  "tags": [
+    "infantry",
+    "mob"
+  ],
+  "description": "A crowd with rifles and molotovs. Burns out garrisons."
+}

@@ -30,3 +30,20 @@ public sealed record HarvestCommand(int Player, int[] Units, int PileId) : Comma
 
 /// <summary>Send builders to help on an existing construction site.</summary>
 public sealed record AssistBuildCommand(int Player, int[] Units, int BuildingId) : Command(Player);
+
+/// <summary>Use a unit ability. Target point or entity depending on the ability.</summary>
+public sealed record AbilityCommand(int Player, int[] Units, string AbilityId, Vec2 Target, int TargetId) : Command(Player);
+
+/// <summary>Infantry enter a garrisonable building, transport or tunnel.</summary>
+public sealed record GarrisonCommand(int Player, int[] Units, int ContainerId) : Command(Player);
+
+/// <summary>Everyone out of a building/transport (tunnels: out of the network at this tunnel).</summary>
+public sealed record UngarrisonCommand(int Player, int ContainerId) : Command(Player);
+
+public sealed record CaptureCommand(int Player, int[] Units, int BuildingId) : Command(Player);
+
+public sealed record BuyPowerCommand(int Player, string PowerId) : Command(Player);
+
+public sealed record UsePowerCommand(int Player, string PowerId, Vec2 Target) : Command(Player);
+
+public sealed record FireSuperweaponCommand(int Player, int BuildingId, Vec2 Target) : Command(Player);

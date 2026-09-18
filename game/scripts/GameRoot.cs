@@ -219,10 +219,15 @@ public partial class GameRoot : Node3D
                 Views[e.Id] = view;
             }
             view.Sync(alpha);
-            if (e.Owner != LocalPlayer) view.Visible = World.Vision.IsVisible(LocalPlayer, e.Pos) || (e.IsBuilding && World.Vision.Get(LocalPlayer, e.Pos) != Visibility.Shroud);
+            if (e.IsInside) view.Visible = false;
+            else if (e.Owner != LocalPlayer)
+                view.Visible = World.CanSee(LocalPlayer, e) || (e.IsBuilding && !e.Def.Stealth && World.Vision.Get(LocalPlayer, e.Pos) != Visibility.Shroud);
+            else view.Visible = true;
+            view.SetLook(e.Def.Stealth || World.Player(LocalPlayer).StealthFor(e.Def) ? (e.Owner == LocalPlayer ? 0.55f : 1f) : 1f, e.Disabled);
         }
         foreach (var pv in _pileViews) pv.Refresh();
         _vfx.SyncProjectiles(World, alpha);
+        _vfx.SyncWorldObjects(World);
 
         if (_markerTtl > 0)
         {

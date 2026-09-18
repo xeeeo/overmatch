@@ -1,0 +1,27 @@
+{
+  "id": "network_bomb_truck",
+  "faction": "network",
+  "model": "network/bomb_truck",
+  "name": "Bomb Truck",
+  "cost": 1200,
+  "buildTime": 14,
+  "builtAt": "network_arms_dealer",
+  "prereqs": [
+    "network_tech"
+  ],
+  "locomotor": "wheeled",
+  "speed": 5.0,
+  "turnRate": 180,
+  "radius": 1.0,
+  "hp": 260,
+  "armour": "light_vehicle",
+  "vision": 7,
+  "weapons": [
+    "truck_bomb"
+  ],
+  "xpValue": 30,
+  "tags": [
+    "vehicle"
+  ],
+  "description": "Drives into a building and detonates."
+}

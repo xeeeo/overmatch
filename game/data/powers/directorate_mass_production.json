@@ -1,0 +1,14 @@
+{
+  "id": "directorate_mass_production",
+  "faction": "directorate",
+  "name": "Mass Production",
+  "rank": 3,
+  "cooldown": 240,
+  "target": "none",
+  "effect": {
+    "type": "discount",
+    "amount": 0.75,
+    "duration": 60
+  },
+  "description": "All units cost 25% less for 60 seconds."
+}

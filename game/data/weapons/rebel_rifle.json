@@ -1,0 +1,14 @@
+{
+  "id": "rebel_rifle",
+  "damage": 11,
+  "damageType": "small_arms",
+  "range": 6.5,
+  "cooldown": 0.65,
+  "projectile": {
+    "kind": "instant"
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 15
+}

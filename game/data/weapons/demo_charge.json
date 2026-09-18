@@ -1,0 +1,19 @@
+{
+  "id": "demo_charge",
+  "damage": 900,
+  "damageType": "demolition",
+  "range": 1,
+  "cooldown": 1,
+  "projectile": {
+    "kind": "instant"
+  },
+  "splash": {
+    "radius": 2.5,
+    "falloff": 0.3
+  },
+  "targets": [
+    "ground"
+  ],
+  "suicide": true,
+  "aimTolerance": 90
+}

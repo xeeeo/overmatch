@@ -1,0 +1,31 @@
+{
+  "id": "network_drone_workshop",
+  "faction": "network",
+  "model": "network/drone_workshop",
+  "tags": [
+    "structure"
+  ],
+  "needsPower": false,
+  "rebuildHole": true,
+  "power": 0,
+  "name": "Drone Workshop",
+  "cost": 1200,
+  "buildTime": 22,
+  "footprint": [
+    3,
+    3
+  ],
+  "hp": 1300,
+  "armour": "structure",
+  "vision": 6,
+  "prereqs": [
+    "network_arms_dealer"
+  ],
+  "produces": [
+    "network_fpv_operator"
+  ],
+  "upgrades": [
+    "network_drone_swarm"
+  ],
+  "description": "Trains FPV drone operators."
+}

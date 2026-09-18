@@ -1,6 +1,6 @@
 # Factions (v1 rosters)
 
-Three factions, deliberately asymmetric. Names are working titles. Each roster below is the v1 target: roughly 10 buildings and 12–13 units per faction, one superweapon, five general's powers, six upgrades. Costs and stats are starting points for balance, not gospel.
+Three factions, deliberately asymmetric. Names are working titles. All three rosters below are implemented as of M4 (data in `game/data/`); costs and stats are starting points for balance, not gospel. Small deviations from this doc live in the data files, which win.
 
 Shared: every faction has a builder, a harvester, a basic infantry, an anti-tank/anti-air infantry, a main tank, an artillery piece, a fast scout/raider, a transport, and an air or drone answer. How they do each of those is where the asymmetry lives.
 
@@ -95,14 +95,14 @@ Composite Armour (vehicles), Guided Rounds (tanks +25%), Drone Autonomy (Hive/Wa
 | Troop Crawler | 1000 | Transport 8 infantry; stealth detection; heals passengers. |
 
 ### General's powers
-1. **Artillery Barrage** – shells rain on an area for 20 s. 
-1. **Cyber Intrusion** – disable enemy buildings in an area for 30 s. 
-3. **Mass Production** – 25% cheaper vehicles for 60 s. 
-3. **Carpet Bomb** – bombers lay a line of bombs. 
-5. **Nuclear Shells** – one Colossus/Vanguard salvo is nuclear for 30 s.
+1. **Artillery Barrage** – shells rain on an area for 15 s. 
+1. **Cyber Intrusion** – disable enemy buildings and units in an area for 30 s. 
+3. **Mass Production** – 25% cheaper units for 60 s. 
+3. **Carpet Bomb** – bombers lay a carpet of bombs. 
+5. **Emergency Conscription** – twelve Conscripts arrive at the point.
 
 ### Upgrades
-Nationalism (horde +25%), Uranium Shells (tanks +25%), Flak Autoloaders, Subliminal Messaging (Speaker heal x2), Reactor Overclock, Conscript Training (capture faster, +HP).
+Nationalism (horde +25%), Uranium Shells (tanks +25%), Flak Autoloaders, Subliminal Messaging (+10% speed), Reactor Overclock, Conscript Training (+30% HP).
 
 ---
 
@@ -154,7 +154,7 @@ Every building leaves a **hole** on destruction; a Worker or the hole itself reb
 5. **Toxin Storm** – toxin bombs on an area; lingering cloud.
 
 ### Upgrades
-Camouflage (Rebels stealth), Junk Repair (vehicles self-heal), Toxin Shells, Salvage Efficiency (crates give +1 level), Fortified Structures, Radar (Command Cell).
+Camouflage (Rebels stealth), Better Rifles, Junk Repair (+25% vehicle HP), Toxin Shells, Salvage Efficiency (+12% vehicle speed), Fortified Structures (+40% building HP), Drone Swarm (FPV +35%).
 
 ---
 

@@ -1,0 +1,24 @@
+{
+  "id": "network_fpv_operator",
+  "faction": "network",
+  "model": "network/fpv_operator",
+  "name": "FPV Operator",
+  "cost": 350,
+  "buildTime": 6,
+  "builtAt": "network_drone_workshop",
+  "locomotor": "infantry",
+  "speed": 2.5,
+  "turnRate": 720,
+  "radius": 0.35,
+  "hp": 90,
+  "armour": "infantry",
+  "vision": 11,
+  "weapons": [
+    "fpv_drone"
+  ],
+  "xpValue": 20,
+  "tags": [
+    "infantry"
+  ],
+  "description": "Flies explosive drones into targets."
+}

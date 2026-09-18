@@ -1,0 +1,28 @@
+{
+  "id": "directorate_talon",
+  "faction": "directorate",
+  "model": "directorate/talon",
+  "name": "Talon",
+  "cost": 1300,
+  "buildTime": 16,
+  "builtAt": "directorate_airfield",
+  "locomotor": "air",
+  "speed": 12.0,
+  "turnRate": 180,
+  "radius": 1.0,
+  "hp": 300,
+  "armour": "aircraft",
+  "vision": 11,
+  "flightHeight": 8.0,
+  "weapons": [
+    "talon_bomb"
+  ],
+  "ammo": 2,
+  "rearmTime": 10,
+  "xpValue": 55,
+  "tags": [
+    "aircraft",
+    "jet"
+  ],
+  "description": "Fighter-bomber. Two bombs per sortie."
+}

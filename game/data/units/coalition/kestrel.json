@@ -1,3 +1,28 @@
-{ "id": "coalition_kestrel", "name": "Kestrel", "faction": "coalition", "cost": 1500, "buildTime": 18, "builtAt": "coalition_airfield",
-  "locomotor": "air", "speed": 8.0, "turnRate": 300, "radius": 1.0, "flightHeight": 6.0, "hp": 300, "armour": "aircraft", "vision": 11,
-  "weapons": ["kestrel_missiles", "kestrel_gun"], "turretTurnRate": 360, "xpValue": 50, "model": "coalition/kestrel", "tags": ["aircraft"], "description": "Attack helicopter." }
+{
+  "id": "coalition_kestrel",
+  "name": "Kestrel",
+  "faction": "coalition",
+  "cost": 1500,
+  "buildTime": 18,
+  "builtAt": "coalition_airfield",
+  "locomotor": "air",
+  "speed": 8.0,
+  "turnRate": 300,
+  "radius": 1.0,
+  "flightHeight": 6.0,
+  "hp": 300,
+  "armour": "aircraft",
+  "vision": 11,
+  "weapons": [
+    "kestrel_missiles",
+    "kestrel_gun"
+  ],
+  "turretTurnRate": 360,
+  "xpValue": 50,
+  "model": "coalition/kestrel",
+  "tags": [
+    "aircraft"
+  ],
+  "description": "Attack helicopter.",
+  "detector": 8
+}

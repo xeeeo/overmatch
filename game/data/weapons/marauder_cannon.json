@@ -1,0 +1,19 @@
+{
+  "id": "marauder_cannon",
+  "damage": 55,
+  "damageType": "armour_piercing",
+  "range": 7.5,
+  "cooldown": 2.2,
+  "projectile": {
+    "kind": "shell",
+    "speed": 42
+  },
+  "splash": {
+    "radius": 0.6,
+    "falloff": 0.5
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 6
+}

@@ -1,0 +1,19 @@
+{
+  "id": "flak_cannon",
+  "damage": 40,
+  "damageType": "explosive",
+  "range": 11,
+  "cooldown": 0.9,
+  "projectile": {
+    "kind": "shell",
+    "speed": 50
+  },
+  "splash": {
+    "radius": 1.5,
+    "falloff": 0.5
+  },
+  "targets": [
+    "air"
+  ],
+  "aimTolerance": 25
+}

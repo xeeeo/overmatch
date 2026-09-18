@@ -1,0 +1,27 @@
+{
+  "id": "network_command_cell",
+  "faction": "network",
+  "model": "network/command_cell",
+  "tags": [
+    "structure"
+  ],
+  "needsPower": false,
+  "rebuildHole": true,
+  "power": 0,
+  "name": "Command Cell",
+  "cost": 3000,
+  "buildTime": 45,
+  "footprint": [
+    5,
+    5
+  ],
+  "hp": 4000,
+  "armour": "structure",
+  "vision": 12,
+  "hq": true,
+  "garrisonSlots": 4,
+  "produces": [
+    "network_worker"
+  ],
+  "description": "Headquarters. Trains Workers. Garrison 4. No power needed, like everything the Network builds."
+}

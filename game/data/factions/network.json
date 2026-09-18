@@ -1,1 +1,23 @@
-{ "id": "network", "name": "Network", "colour": "#3bb35a", "builder": "network_worker", "hq": "network_command_cell", "needsPower": false, "startingCash": 10000 }
+{
+  "id": "network",
+  "name": "Network",
+  "colour": "#3bb35a",
+  "builder": "network_worker",
+  "hq": "network_command_cell",
+  "needsPower": false,
+  "salvage": true,
+  "startingCash": 10000,
+  "rankXp": [
+    300,
+    800,
+    1600,
+    2800
+  ],
+  "powers": [
+    "network_rebel_ambush",
+    "network_cash_bounty",
+    "network_ied_belt",
+    "network_drone_ambush",
+    "network_toxin_storm"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Precision Strike",
+  "rank": 3,
+  "cooldown": 180,
+  "target": "point",
+  "effect": {
+    "type": "strike",
+    "damage": 900,
+    "damageType": "explosive",
+    "radius": 3.5,
+    "falloff": 0.3,
+    "impacts": 1,
+    "delay": 3
+  },
+  "description": "A cruise missile on a point. Big single-target damage.",
+  "id": "coalition_precision_strike",
+  "faction": "coalition"
+}

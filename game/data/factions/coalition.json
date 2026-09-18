@@ -1,1 +1,22 @@
-{ "id": "coalition", "name": "Coalition", "colour": "#3b7dd8", "builder": "coalition_dozer", "hq": "coalition_command_post", "needsPower": true, "startingCash": 10000 }
+{
+  "id": "coalition",
+  "name": "Coalition",
+  "colour": "#3b7dd8",
+  "builder": "coalition_dozer",
+  "hq": "coalition_command_post",
+  "needsPower": true,
+  "startingCash": 10000,
+  "powers": [
+    "coalition_loitering_swarm",
+    "coalition_spy_satellite",
+    "coalition_precision_strike",
+    "coalition_ew_blackout",
+    "coalition_emergency_resupply"
+  ],
+  "rankXp": [
+    300,
+    800,
+    1600,
+    2800
+  ]
+}

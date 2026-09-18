@@ -1,0 +1,21 @@
+{
+  "id": "buggy_rockets",
+  "damage": 80,
+  "damageType": "explosive",
+  "range": 16,
+  "minRange": 4,
+  "cooldown": 4.5,
+  "projectile": {
+    "kind": "shell",
+    "speed": 30,
+    "arc": true
+  },
+  "splash": {
+    "radius": 2.0,
+    "falloff": 0.3
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 20
+}

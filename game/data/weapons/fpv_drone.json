@@ -1,0 +1,15 @@
+{
+  "id": "fpv_drone",
+  "damage": 130,
+  "damageType": "armour_piercing",
+  "range": 12,
+  "cooldown": 8,
+  "projectile": {
+    "kind": "missile",
+    "speed": 16
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 45
+}

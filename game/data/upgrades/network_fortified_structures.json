@@ -1,0 +1,16 @@
+{
+  "id": "network_fortified_structures",
+  "faction": "network",
+  "name": "Fortified Structures",
+  "cost": 1500,
+  "time": 45,
+  "researchedAt": "network_black_market",
+  "effects": [
+    {
+      "type": "hp",
+      "tag": "structure",
+      "mult": 1.4
+    }
+  ],
+  "description": "Buildings gain 40% hit points."
+}

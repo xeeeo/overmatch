@@ -12,7 +12,7 @@ public static class Movement
     public static void Update(Entity e, World world)
     {
         var order = e.Move;
-        if (order is null || e.Unit is not { } unit) return;
+        if (order is null || e.Unit is not { } unit || e.Disabled) return;
 
         var dt = World.Dt;
         var loco = unit.LocomotorClass;
@@ -80,6 +80,17 @@ public static class Movement
         e.Move = null;
     }
 
+    /// <summary>Spawned escorts (drones) stay near their leader when idle; they die when the leader does.</summary>
+    public static void Follow(Entity e, World world)
+    {
+        var leader = world.Get(e.FollowId);
+        if (leader is null) { Combat.Kill(world, e, null, silent: true); return; }
+        if (e.TargetId != 0 || e.Move is { Kind: not MoveKind.Chase }) return;
+        var d = (leader.Pos - e.Pos).Length;
+        if (d > 6f && (e.Move is null || (world.Tick + e.Id) % 10 == 0))
+            e.Move = new MoveOrder { Target = leader.Pos + Vec2.FromAngle(e.Id * 2.1f) * 2f, Kind = MoveKind.Chase, ArriveRadius = 1f };
+    }
+
     /// <summary>Push overlapping units apart, then keep everyone out of impassable cells.</summary>
     public static void Separate(World world)
     {
@@ -87,11 +98,16 @@ public static class Movement
         var grid = world.Grid;
         foreach (var a in entities)
         {
-            if (!a.Alive || a.Def.IsAir || a.IsBuilding) continue;
+            if (!a.Alive || a.Def.IsAir || a.IsBuilding || a.IsInside) continue;
             var near = world.Spatial.Query(a.Pos, a.Radius + 2f);
             foreach (var b in near)
             {
-                if (b.Id <= a.Id || !b.Alive || b.Def.IsAir || b.IsBuilding) continue;
+                if (b.Id <= a.Id || !b.Alive || b.Def.IsAir || b.IsBuilding || b.IsInside) continue;
+                // Crushing: a heavy vehicle rolling over enemy infantry kills it.
+                if (a.Def.Crusher && b.Def.IsInfantry && world.AreEnemies(a, b) && a.IsMoving && (b.Pos - a.Pos).Length < a.Radius)
+                { Combat.DirectDamage(world, b, 1000f, "crush", a); continue; }
+                if (b.Def.Crusher && a.Def.IsInfantry && world.AreEnemies(a, b) && b.IsMoving && (b.Pos - a.Pos).Length < b.Radius)
+                { Combat.DirectDamage(world, a, 1000f, "crush", b); continue; }
                 var minDist = a.Radius + b.Radius;
                 var delta = b.Pos - a.Pos;
                 var d2 = delta.LengthSq;
@@ -121,7 +137,7 @@ public static class Movement
 
         foreach (var e in entities)
         {
-            if (!e.Alive || e.Def.IsAir || e.Unit is not { } u) continue;
+            if (!e.Alive || e.Def.IsAir || e.IsInside || e.Unit is not { } u) continue;
             var loco = u.LocomotorClass;
             if (grid.IsPassable(e.Pos, loco)) continue;
             // Pushed into a wall: fall back to where we were at the start of the tick, else nearest free cell centre.

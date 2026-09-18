@@ -1,3 +1,42 @@
-{ "id": "coalition_rifleman", "name": "Rifleman", "faction": "coalition", "cost": 225, "buildTime": 5, "builtAt": "coalition_barracks",
-  "locomotor": "infantry", "speed": 2.6, "turnRate": 720, "radius": 0.35, "hp": 120, "armour": "infantry", "vision": 8,
-  "weapons": ["rifle"], "xpValue": 10, "model": "coalition/rifleman", "tags": ["infantry"], "description": "Basic infantry." }
+{
+  "id": "coalition_rifleman",
+  "name": "Rifleman",
+  "faction": "coalition",
+  "cost": 225,
+  "buildTime": 5,
+  "builtAt": "coalition_barracks",
+  "locomotor": "infantry",
+  "speed": 2.6,
+  "turnRate": 720,
+  "radius": 0.35,
+  "hp": 120,
+  "armour": "infantry",
+  "vision": 8,
+  "weapons": [
+    "rifle"
+  ],
+  "xpValue": 10,
+  "model": "coalition/rifleman",
+  "tags": [
+    "infantry"
+  ],
+  "description": "Basic infantry.",
+  "canCapture": true,
+  "abilities": [
+    {
+      "id": "flashbang",
+      "name": "Flashbang",
+      "cooldown": 20,
+      "target": "building",
+      "range": 6,
+      "effect": {
+        "type": "status",
+        "status": {
+          "type": "disabled",
+          "duration": 5
+        }
+      },
+      "description": "Clears a garrisoned building: occupants are thrown out."
+    }
+  ]
+}

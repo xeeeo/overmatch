@@ -1,0 +1,15 @@
+{
+  "id": "directorate_nationalism",
+  "faction": "directorate",
+  "name": "Nationalism",
+  "cost": 1500,
+  "time": 45,
+  "researchedAt": "directorate_propaganda_center",
+  "effects": [
+    {
+      "type": "horde",
+      "add": 0.25
+    }
+  ],
+  "description": "Horde bonus rises from 25% to 50%."
+}

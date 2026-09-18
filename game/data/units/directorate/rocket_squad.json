@@ -1,0 +1,26 @@
+{
+  "id": "directorate_rocket_squad",
+  "faction": "directorate",
+  "model": "directorate/rocket_squad",
+  "name": "Rocket Squad",
+  "cost": 300,
+  "buildTime": 6,
+  "builtAt": "directorate_barracks",
+  "locomotor": "infantry",
+  "speed": 2.4,
+  "turnRate": 720,
+  "radius": 0.35,
+  "hp": 110,
+  "armour": "infantry",
+  "vision": 8,
+  "weapons": [
+    "rpg_launcher"
+  ],
+  "horde": true,
+  "canCapture": true,
+  "xpValue": 15,
+  "tags": [
+    "infantry"
+  ],
+  "description": "Anti-tank and anti-air. Horde bonus."
+}

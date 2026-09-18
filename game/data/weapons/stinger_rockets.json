@@ -1,0 +1,16 @@
+{
+  "id": "stinger_rockets",
+  "damage": 60,
+  "damageType": "armour_piercing",
+  "range": 11,
+  "cooldown": 1.8,
+  "projectile": {
+    "kind": "missile",
+    "speed": 38
+  },
+  "targets": [
+    "ground",
+    "air"
+  ],
+  "aimTolerance": 30
+}

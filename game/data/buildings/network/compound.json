@@ -1,0 +1,29 @@
+{
+  "id": "network_compound",
+  "faction": "network",
+  "model": "network/compound",
+  "tags": [
+    "structure"
+  ],
+  "needsPower": false,
+  "rebuildHole": true,
+  "power": 0,
+  "name": "Compound",
+  "cost": 2000,
+  "buildTime": 35,
+  "footprint": [
+    4,
+    4
+  ],
+  "hp": 3000,
+  "armour": "fortification",
+  "vision": 10,
+  "prereqs": [
+    "network_arms_dealer"
+  ],
+  "provides": [
+    "network_tech"
+  ],
+  "garrisonSlots": 5,
+  "description": "Fortified tech centre. Garrison 5. Unlocks advanced units."
+}

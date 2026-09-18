@@ -1,0 +1,26 @@
+{
+  "id": "directorate_conscript",
+  "faction": "directorate",
+  "model": "directorate/conscript",
+  "name": "Conscript",
+  "cost": 150,
+  "buildTime": 4,
+  "builtAt": "directorate_barracks",
+  "locomotor": "infantry",
+  "speed": 2.5,
+  "turnRate": 720,
+  "radius": 0.35,
+  "hp": 100,
+  "armour": "infantry",
+  "vision": 7,
+  "weapons": [
+    "conscript_rifle"
+  ],
+  "horde": true,
+  "canCapture": true,
+  "xpValue": 8,
+  "tags": [
+    "infantry"
+  ],
+  "description": "Cheap infantry. Horde bonus with 5 or more together. Captures buildings."
+}

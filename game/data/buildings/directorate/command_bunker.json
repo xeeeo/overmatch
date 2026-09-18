@@ -1,0 +1,24 @@
+{
+  "id": "directorate_command_bunker",
+  "faction": "directorate",
+  "model": "directorate/command_bunker",
+  "tags": [
+    "structure"
+  ],
+  "name": "Command Bunker",
+  "cost": 3000,
+  "buildTime": 45,
+  "footprint": [
+    5,
+    5
+  ],
+  "hp": 4500,
+  "armour": "structure",
+  "vision": 14,
+  "hq": true,
+  "garrisonSlots": 4,
+  "produces": [
+    "directorate_engineering_vehicle"
+  ],
+  "description": "Headquarters. Builds Engineering Vehicles. Garrison 4."
+}

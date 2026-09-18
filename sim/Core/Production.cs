@@ -18,9 +18,18 @@ public static class Production
         {
             var unit = world.Rules.Unit(cmd.ItemId);
             if (!world.HasPrereqs(cmd.Player, unit.Prereqs, out var missing)) { world.Reject(cmd.Player, $"requires {missing}"); return; }
-            if (player.Cash < unit.Cost) { world.Reject(cmd.Player, "insufficient funds"); return; }
-            player.Cash -= unit.Cost;
-            queue.Items.Add(new QueueItem { Id = unit.Id, Cost = unit.Cost, Time = unit.BuildTime });
+            if (unit.Ammo > 0)
+            {
+                // Jets need a free pad.
+                var pads = world.Entities.Where(e => e.Owner == cmd.Player && e.Operational && e.Building is { Pads: > 0 }).Sum(e => e.Building!.Pads);
+                var jets = world.Entities.Count(e => e.Owner == cmd.Player && e.Alive && e.Unit is { Ammo: > 0 })
+                           + world.Entities.Where(e => e.Owner == cmd.Player && e.Queue is not null).Sum(e => e.Queue!.Items.Count(i => !i.IsUpgrade && world.Rules.Units.TryGetValue(i.Id, out var d) && d.Ammo > 0));
+                if (jets >= pads) { world.Reject(cmd.Player, "no free airfield pad"); return; }
+            }
+            var cost = (int)(unit.Cost * player.DiscountMult);
+            if (player.Cash < cost) { world.Reject(cmd.Player, "insufficient funds"); return; }
+            player.Cash -= cost;
+            queue.Items.Add(new QueueItem { Id = unit.Id, Cost = cost, Time = unit.BuildTime });
         }
         else if (def.Upgrades.Contains(cmd.ItemId))
         {

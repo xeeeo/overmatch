@@ -1,0 +1,29 @@
+{
+  "id": "directorate_cyber_center",
+  "faction": "directorate",
+  "model": "directorate/cyber_center",
+  "tags": [
+    "structure"
+  ],
+  "name": "Cyber Center",
+  "cost": 2500,
+  "buildTime": 30,
+  "footprint": [
+    3,
+    3
+  ],
+  "hp": 1800,
+  "armour": "structure",
+  "vision": 8,
+  "power": -3,
+  "prereqs": [
+    "directorate_supply_depot"
+  ],
+  "garrisonSlots": 4,
+  "trickle": {
+    "amount": 100,
+    "interval": 20
+  },
+  "tricklePerPassenger": 150,
+  "description": "Hacks funds: 100 every 20 s, plus 150 per Hacker garrisoned inside."
+}

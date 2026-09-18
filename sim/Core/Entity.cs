@@ -6,7 +6,8 @@ namespace Overmatch.Sim;
 public sealed class Entity
 {
     public int Id { get; init; }
-    public int Owner { get; init; }
+    /// <summary>Player id, or -1 for neutral.</summary>
+    public int Owner { get; set; }
     public ObjectDef Def { get; init; } = null!;
     public UnitDef? Unit => Def as UnitDef;
     public BuildingDef? Building => Def as BuildingDef;
@@ -60,6 +61,41 @@ public sealed class Entity
     public int PileId { get; set; }
     public int Carried { get; set; }
     public float StateTimer { get; set; }
+
+    // --- M4 systems ---
+    public List<Status> Statuses { get; } = new();
+    public float[] AbilityCooldowns { get; set; } = Array.Empty<float>();
+    /// <summary>Entities riding inside (garrison or transport).</summary>
+    public List<int> Passengers { get; } = new();
+    /// <summary>Container this entity is inside, or 0.</summary>
+    public int InsideId { get; set; }
+    /// <summary>Container this unit is walking to, or 0.</summary>
+    public int EnterTargetId { get; set; }
+    public int CaptureTargetId { get; set; }
+    public float CaptureProgress { get; set; }
+    public int Ammo { get; set; }
+    public bool Rearming { get; set; }
+    public float RearmTimer { get; set; }
+    public int SalvageLevel { get; set; }
+    /// <summary>Leader this spawned unit escorts, or 0.</summary>
+    public int FollowId { get; set; }
+    public float LifetimeLeft { get; set; }
+    public float SpawnTimer { get; set; }
+    /// <summary>Seconds of charge accumulated by a superweapon building.</summary>
+    public float SuperweaponCharge { get; set; }
+    /// <summary>For holes: the building def to regrow and where its footprint origin was.</summary>
+    public string HoleDefId { get; set; } = "";
+    public int HoleCellX { get; set; }
+    public int HoleCellY { get; set; }
+    /// <summary>Horde bonus currently applied (1 = none).</summary>
+    public float HordeMult { get; set; } = 1f;
+    public int Level => Xp >= Def.Veterancy[2] ? 3 : Xp >= Def.Veterancy[1] ? 2 : Xp >= Def.Veterancy[0] ? 1 : 0;
+    public bool IsInside => InsideId != 0;
+    public bool Has(string status) { foreach (var s in Statuses) if (s.Type == status) return true; return false; }
+    public bool Disabled => Has("disabled");
+    /// <summary>Damage multiplier from veterancy and salvage.</summary>
+    public float DamageMult => (1f + 0.1f * Level) * (1f + 0.3f * SalvageLevel) * (Has("empowered") ? 1.5f : 1f) * HordeMult;
+    public float MaxHpMult => (1f + 0.1f * Level) * (1f + 0.25f * SalvageLevel);
 
     public float Radius => Def.Radius;
     public bool IsMoving => Move is not null;
@@ -117,4 +153,12 @@ public sealed class ProductionQueue
     public const int MaxItems = 9;
     public List<QueueItem> Items { get; } = new();
     public QueueItem? Head => Items.Count > 0 ? Items[0] : null;
+}
+
+public sealed class Status
+{
+    public string Type = "";
+    public float Remaining;
+    public float Magnitude = 1f;
+    public int SourceId;
 }

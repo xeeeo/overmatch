@@ -10,6 +10,8 @@ public partial class App : Node
     private string? _smokePath;
     private int _speed = 1;
     private string? _autoDifficulty;
+    private string _faction = "coalition";
+    private string _enemy = "coalition";
 
     public override void _Ready()
     {
@@ -18,9 +20,16 @@ public partial class App : Node
             if (arg.StartsWith("--smoke=")) _smokePath = arg["--smoke=".Length..];
             else if (arg.StartsWith("--speed=")) _speed = int.Parse(arg["--speed=".Length..]);
             else if (arg.StartsWith("--ai=")) _autoDifficulty = arg["--ai=".Length..];
+            else if (arg.StartsWith("--faction=")) _faction = arg["--faction=".Length..];
+            else if (arg.StartsWith("--enemy=")) _enemy = arg["--enemy=".Length..];
         }
         if (_smokePath is not null || _autoDifficulty is not null)
-            StartMatch(MatchSettings.Default(1, _autoDifficulty ?? "medium"));
+        {
+            var s = MatchSettings.Default(1, _autoDifficulty ?? "medium");
+            s.Players[0].Faction = _faction;
+            s.Players[1].Faction = _enemy;
+            StartMatch(s);
+        }
         else
             ShowMenu();
     }

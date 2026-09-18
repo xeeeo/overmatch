@@ -1,0 +1,16 @@
+{
+  "id": "directorate_conscript_training",
+  "faction": "directorate",
+  "name": "Conscript Training",
+  "cost": 700,
+  "time": 30,
+  "researchedAt": "directorate_barracks",
+  "effects": [
+    {
+      "type": "hp",
+      "tag": "infantry",
+      "mult": 1.3
+    }
+  ],
+  "description": "Infantry are 30% tougher."
+}

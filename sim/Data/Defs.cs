@@ -3,6 +3,96 @@ using System.Text.Json.Serialization;
 
 namespace Overmatch.Sim.Data;
 
+/// <summary>A lingering damage area (toxin pool, radiation).</summary>
+public sealed class HazardDef
+{
+    public float Radius { get; set; } = 3f;
+    /// <summary>Damage per second to anything inside (armour table applies).</summary>
+    public float Dps { get; set; } = 10f;
+    public string DamageType { get; set; } = "toxin";
+    public float Duration { get; set; } = 20f;
+}
+
+/// <summary>A status applied on hit or by an effect.</summary>
+public sealed class StatusDef
+{
+    /// <summary>"disabled" (no actions), "jammed" (guidance off, drones fall), "poisoned", "revealed", "empowered".</summary>
+    public string Type { get; set; } = "disabled";
+    public float Duration { get; set; } = 10f;
+    public float Magnitude { get; set; } = 1f;
+}
+
+/// <summary>What a power, ability or superweapon does.</summary>
+public sealed class EffectSpec
+{
+    /// <summary>"spawn", "strike", "reveal", "status", "heal", "bounty", "discount", "damage", "hazard".</summary>
+    public string Type { get; set; } = "";
+    public string Unit { get; set; } = "";
+    public int Count { get; set; } = 1;
+    /// <summary>Seconds spawned units live (0 = forever).</summary>
+    public float Lifetime { get; set; }
+    /// <summary>Seconds a status/reveal/discount lasts.</summary>
+    public float Duration { get; set; } = 10f;
+    public float Damage { get; set; }
+    public string DamageType { get; set; } = "explosive";
+    public float Radius { get; set; } = 4f;
+    public float Falloff { get; set; } = 0.4f;
+    /// <summary>Strike: number of impacts spread over Interval seconds after Delay.</summary>
+    public int Impacts { get; set; } = 1;
+    public float Interval { get; set; }
+    public float Delay { get; set; } = 2f;
+    /// <summary>Strike: scatter radius for impacts (0 = all on the point).</summary>
+    public float Scatter { get; set; }
+    public StatusDef? Status { get; set; }
+    public HazardDef? Hazard { get; set; }
+    /// <summary>heal: fraction of max HP; bounty: fraction of victim cost; discount: cost multiplier.</summary>
+    public float Amount { get; set; } = 0.5f;
+    /// <summary>status/heal targets: "enemies" or "friends".</summary>
+    public string Targets { get; set; } = "enemies";
+}
+
+public sealed class AuraDef
+{
+    /// <summary>"heal" (Amount = hp/s to friends), "jam" (drones burn Amount/s, enemy missiles lose guidance), "horde" (+Amount damage with 5+ horde units nearby).</summary>
+    public string Type { get; set; } = "heal";
+    public float Radius { get; set; } = 6f;
+    public float Amount { get; set; } = 5f;
+}
+
+public sealed class AbilityDef
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public float Cooldown { get; set; } = 30f;
+    /// <summary>"none", "point", "unit", "building".</summary>
+    public string Target { get; set; } = "none";
+    public float Range { get; set; } = 8f;
+    public EffectSpec Effect { get; set; } = new();
+    public string Description { get; set; } = "";
+}
+
+public sealed class SpawnerDef
+{
+    public string Unit { get; set; } = "";
+    public int Max { get; set; } = 4;
+    public float Interval { get; set; } = 8f;
+}
+
+public sealed class SuperweaponDef
+{
+    public string Name { get; set; } = "";
+    public float ChargeTime { get; set; } = 300f;
+    public EffectSpec Effect { get; set; } = new();
+}
+
+public sealed class DeathDamageDef
+{
+    public float Damage { get; set; } = 200f;
+    public string DamageType { get; set; } = "explosive";
+    public float Radius { get; set; } = 5f;
+    public HazardDef? Hazard { get; set; }
+}
+
 /// <summary>Fields shared by units and buildings.</summary>
 public abstract class ObjectDef
 {
@@ -25,8 +115,27 @@ public abstract class ObjectDef
     /// <summary>XP awarded to the killer.</summary>
     public int XpValue { get; set; } = 10;
     public string Description { get; set; } = "";
+    /// <summary>Invisible to enemies unless a detector is near or it is attacking.</summary>
+    public bool Stealth { get; set; }
+    /// <summary>Reveals stealthed enemies within this radius (0 = none).</summary>
+    public float Detector { get; set; }
+    /// <summary>Infantry slots for garrisons (buildings) or transports (units).</summary>
+    public int GarrisonSlots { get; set; }
+    public List<AuraDef> Auras { get; set; } = new();
+    public List<AbilityDef> Abilities { get; set; } = new();
+    /// <summary>XP needed for veterancy levels 1..3.</summary>
+    public float[] Veterancy { get; set; } = { 100f, 250f, 500f };
+    public DeathDamageDef? DeathDamage { get; set; }
+    public SpawnerDef? Spawner { get; set; }
+    /// <summary>Kills infantry it drives over.</summary>
+    public bool Crusher { get; set; }
+    /// <summary>Picks up salvage crates from wrecks.</summary>
+    public bool Salvager { get; set; }
+    /// <summary>Counts toward and benefits from horde auras.</summary>
+    public bool Horde { get; set; }
 
     [JsonIgnore] public bool HasTurret => TurretTurnRate > 0f;
+    [JsonIgnore] public bool IsInfantry => Tags.Contains("infantry");
     [JsonIgnore] public virtual bool IsAir => false;
     [JsonIgnore] public abstract float Radius { get; }
     [JsonIgnore] public bool IsBuilding => this is BuildingDef;
@@ -60,6 +169,13 @@ public sealed class UnitDef : ObjectDef
     public bool Builder { get; set; }
     /// <summary>Non-null for harvesters.</summary>
     public HarvestDef? Harvest { get; set; }
+    /// <summary>Can capture neutral and enemy capturable buildings.</summary>
+    public bool CanCapture { get; set; }
+    /// <summary>Shots before returning to an airfield (0 = unlimited).</summary>
+    public int Ammo { get; set; }
+    public float RearmTime { get; set; } = 8f;
+    /// <summary>Seconds the unit exists (0 = forever). Used for drones and paradrops.</summary>
+    public float Lifetime { get; set; }
 
     [JsonIgnore] public Locomotor LocomotorClass => LocomotorParse.Parse(Locomotor);
     [JsonIgnore] public override bool IsAir => LocomotorClass == Sim.Locomotor.Air;
@@ -84,7 +200,6 @@ public sealed class BuildingDef : ObjectDef
     public List<string> Upgrades { get; set; } = new();
     /// <summary>Tech tags this building satisfies for prereqs (its own id always counts).</summary>
     public List<string> Provides { get; set; } = new();
-    public int GarrisonSlots { get; set; }
     public TrickleDef? Trickle { get; set; }
     /// <summary>Harvesters unload here.</summary>
     public bool SupplyCenter { get; set; }
@@ -92,6 +207,19 @@ public sealed class BuildingDef : ObjectDef
     public bool Hq { get; set; }
     /// <summary>Weapons stop working when the base is under-powered.</summary>
     public bool NeedsPower { get; set; } = true;
+    /// <summary>Neutral tech building that infantry can capture.</summary>
+    public bool Capturable { get; set; }
+    /// <summary>Extra trickle per garrisoned infantry (Cyber Center hackers).</summary>
+    public int TricklePerPassenger { get; set; }
+    /// <summary>Leaves a hole that regrows the building.</summary>
+    public bool RebuildHole { get; set; }
+    /// <summary>Part of the player's shared tunnel network.</summary>
+    public bool TunnelHub { get; set; }
+    /// <summary>Aircraft pads provided (jets need one to rearm).</summary>
+    public int Pads { get; set; }
+    public SuperweaponDef? Superweapon { get; set; }
+    /// <summary>Marks a hole: which building it regrows. Set by the engine, not data.</summary>
+    public bool IsHole { get; set; }
 
     [JsonIgnore] public int Width => Footprint.Length > 0 ? Footprint[0] : 3;
     [JsonIgnore] public int Height => Footprint.Length > 1 ? Footprint[1] : Width;
@@ -154,6 +282,12 @@ public sealed class WeaponDef
     public List<string> Targets { get; set; } = new() { "ground" };
     /// <summary>Degrees of aim error tolerated before firing.</summary>
     public float AimTolerance { get; set; } = 6f;
+    /// <summary>The shooter detonates itself (bomb trucks, saboteurs, mines, FPV drones).</summary>
+    public bool Suicide { get; set; }
+    public HazardDef? Hazard { get; set; }
+    public StatusDef? Status { get; set; }
+    /// <summary>Hits occupants of a garrisoned building directly (flame, toxin, flashbang).</summary>
+    public bool ClearsGarrison { get; set; }
 
     [JsonIgnore] public bool CanTargetAir => Targets.Contains("air");
     [JsonIgnore] public bool CanTargetGround => Targets.Contains("ground");
@@ -168,6 +302,25 @@ public sealed class FactionDef
     public string Hq { get; set; } = "";
     public bool NeedsPower { get; set; } = true;
     public int StartingCash { get; set; } = 10000;
+    /// <summary>Enemy vehicle wrecks drop salvage crates for this faction's salvagers.</summary>
+    public bool Salvage { get; set; }
+    /// <summary>XP needed to reach ranks 2..5.</summary>
+    public float[] RankXp { get; set; } = { 300f, 800f, 1600f, 2800f };
+    public List<string> Powers { get; set; } = new();
+}
+
+public sealed class PowerDef
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Faction { get; set; } = "";
+    /// <summary>Minimum rank to buy (1, 3 or 5).</summary>
+    public int Rank { get; set; } = 1;
+    public float Cooldown { get; set; } = 120f;
+    /// <summary>"none" or "point".</summary>
+    public string Target { get; set; } = "point";
+    public EffectSpec Effect { get; set; } = new();
+    public string Description { get; set; } = "";
 }
 
 public sealed class RectDef
@@ -204,6 +357,15 @@ public sealed class MapDef
     public List<RectDef> Road { get; set; } = new();
     public List<SpawnDef> Spawns { get; set; } = new();
     public List<SupplyDef> Supplies { get; set; } = new();
+    /// <summary>Neutral buildings placed on the map: civilian houses to garrison, oil derricks to capture.</summary>
+    public List<NeutralDef> Neutrals { get; set; } = new();
+}
+
+public sealed class NeutralDef
+{
+    public string Id { get; set; } = "";
+    public int X { get; set; }
+    public int Y { get; set; }
 }
 
 /// <summary>A data file's relative path (e.g. "units/coalition/bulwark.json") and its JSON text.</summary>
@@ -218,14 +380,16 @@ public sealed class GameRules
     public IReadOnlyDictionary<string, UpgradeDef> Upgrades { get; }
     public IReadOnlyDictionary<string, FactionDef> Factions { get; }
     public IReadOnlyDictionary<string, MapDef> Maps { get; }
+    public IReadOnlyDictionary<string, PowerDef> Powers { get; }
     /// <summary>Keyed "faction/difficulty".</summary>
     public IReadOnlyDictionary<string, AiProfile> AiProfiles { get; }
     public ArmourTable Armour { get; }
 
     private GameRules(Dictionary<string, UnitDef> units, Dictionary<string, BuildingDef> buildings, Dictionary<string, WeaponDef> weapons,
         Dictionary<string, UpgradeDef> upgrades, Dictionary<string, FactionDef> factions, Dictionary<string, MapDef> maps,
-        Dictionary<string, AiProfile> ai, ArmourTable armour)
+        Dictionary<string, PowerDef> powers, Dictionary<string, AiProfile> ai, ArmourTable armour)
     {
+        Powers = powers;
         Units = units;
         Buildings = buildings;
         Weapons = weapons;
@@ -253,6 +417,7 @@ public sealed class GameRules
         var factions = new Dictionary<string, FactionDef>();
         var maps = new Dictionary<string, MapDef>();
         var ai = new Dictionary<string, AiProfile>();
+        var powers = new Dictionary<string, PowerDef>();
         var armour = new ArmourTable();
 
         foreach (var file in files)
@@ -266,6 +431,7 @@ public sealed class GameRules
             else if (path.StartsWith("factions/")) Add(factions, Parse<FactionDef>(file), d => d.Id, path);
             else if (path.StartsWith("maps/")) Add(maps, Parse<MapDef>(file), d => d.Id, path);
             else if (path.StartsWith("ai/")) Add(ai, Parse<AiProfile>(file), d => $"{d.Faction}/{d.Difficulty}", path);
+            else if (path.StartsWith("powers/")) Add(powers, Parse<PowerDef>(file), d => d.Id, path);
             else if (path == "armour.json") armour = ArmourTable.Parse(file.Json);
         }
 
@@ -280,7 +446,10 @@ public sealed class GameRules
                 if (!upgrades.ContainsKey(u)) throw new InvalidDataException($"Building '{b.Id}' offers unknown upgrade '{u}'");
         }
 
-        return new GameRules(units, buildings, weapons, upgrades, factions, maps, ai, armour);
+        foreach (var f in factions.Values)
+            foreach (var pw in f.Powers)
+                if (!powers.ContainsKey(pw)) throw new InvalidDataException($"Faction '{f.Id}' lists unknown power '{pw}'");
+        return new GameRules(units, buildings, weapons, upgrades, factions, maps, powers, ai, armour);
     }
 
     private static T Parse<T>(DataFile file) =>
@@ -310,6 +479,9 @@ public sealed class GameRules
 
     public MapDef Map(string id) =>
         Maps.TryGetValue(id, out var d) ? d : throw new KeyNotFoundException($"Unknown map '{id}'");
+
+    public PowerDef Power(string id) =>
+        Powers.TryGetValue(id, out var d) ? d : throw new KeyNotFoundException($"Unknown power '{id}'");
 
     public AiProfile Ai(string faction, string difficulty) =>
         AiProfiles.TryGetValue($"{faction}/{difficulty}", out var d) ? d : throw new KeyNotFoundException($"No AI profile for {faction}/{difficulty}");

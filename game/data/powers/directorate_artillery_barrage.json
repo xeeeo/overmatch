@@ -1,0 +1,20 @@
+{
+  "id": "directorate_artillery_barrage",
+  "faction": "directorate",
+  "name": "Artillery Barrage",
+  "rank": 1,
+  "cooldown": 150,
+  "target": "point",
+  "effect": {
+    "type": "strike",
+    "damage": 85,
+    "damageType": "explosive",
+    "radius": 3,
+    "falloff": 0.4,
+    "impacts": 24,
+    "interval": 15,
+    "delay": 2,
+    "scatter": 6
+  },
+  "description": "Shells rain on the area for 15 seconds."
+}

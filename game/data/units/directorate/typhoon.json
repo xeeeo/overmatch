@@ -1,0 +1,26 @@
+{
+  "id": "directorate_typhoon",
+  "faction": "directorate",
+  "model": "directorate/typhoon",
+  "name": "Typhoon",
+  "cost": 1200,
+  "buildTime": 16,
+  "builtAt": "directorate_vehicle_plant",
+  "locomotor": "tracked",
+  "speed": 3.2,
+  "turnRate": 120,
+  "radius": 1.1,
+  "hp": 300,
+  "armour": "light_vehicle",
+  "vision": 9,
+  "weapons": [
+    "typhoon_rockets"
+  ],
+  "turretTurnRate": 150,
+  "xpValue": 45,
+  "tags": [
+    "vehicle",
+    "artillery"
+  ],
+  "description": "Rocket artillery. Long range, area damage."
+}

@@ -16,7 +16,7 @@ The world has moved on since 2003. Overmatch's battlefield is today's: cheap FPV
 
 ## Status
 
-Pre-alpha. Playable skirmish. M0–M3 are done: movement, combat, fog of war, base building, economy, production, upgrades, the Coalition tree, a skirmish AI with four difficulty tiers, victory and defeat, a main menu and skirmish setup. M4 (the Directorate and Network factions, generals' powers, superweapons) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
+Pre-alpha. Playable skirmish with all three factions. M0–M4 are done: movement, combat, fog of war, base building, economy, production, upgrades, three full faction trees (Coalition, Directorate, Network), generals' promotions and powers, superweapons, garrisons, transports, tunnels, capturable oil derricks, stealth and detection, veterancy, salvage, hazards, a skirmish AI with four difficulty tiers, victory and defeat, menus. M5 (feel: sound, voices, minimap, more maps, balance) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
 
 ## Building from source
 

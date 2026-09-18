@@ -1,0 +1,2 @@
+{ "id": "civilian_house", "name": "Civilian House", "faction": "", "cost": 0, "buildTime": 1, "footprint": [3, 3], "hp": 900, "armour": "structure", "vision": 0,
+  "garrisonSlots": 6, "needsPower": false, "model": "neutral/civilian_house", "tags": ["structure", "civilian"], "description": "Garrison up to 6 infantry." }

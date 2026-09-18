@@ -19,6 +19,9 @@ public partial class Hud : CanvasLayer
     private HBoxContainer _queueBox = null!;
     private GridContainer _buttons = null!;
     private PanelContainer _commandBar = null!;
+    private VBoxContainer _powersBox = null!;
+    private Label _rank = null!;
+    private string _lastPowersSig = "";
     private string _lastSignature = "";
     private int _lastCash = -1;
     private double _refreshTimer;
@@ -29,6 +32,7 @@ public partial class Hud : CanvasLayer
     {
         BuildTopBar();
         BuildCommandBar();
+        BuildPowersPanel();
         _message = new Label { Modulate = new Color(1f, 0.85f, 0.4f), HorizontalAlignment = HorizontalAlignment.Center };
         _message.SetAnchorsPreset(Control.LayoutPreset.CenterTop);
         _message.Position = new Vector2(0, 70);
@@ -86,6 +90,76 @@ public partial class Hud : CanvasLayer
         AddChild(_commandBar);
     }
 
+    private void BuildPowersPanel()
+    {
+        var panel = new PanelContainer();
+        panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.TopRight);
+        panel.OffsetTop = 36;
+        panel.OffsetLeft = -230;
+        panel.OffsetRight = -6;
+        _powersBox = new VBoxContainer { CustomMinimumSize = new Vector2(220, 0) };
+        _powersBox.AddThemeConstantOverride("separation", 4);
+        panel.AddChild(_powersBox);
+        _rank = MakeLabel("Rank 1", 13);
+        _powersBox.AddChild(_rank);
+        AddChild(panel);
+    }
+
+    private void RefreshPowers()
+    {
+        var w = Root.World;
+        var p = w.Player(Root.LocalPlayer);
+        var sig = $"{p.Rank}/{p.Points}/{string.Join(",", p.PowersOwned)}/{(int)(w.Time / 5)}/{string.Join(",", w.Entities.Where(e => e.Owner == Root.LocalPlayer && e.Building?.Superweapon is not null).Select(e => e.Id + ":" + (int)e.SuperweaponCharge))}";
+        if (sig == _lastPowersSig) return;
+        _lastPowersSig = sig;
+        foreach (var c in _powersBox.GetChildren()) if (c != _rank) c.QueueFree();
+        _rank.Text = $"Rank {p.Rank}   {p.Points} point{(p.Points == 1 ? "" : "s")}   {p.Xp} xp";
+        foreach (var pid in p.Faction.Powers)
+        {
+            var def = w.Rules.Power(pid);
+            Button btn;
+            if (!p.HasPower(pid))
+            {
+                var can = p.Points > 0 && p.Rank >= def.Rank;
+                btn = new Button { Text = $"Buy: {def.Name}  (rank {def.Rank})", Disabled = !can, TooltipText = def.Description, Alignment = HorizontalAlignment.Left };
+                btn.Pressed += () => w.Submit(new BuyPowerCommand(Root.LocalPlayer, pid));
+            }
+            else
+            {
+                var left = p.PowerReadyAt(pid) - w.Time;
+                var ready = left <= 0f;
+                var passive = def.Target == "none" && def.Effect.Type == "bounty";
+                btn = new Button
+                {
+                    Text = passive ? $"{def.Name}  (active)" : ready ? def.Name : $"{def.Name}  {left:0}s",
+                    Disabled = !ready || passive, TooltipText = def.Description, Alignment = HorizontalAlignment.Left,
+                };
+                btn.Pressed += () =>
+                {
+                    if (def.Target == "none") w.Submit(new UsePowerCommand(Root.LocalPlayer, pid, Vec2.Zero));
+                    else Root.Selection.Arm(new SelectionController.Pending("power", pid, 0, def.Name, false));
+                };
+            }
+            btn.AddThemeFontSizeOverride("font_size", 12);
+            _powersBox.AddChild(btn);
+        }
+        foreach (var b in w.Entities.Where(e => e.Owner == Root.LocalPlayer && e.Operational && e.Building?.Superweapon is not null))
+        {
+            var sw = b.Building!.Superweapon!;
+            var left = sw.ChargeTime - b.SuperweaponCharge;
+            var btn = new Button
+            {
+                Text = left <= 0f ? $"FIRE {sw.Name}" : $"{sw.Name}  {left / 60f:0}:{left % 60f:00}",
+                Disabled = left > 0f, Alignment = HorizontalAlignment.Left,
+            };
+            btn.Modulate = left <= 0f ? new Color(1f, 0.6f, 0.3f) : Colors.White;
+            var id = b.Id;
+            btn.Pressed += () => Root.Selection.Arm(new SelectionController.Pending("superweapon", "", id, sw.Name, false));
+            btn.AddThemeFontSizeOverride("font_size", 12);
+            _powersBox.AddChild(btn);
+        }
+    }
+
     private static Label MakeLabel(string text, int size)
     {
         var l = new Label { Text = text };
@@ -112,6 +186,8 @@ public partial class Hud : CanvasLayer
         _debug.Text = $"units {mine}   tick {w.Tick}   {Engine.GetFramesPerSecond()} fps   speed {Root.Speed}x";
 
         if (_messageTtl > 0) { _messageTtl -= (float)delta; if (_messageTtl <= 0) _message.Text = ""; }
+        RefreshPowers();
+        if (Root.Selection.PendingTarget is { } pt && _messageTtl <= 0) _message.Text = $"{pt.Label}: click a target (right-click cancels)";
 
         _refreshTimer += delta;
         var sig = Root.Selection.Signature();
@@ -159,6 +235,10 @@ public partial class Hud : CanvasLayer
         var title = count > 1 && !e.IsBuilding ? $"{count} units" : e.Def.Name;
         var state = e.UnderConstruction ? $"  constructing {e.BuildProgress * 100:0}%" : "";
         var extra = e.IsHarvester ? $"\ncarrying {e.Carried}" : "";
+        if (e.Level > 0) extra += $"   veteran {new string('*', e.Level)}";
+        if (e.SalvageLevel > 0) extra += $"   salvage {e.SalvageLevel}";
+        if (e.Statuses.Count > 0) extra += "   " + string.Join(" ", e.Statuses.Select(st => st.Type));
+        if (e.Unit is { Ammo: > 0 } au) extra += $"   ammo {e.Ammo}/{au.Ammo}";
         _info.Text = $"{title}{state}\nHP {e.Hp:0} / {e.MaxHp:0}{extra}\n{e.Def.Description}";
 
         if (e.IsBuilding)
@@ -186,7 +266,16 @@ public partial class Hud : CanvasLayer
                 var reason = !ok ? $"Requires {Name(missing)}" : !afford ? "Not enough cash" : up.Description;
                 AddButton($"{up.Name}\n${up.Cost}", ok && afford, reason, () => w.Submit(new ProduceCommand(Root.LocalPlayer, e.Id, upid)));
             }
-            AddButton($"Sell\n+${e.Def.Cost / 2}", true, "Sell this building for half its cost", () => w.Submit(new SellCommand(Root.LocalPlayer, e.Id)));
+            if (e.Passengers.Count > 0 || (e.Building!.TunnelHub && player.TunnelPool.Count > 0))
+            {
+                var n = e.Building.TunnelHub ? player.TunnelPool.Count : e.Passengers.Count;
+                AddButton($"Evacuate\n({n} inside)", true, "Everyone out", () => w.Submit(new UngarrisonCommand(Root.LocalPlayer, e.Id)));
+            }
+            if (e.Building!.Superweapon is { } sw)
+                AddButton(e.SuperweaponCharge >= sw.ChargeTime ? $"FIRE\n{sw.Name}" : $"{sw.Name}\ncharging", e.SuperweaponCharge >= sw.ChargeTime, sw.Effect.Type,
+                    () => Root.Selection.Arm(new SelectionController.Pending("superweapon", "", e.Id, sw.Name, false)));
+            if (e.Owner == Root.LocalPlayer && e.Def.Cost > 0)
+                AddButton($"Sell\n+${e.Def.Cost / 2}", true, "Sell this building for half its cost", () => w.Submit(new SellCommand(Root.LocalPlayer, e.Id)));
             if (e.Queue is not null)
             {
                 for (var i = 0; i < e.Queue.Items.Count; i++)
@@ -216,6 +305,19 @@ public partial class Hud : CanvasLayer
         }
         if (e.IsHarvester)
             AddButton("Harvest\nnearest", true, "Go to the nearest supply pile", () => w.Submit(new HarvestCommand(Root.LocalPlayer, Root.Selection.Selected.ToArray(), 0)));
+        for (var i = 0; i < e.Def.Abilities.Count; i++)
+        {
+            var ab = e.Def.Abilities[i];
+            var cd = e.AbilityCooldowns.Length > i ? e.AbilityCooldowns[i] : 0f;
+            var label = cd > 0f ? $"{ab.Name}\n{cd:0}s" : ab.Name;
+            AddButton(label, cd <= 0f, ab.Description, () =>
+            {
+                if (ab.Target == "none") w.Submit(new AbilityCommand(Root.LocalPlayer, Root.Selection.Selected.ToArray(), ab.Id, Vec2.Zero, 0));
+                else Root.Selection.Arm(new SelectionController.Pending("ability", ab.Id, 0, ab.Name, ab.Target is "unit" or "building"));
+            });
+        }
+        if (e.Passengers.Count > 0)
+            AddButton($"Unload\n({e.Passengers.Count})", true, "Passengers out", () => w.Submit(new UngarrisonCommand(Root.LocalPlayer, e.Id)));
         AddButton("Stop\n(S)", true, "", () => w.Submit(new StopCommand(Root.LocalPlayer, Root.Selection.Selected.ToArray())));
         if (e.HasWeapons) AddButton("Attack-move\n(A)", true, "Then click a destination", () => Root.Selection.ArmAttackMove());
     }

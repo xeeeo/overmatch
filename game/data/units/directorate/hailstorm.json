@@ -1,0 +1,26 @@
+{
+  "id": "directorate_hailstorm",
+  "faction": "directorate",
+  "model": "directorate/hailstorm",
+  "name": "Hailstorm",
+  "cost": 800,
+  "buildTime": 11,
+  "builtAt": "directorate_vehicle_plant",
+  "locomotor": "tracked",
+  "speed": 3.8,
+  "turnRate": 150,
+  "radius": 1.0,
+  "hp": 320,
+  "armour": "light_vehicle",
+  "vision": 10,
+  "weapons": [
+    "flak_cannon",
+    "hailstorm_gatling"
+  ],
+  "turretTurnRate": 360,
+  "xpValue": 35,
+  "tags": [
+    "vehicle"
+  ],
+  "description": "Flak vehicle. Shreds aircraft and infantry."
+}

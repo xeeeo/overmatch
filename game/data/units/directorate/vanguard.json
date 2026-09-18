@@ -1,0 +1,27 @@
+{
+  "id": "directorate_vanguard",
+  "faction": "directorate",
+  "model": "directorate/vanguard",
+  "name": "Vanguard",
+  "cost": 700,
+  "buildTime": 10,
+  "builtAt": "directorate_vehicle_plant",
+  "locomotor": "tracked",
+  "speed": 3.8,
+  "turnRate": 140,
+  "radius": 1.0,
+  "hp": 360,
+  "armour": "tank",
+  "vision": 8,
+  "weapons": [
+    "vanguard_cannon"
+  ],
+  "turretTurnRate": 180,
+  "horde": true,
+  "xpValue": 30,
+  "tags": [
+    "vehicle",
+    "tank"
+  ],
+  "description": "Cheap battle tank. Horde bonus with 5 or more together."
+}

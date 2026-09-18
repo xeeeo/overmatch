@@ -20,6 +20,8 @@ public sealed class AiController
     private Vec2 _muster;
     private Vec2 _enemyDir = new(1, 0);
     private int _defenceIndex;
+    /// <summary>Units given a job by a command submitted this think (commands apply next tick, so the entity does not show it yet).</summary>
+    private readonly HashSet<int> _assigned = new();
 
     public string Status { get; private set; } = "";
 
@@ -43,6 +45,7 @@ public sealed class AiController
         if (hq is null) { Status = "no base"; return; }
         UpdateEnemyDirection(hq);
         _wave.RemoveAll(id => _w.Get(id) is null);
+        _assigned.Clear();
 
         ManageBuilders(hq);
         ManageBase(hq);
@@ -51,6 +54,60 @@ public sealed class AiController
         ManageUpgrades();
         ManageDefence(hq);
         ManageAttack(hq);
+        ManagePowers(hq);
+    }
+
+    /// <summary>Buy powers in the faction's order; use targeted powers on the enemy; fire superweapons at the enemy HQ.</summary>
+    private void ManagePowers(Entity hq)
+    {
+        var me = Me;
+        if (me.Points > 0)
+            foreach (var pid in me.Faction.Powers)
+            {
+                if (me.HasPower(pid)) continue;
+                var def = _w.Rules.Power(pid);
+                if (me.Rank < def.Rank) continue;
+                _w.Submit(new BuyPowerCommand(Player, pid));
+                break;
+            }
+
+        Entity? enemyHq = null;
+        foreach (var e in _w.Entities)
+            if (e.Alive && e.Owner != Player && e.Owner >= 0 && e.Building is { Hq: true } && !_w.Player(e.Owner).Eliminated) { enemyHq = e; break; }
+        var target = _wave.Count > 0 && _w.Get(_waveTargetId) is { } wt ? wt : enemyHq ?? NearestEnemyBuilding(hq.Pos);
+        if (target is null) return;
+
+        foreach (var pid in me.PowersOwned)
+        {
+            var def = _w.Rules.Power(pid);
+            if (def.Target == "none" || _w.Time < me.PowerReadyAt(pid)) continue;
+            var at = def.Effect.Type switch
+            {
+                "heal" => DamagedCluster() ?? target.Pos,
+                "reveal" => target.Pos,
+                "spawn" when def.Effect.Unit.Contains("drone") || def.Effect.Unit.Contains("ied") => target.Pos,
+                "spawn" => _wave.Count > 0 ? target.Pos : _muster,
+                _ => target.Pos,
+            };
+            if (def.Effect.Type == "heal" && DamagedCluster() is null) continue;
+            _w.Submit(new UsePowerCommand(Player, pid, at));
+            break;
+        }
+
+        foreach (var b in Mine)
+        {
+            if (b.Building?.Superweapon is not { } sw || !b.Operational || b.SuperweaponCharge < sw.ChargeTime) continue;
+            _w.Submit(new FireSuperweaponCommand(Player, b.Id, (enemyHq ?? target).Pos));
+            Status = "superweapon fired";
+        }
+    }
+
+    private Vec2? DamagedCluster()
+    {
+        Entity? worst = null;
+        foreach (var e in Mine)
+            if (!e.IsBuilding && e.HasWeapons && e.HpFraction < 0.5f && (worst is null || e.HpFraction < worst.HpFraction)) worst = e;
+        return worst?.Pos;
     }
 
     // ------------------------------------------------------------ helpers
@@ -68,7 +125,7 @@ public sealed class AiController
         var bestD = float.MaxValue;
         foreach (var e in _w.Entities)
         {
-            if (!e.Alive || e.Owner == Player || !e.IsBuilding || _w.Player(e.Owner).Eliminated) continue;
+            if (!e.Alive || e.Owner == Player || e.Owner < 0 || !e.IsBuilding || e.Building!.IsHole || _w.Player(e.Owner).Eliminated) continue;
             var d = (e.Pos - from).LengthSq;
             if (d < bestD) { bestD = d; best = e; }
         }
@@ -79,7 +136,10 @@ public sealed class AiController
     private int CountIncludingQueued(string unitId) => Count(unitId) + Mine.Sum(e => e.Queue?.Items.Count(i => !i.IsUpgrade && i.Id == unitId) ?? 0);
     private bool Owns(string buildingId) => Mine.Any(e => e.Building?.Id == buildingId);
     private bool Constructing(string buildingId) => Mine.Any(e => e.Building?.Id == buildingId && e.UnderConstruction);
-    private Entity? IdleBuilder() => Mine.FirstOrDefault(e => e.IsBuilder && e.BuildTargetId == 0 && e.Move is null) ?? Mine.FirstOrDefault(e => e.IsBuilder && e.BuildTargetId == 0);
+    /// <summary>A builder not already on a site. Prefers one that is idle over one that is harvesting; never one carrying cargo home.</summary>
+    private Entity? IdleBuilder() =>
+        Mine.FirstOrDefault(e => e.IsBuilder && e.BuildTargetId == 0 && !e.IsInside && !_assigned.Contains(e.Id) && e.Move is null && e.HarvestState == HarvestState.Idle)
+        ?? Mine.FirstOrDefault(e => e.IsBuilder && e.BuildTargetId == 0 && !e.IsInside && !_assigned.Contains(e.Id) && e.HarvestState is HarvestState.Idle or HarvestState.ToPile or HarvestState.Loading);
     private bool CanAfford(int cost) => Me.Cash >= cost + _p.CashReserve;
 
     private IEnumerable<Entity> Producers(string unitId) => Mine.Where(e => e.Operational && e.Building?.Produces.Contains(unitId) == true);
@@ -128,6 +188,7 @@ public sealed class AiController
         var spot = FindPlacement(def, anchor, minDist, maxDist, bias);
         if (spot is null) return false;
         _w.Submit(new BuildCommand(Player, builder.Id, buildingId, spot.Value.x, spot.Value.y));
+        _assigned.Add(builder.Id);
         Status = $"building {def.Name}";
         return true;
     }
@@ -197,13 +258,15 @@ public sealed class AiController
         var have = CountIncludingQueued(_p.HarvesterUnit);
         var centres = Mine.Count(e => e.Operational && e.Building is { SupplyCenter: true });
         var target = Math.Min(_p.MaxHarvesters, _p.TargetHarvesters + Math.Max(0, centres - 1) * 2);
+        // Idle harvesters go back to work, but only when there is somewhere to unload, and never a builder on (or just sent to) a site.
+        var hasCenter = Mine.Any(e => e.Operational && e.Building is { SupplyCenter: true });
+        if (hasCenter)
+            foreach (var h in Mine.Where(e => e.IsHarvester && e.HarvestState == HarvestState.Idle && e.Move is null && e.BuildTargetId == 0 && !e.IsInside && !_assigned.Contains(e.Id)))
+                if (Economy.NearestPile(_w, h.Pos, 60f) is not null) { _w.Submit(new HarvestCommand(Player, new[] { h.Id }, 0)); _assigned.Add(h.Id); }
         if (have >= target || _w.Piles.All(p => p.Depleted)) return;
         var producer = Producers(_p.HarvesterUnit).FirstOrDefault(e => e.Queue is { Items.Count: 0 });
         if (producer is null || !CanAfford(_w.Rules.Unit(_p.HarvesterUnit).Cost)) return;
         _w.Submit(new ProduceCommand(Player, producer.Id, _p.HarvesterUnit));
-        // Idle harvesters go back to work.
-        foreach (var h in Mine.Where(e => e.IsHarvester && e.HarvestState == HarvestState.Idle && e.Move is null))
-            _w.Submit(new HarvestCommand(Player, new[] { h.Id }, 0));
     }
 
     private void ManageProduction()
@@ -260,7 +323,7 @@ public sealed class AiController
         {
             foreach (var c in _w.Spatial.Query(b.Pos, _p.DefenceRadius))
             {
-                if (c.Owner == Player || c.IsBuilding || !c.HasWeapons) continue;
+                if (c.Owner == Player || c.Owner < 0 || c.IsBuilding || !c.HasWeapons) continue;
                 var d = (c.Pos - b.Pos).Length;
                 if (d < bestD) { bestD = d; threat = c; }
             }
@@ -325,7 +388,7 @@ public sealed class AiController
             var hd = float.MaxValue;
             foreach (var e in _w.Entities)
             {
-                if (!e.Alive || e.Owner == Player || _w.Player(e.Owner).Eliminated) continue;
+                if (!e.Alive || e.Owner == Player || e.Owner < 0 || _w.Player(e.Owner).Eliminated) continue;
                 if (!e.IsHarvester && e.Building is not { SupplyCenter: true }) continue;
                 var d = (e.Pos - from).LengthSq;
                 if (d < hd) { hd = d; h = e; }

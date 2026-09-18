@@ -1,0 +1,24 @@
+{
+  "id": "directorate_uranium_shells",
+  "faction": "directorate",
+  "name": "Uranium Shells",
+  "cost": 1500,
+  "time": 45,
+  "researchedAt": "directorate_vehicle_plant",
+  "prereqs": [
+    "directorate_tech"
+  ],
+  "effects": [
+    {
+      "type": "weaponDamage",
+      "weapon": "vanguard_cannon",
+      "mult": 1.25
+    },
+    {
+      "type": "weaponDamage",
+      "weapon": "colossus_twin",
+      "mult": 1.25
+    }
+  ],
+  "description": "Tank cannons deal 25% more damage."
+}

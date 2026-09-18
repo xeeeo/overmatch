@@ -1,0 +1,29 @@
+{
+  "id": "directorate_flak_tower",
+  "faction": "directorate",
+  "model": "directorate/flak_tower",
+  "tags": [
+    "structure"
+  ],
+  "name": "Flak Tower",
+  "cost": 1100,
+  "buildTime": 18,
+  "footprint": [
+    2,
+    2
+  ],
+  "hp": 1500,
+  "armour": "fortification",
+  "vision": 11,
+  "power": -2,
+  "prereqs": [
+    "directorate_barracks"
+  ],
+  "garrisonSlots": 5,
+  "weapons": [
+    "flak_cannon",
+    "tower_gatling"
+  ],
+  "turretTurnRate": 280,
+  "description": "Flak against aircraft, gatling against ground. Garrison 5."
+}

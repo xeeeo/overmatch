@@ -18,9 +18,15 @@ public partial class SelectionController : Control
     private bool _boxActive;
     private bool _attackMoveArmed;
 
+    /// <summary>A pending click-to-target action: attack-move, a power, an ability or a superweapon.</summary>
+    public sealed record Pending(string Kind, string Id, int BuildingId, string Label, bool NeedsEntity);
+    public Pending? PendingTarget { get; private set; }
+
     public IReadOnlyCollection<int> Selected => _selected;
-    public bool AttackMoveArmed => _attackMoveArmed;
+    public bool AttackMoveArmed => _attackMoveArmed || PendingTarget is not null;
     public void ArmAttackMove() => _attackMoveArmed = _selected.Count > 0;
+    public void Arm(Pending p) { PendingTarget = p; _attackMoveArmed = false; }
+    public void Disarm() { PendingTarget = null; _attackMoveArmed = false; }
     public void SelectOnly(int id)
     {
         _selected.Clear();
@@ -45,6 +51,11 @@ public partial class SelectionController : Control
                 if (mb.Pressed)
                 {
                     if (Root.Hud.IsMouseOverBar(mb.Position)) return;
+                    if (PendingTarget is not null)
+                    {
+                        ApplyPending(mb.Position);
+                        return;
+                    }
                     if (_attackMoveArmed)
                     {
                         IssueAttackMove(mb.Position);
@@ -67,7 +78,7 @@ public partial class SelectionController : Control
             }
             else if (mb.ButtonIndex == MouseButton.Right && mb.Pressed)
             {
-                _attackMoveArmed = false;
+                if (PendingTarget is not null || _attackMoveArmed) { Disarm(); return; }
                 if (!Root.Hud.IsMouseOverBar(mb.Position)) IssueContextOrder(mb.Position);
             }
         }
@@ -94,8 +105,32 @@ public partial class SelectionController : Control
         }
         else if (@event.IsActionPressed("cancel"))
         {
-            _attackMoveArmed = false;
+            Disarm();
         }
+    }
+
+    private void ApplyPending(Vector2 screen)
+    {
+        var p = PendingTarget!;
+        var ground = Root.Camera.GroundPoint(screen);
+        var entity = p.NeedsEntity ? Pick(screen, e => true) : null;
+        if (p.NeedsEntity && entity is null) { Root.Hud.Say("Pick a target"); return; }
+        var target = entity is not null ? entity.Pos : ground is { } g ? MapView.ToSim(g) : (Vec2?)null;
+        if (target is null) return;
+        switch (p.Kind)
+        {
+            case "power":
+                Root.World.Submit(new UsePowerCommand(Player, p.Id, target.Value));
+                break;
+            case "ability":
+                Root.World.Submit(new AbilityCommand(Player, _selected.ToArray(), p.Id, target.Value, entity?.Id ?? 0));
+                break;
+            case "superweapon":
+                Root.World.Submit(new FireSuperweaponCommand(Player, p.BuildingId, target.Value));
+                break;
+        }
+        Root.ShowMarker(MapView.ToWorld(target.Value), new Color(1f, 0.5f, 0.2f));
+        Disarm();
     }
 
     /// <summary>Nearest entity to a screen point, filtered; null if none within the pick radius.</summary>
@@ -106,7 +141,7 @@ public partial class SelectionController : Control
         var bestD = PickRadiusPx;
         foreach (var e in Root.World.Entities)
         {
-            if (!e.Alive || !filter(e)) continue;
+            if (!e.Alive || e.IsInside || !filter(e)) continue;
             if (!Root.Views.TryGetValue(e.Id, out var view) || !view.Visible) continue;
             var world = MapView.ToWorld(e.Pos, 0.7f + (e.Unit?.FlightHeight ?? 0f));
             if (cam.IsPositionBehind(world)) continue;
@@ -184,7 +219,27 @@ public partial class SelectionController : Control
                 return;
             }
         }
-        var enemy = Pick(screen, e => e.Owner != Player);
+        // Infantry right-clicking a garrisonable building/transport enter it; capture-capable infantry capture neutral/enemy tech buildings.
+        var infantry = _selected.Where(id => Root.World.Get(id) is { Def.IsInfantry: true }).ToArray();
+        if (infantry.Length > 0)
+        {
+            var container = Pick(screen, e => e.Def.GarrisonSlots > 0 && (e.Owner == Player || e.Owner < 0) && !e.Building!.IsHole);
+            if (container is not null && container.Building is not { Capturable: true })
+            {
+                Root.World.Submit(new GarrisonCommand(Player, infantry, container.Id));
+                Root.ShowMarker(MapView.ToWorld(container.Pos), new Color(0.4f, 0.8f, 1f));
+                return;
+            }
+            var capturable = Pick(screen, e => e.Building is { Capturable: true } && e.Owner != Player);
+            var capturers = infantry.Where(id => Root.World.Get(id)!.Unit!.CanCapture).ToArray();
+            if (capturable is not null && capturers.Length > 0)
+            {
+                Root.World.Submit(new CaptureCommand(Player, capturers, capturable.Id));
+                Root.ShowMarker(MapView.ToWorld(capturable.Pos), new Color(0.4f, 0.8f, 1f));
+                return;
+            }
+        }
+        var enemy = Pick(screen, e => e.Owner != Player && e.Owner >= 0);
         if (enemy is not null)
         {
             Root.World.Submit(new AttackCommand(Player, _selected.ToArray(), enemy.Id));

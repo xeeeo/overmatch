@@ -1,0 +1,16 @@
+{
+  "id": "rpg_launcher",
+  "damage": 48,
+  "damageType": "armour_piercing",
+  "range": 8,
+  "cooldown": 2.8,
+  "projectile": {
+    "kind": "missile",
+    "speed": 24
+  },
+  "targets": [
+    "ground",
+    "air"
+  ],
+  "aimTolerance": 20
+}

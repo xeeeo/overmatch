@@ -1,0 +1,37 @@
+{
+  "id": "directorate_propaganda_center",
+  "faction": "directorate",
+  "model": "directorate/propaganda_center",
+  "tags": [
+    "structure"
+  ],
+  "name": "Propaganda Center",
+  "cost": 2000,
+  "buildTime": 35,
+  "footprint": [
+    4,
+    4
+  ],
+  "hp": 2500,
+  "armour": "structure",
+  "vision": 10,
+  "power": -4,
+  "prereqs": [
+    "directorate_vehicle_plant"
+  ],
+  "provides": [
+    "directorate_tech"
+  ],
+  "auras": [
+    {
+      "type": "heal",
+      "radius": 12,
+      "amount": 4
+    }
+  ],
+  "upgrades": [
+    "directorate_nationalism",
+    "directorate_subliminal_messaging"
+  ],
+  "description": "Tech centre. Heals nearby units. Horde and propaganda upgrades."
+}

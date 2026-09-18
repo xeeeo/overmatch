@@ -1,0 +1,21 @@
+{
+  "id": "typhoon_rockets",
+  "damage": 95,
+  "damageType": "explosive",
+  "range": 18,
+  "minRange": 5,
+  "cooldown": 5.5,
+  "projectile": {
+    "kind": "shell",
+    "speed": 26,
+    "arc": true
+  },
+  "splash": {
+    "radius": 2.6,
+    "falloff": 0.3
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 20
+}

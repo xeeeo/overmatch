@@ -1,0 +1,28 @@
+{
+  "id": "directorate_supply_truck",
+  "faction": "directorate",
+  "model": "directorate/supply_truck",
+  "name": "Supply Truck",
+  "cost": 600,
+  "buildTime": 8,
+  "builtAt": "directorate_supply_depot",
+  "locomotor": "wheeled",
+  "speed": 4.8,
+  "turnRate": 180,
+  "radius": 0.95,
+  "hp": 400,
+  "armour": "harvester",
+  "vision": 7,
+  "harvest": {
+    "capacity": 300,
+    "loadTime": 3,
+    "unloadTime": 1.2,
+    "searchRadius": 34
+  },
+  "xpValue": 25,
+  "tags": [
+    "vehicle",
+    "harvester"
+  ],
+  "description": "Armoured ground harvester."
+}

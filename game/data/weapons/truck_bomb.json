@@ -1,0 +1,19 @@
+{
+  "id": "truck_bomb",
+  "damage": 1400,
+  "damageType": "demolition",
+  "range": 1,
+  "cooldown": 1,
+  "projectile": {
+    "kind": "instant"
+  },
+  "splash": {
+    "radius": 5,
+    "falloff": 0.3
+  },
+  "targets": [
+    "ground"
+  ],
+  "suicide": true,
+  "aimTolerance": 90
+}

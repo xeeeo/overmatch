@@ -1,0 +1,15 @@
+{
+  "id": "technical_mg",
+  "damage": 12,
+  "damageType": "small_arms",
+  "range": 7,
+  "cooldown": 0.25,
+  "projectile": {
+    "kind": "instant"
+  },
+  "targets": [
+    "ground",
+    "air"
+  ],
+  "aimTolerance": 15
+}

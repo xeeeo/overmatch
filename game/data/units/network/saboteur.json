@@ -1,0 +1,25 @@
+{
+  "id": "network_saboteur",
+  "faction": "network",
+  "model": "network/saboteur",
+  "name": "Saboteur",
+  "cost": 500,
+  "buildTime": 8,
+  "builtAt": "network_safehouse",
+  "locomotor": "infantry",
+  "speed": 3.2,
+  "turnRate": 720,
+  "radius": 0.35,
+  "hp": 80,
+  "armour": "infantry",
+  "vision": 8,
+  "stealth": true,
+  "weapons": [
+    "demo_charge"
+  ],
+  "xpValue": 20,
+  "tags": [
+    "infantry"
+  ],
+  "description": "Stealthed. Runs a demolition charge into a building."
+}

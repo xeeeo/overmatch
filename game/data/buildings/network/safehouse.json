@@ -1,0 +1,33 @@
+{
+  "id": "network_safehouse",
+  "faction": "network",
+  "model": "network/safehouse",
+  "tags": [
+    "structure"
+  ],
+  "needsPower": false,
+  "rebuildHole": true,
+  "power": 0,
+  "name": "Safehouse",
+  "cost": 500,
+  "buildTime": 15,
+  "footprint": [
+    3,
+    3
+  ],
+  "hp": 1100,
+  "armour": "structure",
+  "vision": 6,
+  "stealth": true,
+  "produces": [
+    "network_rebel",
+    "network_rpg_trooper",
+    "network_saboteur",
+    "network_angry_mob"
+  ],
+  "upgrades": [
+    "network_camouflage",
+    "network_better_rifles"
+  ],
+  "description": "Trains infantry. Stealthed."
+}

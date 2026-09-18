@@ -1,0 +1,36 @@
+{
+  "id": "directorate_vehicle_plant",
+  "faction": "directorate",
+  "model": "directorate/vehicle_plant",
+  "tags": [
+    "structure"
+  ],
+  "name": "Vehicle Plant",
+  "cost": 2000,
+  "buildTime": 30,
+  "footprint": [
+    4,
+    4
+  ],
+  "hp": 2800,
+  "armour": "structure",
+  "vision": 6,
+  "power": -3,
+  "prereqs": [
+    "directorate_supply_depot"
+  ],
+  "produces": [
+    "directorate_vanguard",
+    "directorate_colossus",
+    "directorate_typhoon",
+    "directorate_hailstorm",
+    "directorate_speaker",
+    "directorate_ghost_van",
+    "directorate_troop_crawler"
+  ],
+  "upgrades": [
+    "directorate_uranium_shells",
+    "directorate_flak_autoloaders"
+  ],
+  "description": "Builds vehicles."
+}

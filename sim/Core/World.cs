@@ -29,6 +29,16 @@ public sealed class World
     private readonly Queue<Command> _pending = new();
     private readonly List<GameEvent> _events = new();
     private readonly List<AiController> _ais = new();
+    internal readonly List<Hazard> HazardList = new();
+    internal readonly List<Strike> StrikeList = new();
+    internal readonly List<Crate> CrateList = new();
+    internal readonly List<Reveal> RevealList = new();
+    public IReadOnlyList<Hazard> Hazards => HazardList;
+    public IReadOnlyList<Crate> Crates => CrateList;
+    public IReadOnlyList<Reveal> Reveals => RevealList;
+    internal readonly List<(string defId, int owner, int cx, int cy)> PendingHoles = new();
+    /// <summary>Deterministic randomness for scatter and the like.</summary>
+    public Random Rng { get; }
     /// <summary>Building entity id occupying each cell, 0 for none.</summary>
     private readonly int[] _cellBuilding;
     private int _nextId = 1;
@@ -53,8 +63,27 @@ public sealed class World
         }
         Vision = new VisionMap(Grid.Width, Grid.Height, _players.Count);
         Fields = new FlowFieldCache(Grid);
+        Rng = new Random(map.Width * 7919 + map.Height * 31 + _players.Count);
         foreach (var s in map.Supplies)
             _piles.Add(new SupplyPile { Id = _nextId++, Pos = new Vec2(s.X, s.Y), Initial = s.Amount, Remaining = s.Amount });
+        foreach (var n in map.Neutrals)
+            if (rules.Buildings.ContainsKey(n.Id)) PlaceBuilding(n.Id, -1, n.X, n.Y);
+    }
+
+    /// <summary>HP multiplier from a player's upgrades; neutral objects get none.</summary>
+    public float HpMultFor(int owner, ObjectDef def) => owner >= 0 && owner < _players.Count ? _players[owner].HpMult(def) : 1f;
+
+    /// <summary>Can this player currently see the entity? Fog, stealth and detection.</summary>
+    public bool CanSee(int player, Entity e)
+    {
+        if (e.Owner == player) return true;
+        if (e.IsInside) return false;
+        if (!Vision.IsVisible(player, e.Pos)) return false;
+        var stealthy = e.Def.Stealth || (e.Owner >= 0 && Player(e.Owner).StealthFor(e.Def));
+        if (!stealthy || e.Has("revealed")) return true;
+        foreach (var d in Spatial.Query(e.Pos, 14f))
+            if (d.Owner == player && d.Alive && d.Def.Detector > 0f && (d.Pos - e.Pos).Length <= d.Def.Detector) return true;
+        return false;
     }
 
     public World(GameRules rules, MapDef map, int playerCount = 2)
@@ -88,8 +117,10 @@ public sealed class World
     {
         var def = Rules.Unit(unitId);
         var e = Create(def, owner, pos, facing);
-        e.MaxHp = def.Hp * Player(owner).HpMult(def);
+        e.MaxHp = def.Hp * HpMultFor(owner, def);
         e.Hp = e.MaxHp;
+        e.Ammo = def.Ammo;
+        e.LifetimeLeft = def.Lifetime;
         _events.Add(new SpawnedEvent(e.Id));
         return e;
     }
@@ -108,6 +139,7 @@ public sealed class World
             TurretFacing = facing,
             PrevTurretFacing = facing,
             Cooldowns = new float[def.Weapons.Count],
+            AbilityCooldowns = new float[def.Abilities.Count],
         };
         _entities.Add(e);
         _byId[e.Id] = e;
@@ -164,7 +196,7 @@ public sealed class World
         var e = Create(def, owner, new Vec2(cx + def.Width * 0.5f, cy + def.Height * 0.5f), 0f);
         e.CellX = cx;
         e.CellY = cy;
-        e.MaxHp = def.Hp * Player(owner).HpMult(def);
+        e.MaxHp = def.Hp * HpMultFor(owner, def);
         if (complete)
         {
             e.Hp = e.MaxHp;
@@ -176,6 +208,7 @@ public sealed class World
         }
         if (def.Produces.Count > 0 || def.Upgrades.Count > 0) e.Queue = new ProductionQueue();
         if (def.Trickle is { } t) e.TrickleTimer = t.Interval;
+        if (def.Spawner is { } sp) e.SpawnTimer = sp.Interval;
         for (var y = cy; y < cy + def.Height; y++)
             for (var x = cx; x < cx + def.Width; x++)
             {
@@ -264,16 +297,20 @@ public sealed class World
         while (_pending.Count > 0) Apply(_pending.Dequeue());
 
         Spatial.Rebuild(_entities);
-        if (Tick % VisionMap.UpdateInterval == 1) Vision.Recompute(_entities);
+        if (Tick % VisionMap.UpdateInterval == 1) Vision.Recompute(_entities, RevealList);
 
+        Effects.Update(this);
         Economy.Update(this);
         Construction.Update(this);
         Production.Update(this);
+        Garrison.Update(this);
+        Powers.UpdateSuperweapons(this);
         Combat.Update(this);
 
         foreach (var e in _entities)
         {
-            if (!e.Alive || e.IsBuilding) continue;
+            if (!e.Alive || e.IsBuilding || e.IsInside) continue;
+            if (e.FollowId != 0) Movement.Follow(e, this);
             Movement.Update(e, this);
         }
         Movement.Separate(this);
@@ -287,10 +324,27 @@ public sealed class World
             var e = _entities[i];
             if (e.Alive) continue;
             if (e.IsBuilding) { FreeFootprint(e); removed = true; }
+            if (e.IsInside && Get(e.InsideId) is { } c) { c.Passengers.Remove(e.Id); if (e.Owner >= 0) Player(e.Owner).TunnelPool.Remove(e.Id); }
             _byId.Remove(e.Id);
             _entities.RemoveAt(i);
         }
         if (removed) Economy.RecomputePower(this);
+        foreach (var (defId, owner, cx, cy) in PendingHoles)
+        {
+            var def = Rules.Building(defId);
+            var holeDef = Rules.Building("hole");
+            var hx = cx + (def.Width - holeDef.Width) / 2;
+            var hy = cy + (def.Height - holeDef.Height) / 2;
+            if (!CanPlace(holeDef, hx, hy, out _)) continue;
+            var hole = PlaceBuilding("hole", owner, hx, hy, complete: true);
+            hole.HoleDefId = defId;
+            hole.HoleCellX = cx;
+            hole.HoleCellY = cy;
+            _events.Add(new HoleEvent(hole.Id, defId, false));
+        }
+        PendingHoles.Clear();
+        // Discounts expire.
+        foreach (var p in _players) if (p.DiscountUntil > 0f && Time >= p.DiscountUntil) { p.DiscountMult = 1f; p.DiscountUntil = 0f; }
         _projectiles.RemoveAll(p => !p.Alive);
 
         if (Tick % TicksPerSecond == 0) CheckElimination();
@@ -305,7 +359,7 @@ public sealed class World
             if (p.Eliminated) continue;
             var alive = false;
             foreach (var e in _entities)
-                if (e.Alive && e.Owner == p.Id && (e.IsBuilding || e.IsBuilder)) { alive = true; break; }
+                if (e.Alive && e.Owner == p.Id && ((e.IsBuilding && !e.Building!.IsHole) || e.IsBuilder)) { alive = true; break; }
             if (alive) continue;
             p.Eliminated = true;
             _events.Add(new PlayerEliminatedEvent(p.Id));
@@ -375,6 +429,53 @@ public sealed class World
             case SellCommand s:
                 Economy.Sell(this, s);
                 break;
+            case AbilityCommand ab:
+                Powers.UseAbility(this, ab);
+                break;
+            case GarrisonCommand g:
+            {
+                var c = Get(g.ContainerId);
+                if (c is null) break;
+                foreach (var u in OwnedUnits(g.Player, g.Units))
+                {
+                    if (!Garrison.CanEnter(u, c)) continue;
+                    ClearJobs(u);
+                    u.TargetId = 0;
+                    u.EnterTargetId = c.Id;
+                    u.Move = null;
+                }
+                break;
+            }
+            case UngarrisonCommand ug:
+            {
+                var c = Get(ug.ContainerId);
+                if (c is not null && (c.Owner == ug.Player || c.Owner < 0)) Garrison.Exit(this, c, ug.Player);
+                break;
+            }
+            case CaptureCommand cap:
+            {
+                var b = Get(cap.BuildingId);
+                if (b is null || b.Building is not { Capturable: true } || b.Owner == cap.Player) break;
+                foreach (var u in OwnedUnits(cap.Player, cap.Units))
+                {
+                    if (u.Unit is not { CanCapture: true }) continue;
+                    ClearJobs(u);
+                    u.TargetId = 0;
+                    u.CaptureTargetId = b.Id;
+                    u.CaptureProgress = 0f;
+                    u.Move = null;
+                }
+                break;
+            }
+            case BuyPowerCommand bp:
+                Powers.Buy(this, bp);
+                break;
+            case UsePowerCommand up:
+                Powers.Use(this, up);
+                break;
+            case FireSuperweaponCommand fs:
+                Powers.Fire(this, fs);
+                break;
             case HarvestCommand h:
                 foreach (var u in OwnedUnits(h.Player, h.Units))
                 {
@@ -393,6 +494,9 @@ public sealed class World
     private static void ClearJobs(Entity u)
     {
         u.BuildTargetId = 0;
+        u.EnterTargetId = 0;
+        u.CaptureTargetId = 0;
+        u.CaptureProgress = 0f;
         if (u.HarvestState != HarvestState.Idle && u.HarvestState != HarvestState.Loading && u.HarvestState != HarvestState.Unloading)
             u.HarvestState = HarvestState.Idle;
     }
@@ -423,11 +527,11 @@ public sealed class World
     {
         var list = new List<Entity>(ids.Length);
         foreach (var id in ids)
-            if (_byId.TryGetValue(id, out var e) && e.Alive && e.Owner == player && !e.IsBuilding) list.Add(e);
+            if (_byId.TryGetValue(id, out var e) && e.Alive && e.Owner == player && !e.IsBuilding && !e.IsInside) list.Add(e);
         return list;
     }
 
-    public bool AreEnemies(Entity a, Entity b) => a.Owner != b.Owner;
+    public bool AreEnemies(Entity a, Entity b) => a.Owner != b.Owner && a.Owner >= 0 && b.Owner >= 0;
 
     internal void Reject(int player, string reason) => _events.Add(new OrderRejectedEvent(player, reason));
 }

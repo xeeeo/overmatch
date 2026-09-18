@@ -1,0 +1,30 @@
+{
+  "id": "network_worker",
+  "faction": "network",
+  "model": "network/worker",
+  "name": "Worker",
+  "cost": 200,
+  "buildTime": 5,
+  "builtAt": "network_command_cell",
+  "locomotor": "infantry",
+  "speed": 2.9,
+  "turnRate": 720,
+  "radius": 0.4,
+  "hp": 120,
+  "armour": "infantry",
+  "vision": 7,
+  "builder": true,
+  "harvest": {
+    "capacity": 150,
+    "loadTime": 3,
+    "unloadTime": 1,
+    "searchRadius": 34
+  },
+  "xpValue": 8,
+  "tags": [
+    "infantry",
+    "builder",
+    "harvester"
+  ],
+  "description": "Builds and harvests. Cheap; get many."
+}

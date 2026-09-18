@@ -1,0 +1,14 @@
+{
+  "id": "quad_mg",
+  "damage": 9,
+  "damageType": "small_arms",
+  "range": 6.5,
+  "cooldown": 0.25,
+  "projectile": {
+    "kind": "instant"
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 15
+}

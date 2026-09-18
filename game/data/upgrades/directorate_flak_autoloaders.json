@@ -1,0 +1,16 @@
+{
+  "id": "directorate_flak_autoloaders",
+  "faction": "directorate",
+  "name": "Flak Autoloaders",
+  "cost": 800,
+  "time": 30,
+  "researchedAt": "directorate_vehicle_plant",
+  "effects": [
+    {
+      "type": "weaponDamage",
+      "weapon": "flak_cannon",
+      "mult": 1.3
+    }
+  ],
+  "description": "Flak fires 30% harder."
+}

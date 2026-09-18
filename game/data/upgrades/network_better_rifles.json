@@ -1,0 +1,21 @@
+{
+  "id": "network_better_rifles",
+  "faction": "network",
+  "name": "Better Rifles",
+  "cost": 600,
+  "time": 25,
+  "researchedAt": "network_safehouse",
+  "effects": [
+    {
+      "type": "weaponDamage",
+      "weapon": "rebel_rifle",
+      "mult": 1.3
+    },
+    {
+      "type": "weaponDamage",
+      "weapon": "mob_guns",
+      "mult": 1.3
+    }
+  ],
+  "description": "Rebels and mobs shoot 30% harder."
+}

@@ -143,9 +143,71 @@
       "amount": 30000
     },
     {
-      "x": 48,
-      "y": 48,
+      "x": 40,
+      "y": 40,
       "amount": 20000
+    },
+    {
+      "x": 56,
+      "y": 56,
+      "amount": 20000
+    }
+  ],
+  "neutrals": [
+    {
+      "id": "oil_derrick",
+      "x": 46,
+      "y": 24
+    },
+    {
+      "id": "oil_derrick",
+      "x": 48,
+      "y": 70
+    },
+    {
+      "id": "oil_derrick",
+      "x": 22,
+      "y": 46
+    },
+    {
+      "id": "oil_derrick",
+      "x": 72,
+      "y": 46
+    },
+    {
+      "id": "civilian_house",
+      "x": 40,
+      "y": 52
+    },
+    {
+      "id": "civilian_house",
+      "x": 54,
+      "y": 40
+    },
+    {
+      "id": "civilian_block",
+      "x": 44,
+      "y": 44
+    },
+    {
+      "id": "civilian_house",
+      "x": 12,
+      "y": 48
+    },
+    {
+      "id": "civilian_house",
+      "x": 82,
+      "y": 48
+    },
+    {
+      "id": "civilian_house",
+      "x": 48,
+      "y": 12
+    },
+    {
+      "id": "civilian_house",
+      "x": 48,
+      "y": 82
     }
   ]
 }

@@ -1,0 +1,1 @@
+{ "id": "spectre_bomb", "damage": 900, "damageType": "explosive", "range": 4, "cooldown": 3, "projectile": { "kind": "shell", "speed": 20, "arc": true }, "splash": { "radius": 4, "falloff": 0.3 }, "targets": ["ground"], "aimTolerance": 90 }

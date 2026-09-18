@@ -1,0 +1,29 @@
+{
+  "id": "network_rocket_buggy",
+  "faction": "network",
+  "model": "network/rocket_buggy",
+  "name": "Rocket Buggy",
+  "cost": 900,
+  "buildTime": 12,
+  "builtAt": "network_arms_dealer",
+  "prereqs": [
+    "network_tech"
+  ],
+  "locomotor": "wheeled",
+  "speed": 6.0,
+  "turnRate": 240,
+  "radius": 0.9,
+  "hp": 180,
+  "armour": "light_vehicle",
+  "vision": 9,
+  "weapons": [
+    "buggy_rockets"
+  ],
+  "turretTurnRate": 200,
+  "xpValue": 40,
+  "tags": [
+    "vehicle",
+    "artillery"
+  ],
+  "description": "Long-range rocket pod. Fragile."
+}

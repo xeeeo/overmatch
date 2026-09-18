@@ -5,7 +5,6 @@ public sealed class SpatialHash
 {
     private readonly float _cell;
     private readonly Dictionary<long, List<Entity>> _buckets = new();
-    private readonly List<Entity> _scratch = new();
 
     public SpatialHash(float cellSize = 4f)
     {
@@ -26,10 +25,10 @@ public sealed class SpatialHash
         }
     }
 
-    /// <summary>Entities within radius of p. The returned list is reused; copy it if you keep it.</summary>
+    /// <summary>Entities within radius of p. Returns a fresh list so nested queries are safe.</summary>
     public List<Entity> Query(Vec2 p, float radius)
     {
-        _scratch.Clear();
+        var _scratch = new List<Entity>();
         var x0 = (int)MathF.Floor((p.X - radius) / _cell);
         var x1 = (int)MathF.Floor((p.X + radius) / _cell);
         var y0 = (int)MathF.Floor((p.Y - radius) / _cell);

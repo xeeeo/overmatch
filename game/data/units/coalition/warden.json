@@ -13,8 +13,15 @@
   "hp": 260,
   "armour": "light_vehicle",
   "vision": 10,
-  "weapons": ["warden_mg"],
+  "weapons": [
+    "warden_mg"
+  ],
   "xpValue": 25,
   "model": "coalition/warden",
-  "tags": ["vehicle", "light"]
+  "tags": [
+    "vehicle",
+    "light"
+  ],
+  "garrisonSlots": 5,
+  "detector": 6
 }

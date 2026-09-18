@@ -1,0 +1,31 @@
+{
+  "id": "network_tunnel_network",
+  "faction": "network",
+  "model": "network/tunnel_network",
+  "tags": [
+    "structure"
+  ],
+  "needsPower": false,
+  "rebuildHole": true,
+  "power": 0,
+  "name": "Tunnel Network",
+  "cost": 800,
+  "buildTime": 15,
+  "footprint": [
+    2,
+    2
+  ],
+  "hp": 1400,
+  "armour": "fortification",
+  "vision": 8,
+  "prereqs": [
+    "network_supply_stash"
+  ],
+  "tunnelHub": true,
+  "garrisonSlots": 10,
+  "weapons": [
+    "tunnel_gun"
+  ],
+  "turretTurnRate": 300,
+  "description": "Units enter here and come out of any other tunnel. Auto-turret."
+}

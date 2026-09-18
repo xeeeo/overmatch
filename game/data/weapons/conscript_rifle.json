@@ -1,0 +1,14 @@
+{
+  "id": "conscript_rifle",
+  "damage": 10,
+  "damageType": "small_arms",
+  "range": 6,
+  "cooldown": 0.7,
+  "projectile": {
+    "kind": "instant"
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 15
+}

@@ -1,4 +1,43 @@
-{ "id": "coalition_pathfinder", "name": "Pathfinder", "faction": "coalition", "cost": 600, "buildTime": 10, "builtAt": "coalition_barracks",
-  "prereqs": ["coalition_tech"],
-  "locomotor": "infantry", "speed": 2.8, "turnRate": 720, "radius": 0.35, "hp": 100, "armour": "infantry", "vision": 13,
-  "weapons": ["sniper_rifle"], "xpValue": 30, "model": "coalition/pathfinder", "tags": ["infantry"], "description": "Sniper. Kills infantry at long range." }
+{
+  "id": "coalition_pathfinder",
+  "name": "Pathfinder",
+  "faction": "coalition",
+  "cost": 600,
+  "buildTime": 10,
+  "builtAt": "coalition_barracks",
+  "prereqs": [
+    "coalition_tech"
+  ],
+  "locomotor": "infantry",
+  "speed": 2.8,
+  "turnRate": 720,
+  "radius": 0.35,
+  "hp": 100,
+  "armour": "infantry",
+  "vision": 13,
+  "weapons": [
+    "sniper_rifle"
+  ],
+  "xpValue": 30,
+  "model": "coalition/pathfinder",
+  "tags": [
+    "infantry"
+  ],
+  "description": "Sniper. Kills infantry at long range.",
+  "stealth": true,
+  "abilities": [
+    {
+      "id": "designate",
+      "name": "Laser Designate",
+      "cooldown": 40,
+      "target": "point",
+      "range": 14,
+      "effect": {
+        "type": "reveal",
+        "radius": 10,
+        "duration": 20
+      },
+      "description": "Reveals an area for 20 seconds."
+    }
+  ]
+}

@@ -21,7 +21,8 @@
     "coalition_rocket_trooper": 3,
     "coalition_rifleman": 2,
     "coalition_lancer": 1,
-    "coalition_kestrel": 1
+    "coalition_kestrel": 1,
+    "coalition_jammer": 1
   },
   "upgradeOrder": [
     "coalition_turbine_overdrive",

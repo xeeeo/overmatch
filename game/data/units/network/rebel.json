@@ -1,0 +1,26 @@
+{
+  "id": "network_rebel",
+  "faction": "network",
+  "model": "network/rebel",
+  "name": "Rebel",
+  "cost": 150,
+  "buildTime": 4,
+  "builtAt": "network_safehouse",
+  "locomotor": "infantry",
+  "speed": 2.7,
+  "turnRate": 720,
+  "radius": 0.35,
+  "hp": 100,
+  "armour": "infantry",
+  "vision": 8,
+  "weapons": [
+    "rebel_rifle"
+  ],
+  "canCapture": true,
+  "xpValue": 8,
+  "tags": [
+    "infantry",
+    "rebel"
+  ],
+  "description": "Basic infantry. Captures buildings. Camouflage upgrade hides them."
+}

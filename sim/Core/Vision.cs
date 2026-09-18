@@ -40,7 +40,7 @@ public sealed class VisionMap
     /// <summary>Raw per-cell state for player (read-only use by renderers).</summary>
     public ReadOnlySpan<byte> Raw(int player) => _state[player];
 
-    public void Recompute(IReadOnlyList<Entity> entities)
+    public void Recompute(IReadOnlyList<Entity> entities, IReadOnlyList<Reveal>? reveals = null)
     {
         for (var p = 0; p < PlayerCount; p++)
         {
@@ -50,8 +50,11 @@ public sealed class VisionMap
         foreach (var e in entities)
         {
             if (!e.Alive || e.Owner < 0 || e.Owner >= PlayerCount) continue;
-            Stamp(_state[e.Owner], e.Pos, e.Def.Vision);
+            Stamp(_state[e.Owner], e.Pos, e.IsInside ? MathF.Max(e.Def.Vision, 8f) : e.Def.Vision);
         }
+        if (reveals is not null)
+            foreach (var r in reveals)
+                if (r.Player >= 0 && r.Player < PlayerCount) Stamp(_state[r.Player], r.Pos, r.Radius);
         Version++;
     }
 

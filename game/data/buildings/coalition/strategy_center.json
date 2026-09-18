@@ -1,4 +1,31 @@
-{ "id": "coalition_strategy_center", "name": "Strategy Center", "faction": "coalition", "cost": 2500, "buildTime": 35,
-  "footprint": [4, 4], "hp": 2500, "armour": "structure", "vision": 10, "power": -4, "prereqs": ["coalition_motor_pool"],
-  "provides": ["coalition_tech"], "upgrades": ["coalition_drone_autonomy"], "model": "coalition/strategy_center", "tags": ["structure", "tech"],
-  "description": "Unlocks advanced units and upgrades." }
+{
+  "id": "coalition_strategy_center",
+  "name": "Strategy Center",
+  "faction": "coalition",
+  "cost": 2500,
+  "buildTime": 35,
+  "footprint": [
+    4,
+    4
+  ],
+  "hp": 2500,
+  "armour": "structure",
+  "vision": 10,
+  "power": -4,
+  "prereqs": [
+    "coalition_motor_pool"
+  ],
+  "provides": [
+    "coalition_tech"
+  ],
+  "upgrades": [
+    "coalition_drone_autonomy"
+  ],
+  "model": "coalition/strategy_center",
+  "tags": [
+    "structure",
+    "tech"
+  ],
+  "description": "Unlocks advanced units and upgrades.",
+  "garrisonSlots": 4
+}

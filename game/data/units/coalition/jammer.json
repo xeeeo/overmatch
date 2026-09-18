@@ -1,0 +1,4 @@
+{ "id": "coalition_jammer", "name": "Jammer", "faction": "coalition", "cost": 1000, "buildTime": 14, "builtAt": "coalition_motor_pool", "prereqs": ["coalition_tech"],
+  "locomotor": "wheeled", "speed": 5.0, "turnRate": 200, "radius": 0.95, "hp": 260, "armour": "light_vehicle", "vision": 10, "detector": 10,
+  "auras": [ { "type": "jam", "radius": 9, "amount": 40 } ], "xpValue": 35, "model": "coalition/jammer", "tags": ["vehicle", "support"],
+  "description": "Electronic warfare. Enemy drones nearby burn out; enemy missiles lose guidance. Detects stealth." }

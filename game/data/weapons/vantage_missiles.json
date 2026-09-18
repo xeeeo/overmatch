@@ -1,0 +1,1 @@
+{ "id": "vantage_missiles", "damage": 120, "damageType": "armour_piercing", "range": 10, "cooldown": 1.2, "projectile": { "kind": "missile", "speed": 40 }, "targets": ["ground"], "aimTolerance": 30 }

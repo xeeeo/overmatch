@@ -3,6 +3,28 @@ namespace Overmatch.Sim;
 /// <summary>Builders place and raise buildings. Cost is charged at placement; construction needs a builder standing next to the site.</summary>
 public static class Construction
 {
+    /// <summary>Holes regrow their building on their own; a builder standing by speeds it up (via BuildTargetId).</summary>
+    private static void Holes(World world)
+    {
+        var count = world.Entities.Count;
+        for (var i = 0; i < count; i++)
+        {
+            var h = world.Entities[i];
+            if (!h.Alive || h.Building is not { IsHole: true } || h.HoleDefId == "") continue;
+            h.BuildProgress += World.Dt / HoleRules.RegrowTime;
+            if (h.BuildProgress < 1f) continue;
+            var def = world.Rules.Building(h.HoleDefId);
+            h.Alive = false;
+            world.FreeFootprint(h);
+            if (world.CanPlace(def, h.HoleCellX, h.HoleCellY, out _))
+            {
+                var b = world.PlaceBuilding(def.Id, h.Owner, h.HoleCellX, h.HoleCellY, complete: true);
+                b.Hp = b.MaxHp * 0.5f;
+                world.Emit(new HoleEvent(h.Id, def.Id, true));
+            }
+        }
+    }
+
     /// <summary>How close to the footprint a builder must stand to work.</summary>
     public const float WorkRange = 1.4f;
 
@@ -29,6 +51,7 @@ public static class Construction
     public static void Update(World world)
     {
         var dt = World.Dt;
+        Holes(world);
         // Progress contributed by each builder standing at its site.
         foreach (var b in world.Entities)
         {
@@ -61,4 +84,9 @@ public static class Construction
             }
         }
     }
+}
+
+public static class HoleRules
+{
+    public const float RegrowTime = 60f;
 }

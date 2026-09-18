@@ -1,0 +1,14 @@
+{
+  "id": "tower_gatling",
+  "damage": 10,
+  "damageType": "small_arms",
+  "range": 9,
+  "cooldown": 0.15,
+  "projectile": {
+    "kind": "instant"
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 15
+}

@@ -1,0 +1,16 @@
+{
+  "id": "network_drone_swarm",
+  "faction": "network",
+  "name": "Drone Swarm",
+  "cost": 900,
+  "time": 30,
+  "researchedAt": "network_drone_workshop",
+  "effects": [
+    {
+      "type": "weaponDamage",
+      "weapon": "fpv_drone",
+      "mult": 1.35
+    }
+  ],
+  "description": "FPV drones carry bigger charges."
+}

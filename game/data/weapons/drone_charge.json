@@ -1,0 +1,1 @@
+{ "id": "drone_charge", "damage": 90, "damageType": "explosive", "range": 1.0, "cooldown": 1, "projectile": { "kind": "instant" }, "splash": { "radius": 1.2, "falloff": 0.4 }, "targets": ["ground"], "suicide": true, "aimTolerance": 90 }

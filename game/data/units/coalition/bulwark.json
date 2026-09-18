@@ -13,8 +13,27 @@
   "hp": 420,
   "armour": "tank",
   "vision": 9,
-  "weapons": ["bulwark_cannon"],
+  "weapons": [
+    "bulwark_cannon"
+  ],
   "xpValue": 40,
   "model": "coalition/bulwark",
-  "tags": ["vehicle", "tank"]
+  "tags": [
+    "vehicle",
+    "tank"
+  ],
+  "abilities": [
+    {
+      "id": "aps",
+      "name": "Active Protection",
+      "cooldown": 45,
+      "target": "none",
+      "effect": {
+        "type": "heal",
+        "radius": 0.1,
+        "amount": 0.2
+      },
+      "description": "Emergency repair: restores 20% hit points."
+    }
+  ]
 }

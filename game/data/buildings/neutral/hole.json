@@ -1,0 +1,23 @@
+{
+  "id": "hole",
+  "name": "Hole",
+  "faction": "",
+  "cost": 0,
+  "buildTime": 1,
+  "footprint": [
+    1,
+    1
+  ],
+  "hp": 250,
+  "armour": "fortification",
+  "vision": 2,
+  "stealth": false,
+  "needsPower": false,
+  "isHole": true,
+  "model": "neutral/hole",
+  "tags": [
+    "structure",
+    "hole"
+  ],
+  "description": "The building will regrow from this hole unless it is destroyed."
+}

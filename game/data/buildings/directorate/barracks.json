@@ -1,0 +1,28 @@
+{
+  "id": "directorate_barracks",
+  "faction": "directorate",
+  "model": "directorate/barracks",
+  "tags": [
+    "structure"
+  ],
+  "name": "Barracks",
+  "cost": 500,
+  "buildTime": 15,
+  "footprint": [
+    3,
+    3
+  ],
+  "hp": 1300,
+  "armour": "structure",
+  "vision": 6,
+  "power": -1,
+  "produces": [
+    "directorate_conscript",
+    "directorate_rocket_squad",
+    "directorate_hacker"
+  ],
+  "upgrades": [
+    "directorate_conscript_training"
+  ],
+  "description": "Trains infantry."
+}

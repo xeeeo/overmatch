@@ -1,0 +1,26 @@
+{
+  "id": "network_supply_stash",
+  "faction": "network",
+  "model": "network/supply_stash",
+  "tags": [
+    "structure"
+  ],
+  "needsPower": false,
+  "rebuildHole": true,
+  "power": 0,
+  "name": "Supply Stash",
+  "cost": 1500,
+  "buildTime": 22,
+  "footprint": [
+    4,
+    4
+  ],
+  "hp": 1800,
+  "armour": "structure",
+  "vision": 8,
+  "supplyCenter": true,
+  "produces": [
+    "network_worker"
+  ],
+  "description": "Workers unload here. Trains Workers."
+}

@@ -1,0 +1,30 @@
+{
+  "id": "network_stinger_site",
+  "faction": "network",
+  "model": "network/stinger_site",
+  "tags": [
+    "structure"
+  ],
+  "needsPower": false,
+  "rebuildHole": true,
+  "power": 0,
+  "name": "Stinger Site",
+  "cost": 900,
+  "buildTime": 15,
+  "footprint": [
+    2,
+    2
+  ],
+  "hp": 1000,
+  "armour": "fortification",
+  "vision": 11,
+  "stealth": true,
+  "prereqs": [
+    "network_safehouse"
+  ],
+  "weapons": [
+    "stinger_rockets"
+  ],
+  "turretTurnRate": 300,
+  "description": "Stealthed rocket nest. Hits ground and air."
+}

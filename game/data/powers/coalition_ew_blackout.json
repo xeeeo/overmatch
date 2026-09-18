@@ -1,0 +1,18 @@
+{
+  "name": "EW Blackout",
+  "rank": 3,
+  "cooldown": 180,
+  "target": "point",
+  "effect": {
+    "type": "status",
+    "radius": 11,
+    "targets": "enemies",
+    "status": {
+      "type": "disabled",
+      "duration": 25
+    }
+  },
+  "description": "Enemy units and buildings in the area are disabled for 25 seconds.",
+  "id": "coalition_ew_blackout",
+  "faction": "coalition"
+}

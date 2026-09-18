@@ -1,4 +1,32 @@
-{ "id": "coalition_airfield", "name": "Airfield", "faction": "coalition", "cost": 1000, "buildTime": 25,
-  "footprint": [6, 4], "hp": 2000, "armour": "structure", "vision": 8, "power": -3, "prereqs": ["coalition_supply_center"],
-  "produces": ["coalition_kestrel"], "upgrades": ["coalition_countermeasures"], "model": "coalition/airfield", "tags": ["structure"],
-  "description": "Builds and rearms aircraft." }
+{
+  "id": "coalition_airfield",
+  "name": "Airfield",
+  "faction": "coalition",
+  "cost": 1000,
+  "buildTime": 25,
+  "footprint": [
+    6,
+    4
+  ],
+  "hp": 2000,
+  "armour": "structure",
+  "vision": 8,
+  "power": -3,
+  "prereqs": [
+    "coalition_supply_center"
+  ],
+  "produces": [
+    "coalition_kestrel",
+    "coalition_vantage",
+    "coalition_spectre"
+  ],
+  "upgrades": [
+    "coalition_countermeasures"
+  ],
+  "model": "coalition/airfield",
+  "tags": [
+    "structure"
+  ],
+  "description": "Builds and rearms aircraft.",
+  "pads": 4
+}

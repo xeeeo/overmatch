@@ -1,0 +1,15 @@
+{
+  "id": "network_camouflage",
+  "faction": "network",
+  "name": "Camouflage",
+  "cost": 800,
+  "time": 30,
+  "researchedAt": "network_safehouse",
+  "effects": [
+    {
+      "type": "stealth",
+      "tag": "rebel"
+    }
+  ],
+  "description": "Rebels are stealthed until they fire."
+}

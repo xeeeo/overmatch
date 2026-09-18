@@ -1,0 +1,23 @@
+{
+  "id": "network_radar_van",
+  "faction": "network",
+  "model": "network/radar_van",
+  "name": "Radar Van",
+  "cost": 600,
+  "buildTime": 8,
+  "builtAt": "network_arms_dealer",
+  "locomotor": "wheeled",
+  "speed": 5.5,
+  "turnRate": 220,
+  "radius": 0.9,
+  "hp": 200,
+  "armour": "light_vehicle",
+  "vision": 15,
+  "detector": 12,
+  "xpValue": 25,
+  "tags": [
+    "vehicle",
+    "support"
+  ],
+  "description": "Long sight and stealth detection."
+}

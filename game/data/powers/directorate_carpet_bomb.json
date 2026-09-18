@@ -1,0 +1,20 @@
+{
+  "id": "directorate_carpet_bomb",
+  "faction": "directorate",
+  "name": "Carpet Bomb",
+  "rank": 3,
+  "cooldown": 200,
+  "target": "point",
+  "effect": {
+    "type": "strike",
+    "damage": 260,
+    "damageType": "explosive",
+    "radius": 4,
+    "falloff": 0.35,
+    "impacts": 8,
+    "interval": 3,
+    "delay": 4,
+    "scatter": 6
+  },
+  "description": "Bombers lay a carpet of bombs."
+}

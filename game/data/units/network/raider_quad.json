@@ -1,0 +1,25 @@
+{
+  "id": "network_raider_quad",
+  "faction": "network",
+  "model": "network/raider_quad",
+  "name": "Raider Quad",
+  "cost": 400,
+  "buildTime": 6,
+  "builtAt": "network_arms_dealer",
+  "locomotor": "wheeled",
+  "speed": 8.5,
+  "turnRate": 360,
+  "radius": 0.6,
+  "hp": 140,
+  "armour": "light_vehicle",
+  "vision": 10,
+  "weapons": [
+    "quad_mg"
+  ],
+  "salvager": true,
+  "xpValue": 15,
+  "tags": [
+    "vehicle"
+  ],
+  "description": "Very fast scout. Salvages wrecks."
+}

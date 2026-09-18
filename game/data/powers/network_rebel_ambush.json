@@ -1,0 +1,14 @@
+{
+  "id": "network_rebel_ambush",
+  "faction": "network",
+  "name": "Rebel Ambush",
+  "rank": 1,
+  "cooldown": 150,
+  "target": "point",
+  "effect": {
+    "type": "spawn",
+    "unit": "network_rebel",
+    "count": 8
+  },
+  "description": "Eight Rebels appear at the point."
+}

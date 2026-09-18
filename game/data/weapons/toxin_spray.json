@@ -1,0 +1,21 @@
+{
+  "id": "toxin_spray",
+  "damage": 30,
+  "damageType": "toxin",
+  "range": 5,
+  "cooldown": 1.0,
+  "projectile": {
+    "kind": "instant"
+  },
+  "targets": [
+    "ground"
+  ],
+  "clearsGarrison": true,
+  "hazard": {
+    "radius": 2.2,
+    "dps": 14,
+    "damageType": "toxin",
+    "duration": 12
+  },
+  "aimTolerance": 20
+}

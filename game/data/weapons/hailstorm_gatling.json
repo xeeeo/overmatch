@@ -1,0 +1,14 @@
+{
+  "id": "hailstorm_gatling",
+  "damage": 8,
+  "damageType": "small_arms",
+  "range": 7,
+  "cooldown": 0.15,
+  "projectile": {
+    "kind": "instant"
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 15
+}

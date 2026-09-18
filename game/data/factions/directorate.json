@@ -1,1 +1,22 @@
-{ "id": "directorate", "name": "Directorate", "colour": "#d83b3b", "builder": "directorate_engineering_vehicle", "hq": "directorate_command_bunker", "needsPower": true, "startingCash": 10000 }
+{
+  "id": "directorate",
+  "name": "Directorate",
+  "colour": "#d83b3b",
+  "builder": "directorate_engineering_vehicle",
+  "hq": "directorate_command_bunker",
+  "needsPower": true,
+  "startingCash": 10000,
+  "rankXp": [
+    300,
+    800,
+    1600,
+    2800
+  ],
+  "powers": [
+    "directorate_artillery_barrage",
+    "directorate_cyber_intrusion",
+    "directorate_mass_production",
+    "directorate_carpet_bomb",
+    "directorate_emergency_conscription"
+  ]
+}

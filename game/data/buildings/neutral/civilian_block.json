@@ -1,0 +1,2 @@
+{ "id": "civilian_block", "name": "Apartment Block", "faction": "", "cost": 0, "buildTime": 1, "footprint": [4, 4], "hp": 1600, "armour": "structure", "vision": 0,
+  "garrisonSlots": 10, "needsPower": false, "model": "neutral/civilian_block", "tags": ["structure", "civilian"], "description": "Garrison up to 10 infantry." }

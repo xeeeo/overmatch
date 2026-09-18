@@ -136,6 +136,46 @@ public partial class EntityView : Node3D
     private Color? _teamColour;
     public void SetTeamColour(Color c) => _teamColour = c;
 
+    private float _lookAlpha = 1f;
+    private bool _lookDisabled;
+    private StandardMaterial3D? _ghostMat;
+    private MeshInstance3D? _disabledMark;
+
+    /// <summary>Own stealth units render translucent; disabled things get a blue marker.</summary>
+    public void SetLook(float alpha, bool disabled)
+    {
+        if (Mathf.Abs(alpha - _lookAlpha) > 0.01f && !Entity.UnderConstruction)
+        {
+            _lookAlpha = alpha;
+            if (alpha < 0.99f)
+            {
+                _ghostMat ??= new StandardMaterial3D { AlbedoColor = new Color(0.7f, 0.9f, 1f, alpha), Transparency = BaseMaterial3D.TransparencyEnum.Alpha };
+                ApplyOverride(_model, _ghostMat);
+            }
+            else
+            {
+                ApplyOverride(_model, null);
+                if (_teamColour is { } tc) ApplyTeamColour(_model, tc);
+            }
+        }
+        if (disabled != _lookDisabled)
+        {
+            _lookDisabled = disabled;
+            if (disabled)
+            {
+                _disabledMark ??= new MeshInstance3D
+                {
+                    Mesh = new SphereMesh { Radius = 0.35f, Height = 0.7f, RadialSegments = 8, Rings = 4 },
+                    Position = new Vector3(0, Entity.IsBuilding ? Entity.Radius + 1.5f : 2.4f, 0),
+                    MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.3f, 0.6f, 1f), ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded },
+                };
+                if (_disabledMark.GetParent() is null) AddChild(_disabledMark);
+                _disabledMark.Visible = true;
+            }
+            else if (_disabledMark is not null) _disabledMark.Visible = false;
+        }
+    }
+
     public void Sync(float alpha)
     {
         var e = Entity;

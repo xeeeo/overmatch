@@ -1,0 +1,15 @@
+{
+  "id": "network_drone_ambush",
+  "faction": "network",
+  "name": "Drone Ambush",
+  "rank": 3,
+  "cooldown": 180,
+  "target": "point",
+  "effect": {
+    "type": "spawn",
+    "unit": "network_fpv_drone",
+    "count": 10,
+    "lifetime": 40
+  },
+  "description": "Ten FPV drones swarm the area."
+}

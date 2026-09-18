@@ -1,0 +1,31 @@
+{
+  "id": "directorate_colossus",
+  "faction": "directorate",
+  "model": "directorate/colossus",
+  "name": "Colossus",
+  "cost": 2000,
+  "buildTime": 22,
+  "builtAt": "directorate_vehicle_plant",
+  "prereqs": [
+    "directorate_tech"
+  ],
+  "locomotor": "tracked",
+  "speed": 2.6,
+  "turnRate": 90,
+  "radius": 1.5,
+  "hp": 1500,
+  "armour": "heavy_tank",
+  "vision": 9,
+  "weapons": [
+    "colossus_twin"
+  ],
+  "turretTurnRate": 120,
+  "crusher": true,
+  "xpValue": 90,
+  "tags": [
+    "vehicle",
+    "tank",
+    "heavy"
+  ],
+  "description": "Heavy twin-cannon tank. Crushes infantry and light vehicles."
+}

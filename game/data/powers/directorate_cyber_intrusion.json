@@ -1,0 +1,18 @@
+{
+  "id": "directorate_cyber_intrusion",
+  "faction": "directorate",
+  "name": "Cyber Intrusion",
+  "rank": 1,
+  "cooldown": 150,
+  "target": "point",
+  "effect": {
+    "type": "status",
+    "radius": 10,
+    "targets": "enemies",
+    "status": {
+      "type": "disabled",
+      "duration": 30
+    }
+  },
+  "description": "Enemy buildings and units in the area are disabled for 30 seconds."
+}

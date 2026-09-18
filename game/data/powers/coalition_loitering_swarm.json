@@ -1,0 +1,15 @@
+{
+  "name": "Loitering Swarm",
+  "rank": 1,
+  "cooldown": 150,
+  "target": "point",
+  "effect": {
+    "type": "spawn",
+    "unit": "coalition_loiter_drone",
+    "count": 6,
+    "lifetime": 35
+  },
+  "description": "Six drones circle the area for 35 seconds and dive on anything that moves.",
+  "id": "coalition_loitering_swarm",
+  "faction": "coalition"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "directorate_airfield",
+  "faction": "directorate",
+  "model": "directorate/airfield",
+  "tags": [
+    "structure"
+  ],
+  "name": "Airfield",
+  "cost": 1000,
+  "buildTime": 25,
+  "footprint": [
+    6,
+    4
+  ],
+  "hp": 2000,
+  "armour": "structure",
+  "vision": 8,
+  "power": -3,
+  "pads": 4,
+  "prereqs": [
+    "directorate_supply_depot"
+  ],
+  "produces": [
+    "directorate_talon"
+  ],
+  "description": "Builds and rearms Talon bombers."
+}

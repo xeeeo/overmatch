@@ -1,0 +1,46 @@
+{
+  "id": "network_launch_site",
+  "faction": "network",
+  "model": "network/launch_site",
+  "tags": [
+    "structure"
+  ],
+  "needsPower": false,
+  "rebuildHole": true,
+  "power": 0,
+  "name": "Launch Site",
+  "cost": 4000,
+  "buildTime": 55,
+  "footprint": [
+    4,
+    4
+  ],
+  "hp": 2800,
+  "armour": "structure",
+  "vision": 8,
+  "prereqs": [
+    "network_compound"
+  ],
+  "superweapon": {
+    "name": "Rocket Salvo",
+    "chargeTime": 300,
+    "effect": {
+      "type": "strike",
+      "damage": 700,
+      "damageType": "explosive",
+      "radius": 4.5,
+      "falloff": 0.3,
+      "impacts": 9,
+      "interval": 6,
+      "delay": 5,
+      "scatter": 6,
+      "hazard": {
+        "radius": 4,
+        "dps": 18,
+        "damageType": "toxin",
+        "duration": 25
+      }
+    }
+  },
+  "description": "Superweapon: nine toxin rockets. 5-minute charge."
+}

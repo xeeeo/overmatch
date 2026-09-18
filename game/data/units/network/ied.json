@@ -1,0 +1,25 @@
+{
+  "id": "network_ied",
+  "faction": "network",
+  "model": "network/ied",
+  "name": "IED",
+  "cost": 50,
+  "buildTime": 1,
+  "builtAt": "",
+  "locomotor": "infantry",
+  "speed": 0.0,
+  "turnRate": 0,
+  "radius": 0.3,
+  "hp": 40,
+  "armour": "fortification",
+  "vision": 2,
+  "stealth": true,
+  "weapons": [
+    "ied_charge"
+  ],
+  "xpValue": 2,
+  "tags": [
+    "mine"
+  ],
+  "description": "Buried charge. Detonates under vehicles."
+}

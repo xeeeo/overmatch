@@ -1,0 +1,14 @@
+{
+  "name": "Spy Satellite",
+  "rank": 1,
+  "cooldown": 90,
+  "target": "point",
+  "effect": {
+    "type": "reveal",
+    "radius": 16,
+    "duration": 25
+  },
+  "description": "Reveals a wide area for 25 seconds.",
+  "id": "coalition_spy_satellite",
+  "faction": "coalition"
+}

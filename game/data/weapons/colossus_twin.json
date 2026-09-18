@@ -1,0 +1,19 @@
+{
+  "id": "colossus_twin",
+  "damage": 75,
+  "damageType": "armour_piercing",
+  "range": 8.5,
+  "cooldown": 1.4,
+  "projectile": {
+    "kind": "shell",
+    "speed": 45
+  },
+  "splash": {
+    "radius": 1.0,
+    "falloff": 0.4
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 6
+}

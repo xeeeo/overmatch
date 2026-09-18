@@ -1,0 +1,20 @@
+{
+  "id": "talon_bomb",
+  "damage": 420,
+  "damageType": "explosive",
+  "range": 4,
+  "cooldown": 1.5,
+  "projectile": {
+    "kind": "shell",
+    "speed": 20,
+    "arc": true
+  },
+  "splash": {
+    "radius": 3.2,
+    "falloff": 0.3
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 90
+}

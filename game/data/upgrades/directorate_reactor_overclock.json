@@ -1,0 +1,16 @@
+{
+  "id": "directorate_reactor_overclock",
+  "faction": "directorate",
+  "name": "Reactor Overclock",
+  "cost": 600,
+  "time": 20,
+  "researchedAt": "directorate_reactor",
+  "effects": [
+    {
+      "type": "power",
+      "building": "directorate_reactor",
+      "add": 6
+    }
+  ],
+  "description": "Every Reactor produces 6 more power."
+}

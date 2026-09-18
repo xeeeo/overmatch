@@ -1,0 +1,21 @@
+{
+  "id": "directorate_subliminal_messaging",
+  "faction": "directorate",
+  "name": "Subliminal Messaging",
+  "cost": 1000,
+  "time": 35,
+  "researchedAt": "directorate_propaganda_center",
+  "effects": [
+    {
+      "type": "speed",
+      "tag": "vehicle",
+      "mult": 1.1
+    },
+    {
+      "type": "speed",
+      "tag": "infantry",
+      "mult": 1.1
+    }
+  ],
+  "description": "Everyone moves 10% faster."
+}

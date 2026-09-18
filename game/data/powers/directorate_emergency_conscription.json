@@ -1,0 +1,14 @@
+{
+  "id": "directorate_emergency_conscription",
+  "faction": "directorate",
+  "name": "Emergency Conscription",
+  "rank": 5,
+  "cooldown": 240,
+  "target": "point",
+  "effect": {
+    "type": "spawn",
+    "unit": "directorate_conscript",
+    "count": 12
+  },
+  "description": "Twelve Conscripts arrive at the point."
+}

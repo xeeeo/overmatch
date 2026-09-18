@@ -1,0 +1,45 @@
+{
+  "id": "directorate_ghost_van",
+  "faction": "directorate",
+  "model": "directorate/ghost_van",
+  "name": "Ghost Van",
+  "cost": 900,
+  "buildTime": 12,
+  "builtAt": "directorate_vehicle_plant",
+  "prereqs": [
+    "directorate_tech"
+  ],
+  "locomotor": "wheeled",
+  "speed": 5.0,
+  "turnRate": 200,
+  "radius": 0.9,
+  "hp": 260,
+  "armour": "light_vehicle",
+  "vision": 10,
+  "detector": 9,
+  "abilities": [
+    {
+      "id": "cyber_pulse",
+      "name": "Cyber Pulse",
+      "cooldown": 35,
+      "target": "point",
+      "range": 10,
+      "effect": {
+        "type": "status",
+        "radius": 6,
+        "targets": "enemies",
+        "status": {
+          "type": "disabled",
+          "duration": 8
+        }
+      },
+      "description": "Disables enemy vehicles and defences in the area for 8 seconds."
+    }
+  ],
+  "xpValue": 40,
+  "tags": [
+    "vehicle",
+    "support"
+  ],
+  "description": "Mobile cyber warfare. Detects stealth."
+}

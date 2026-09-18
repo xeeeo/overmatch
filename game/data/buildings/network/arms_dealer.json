@@ -1,0 +1,38 @@
+{
+  "id": "network_arms_dealer",
+  "faction": "network",
+  "model": "network/arms_dealer",
+  "tags": [
+    "structure"
+  ],
+  "needsPower": false,
+  "rebuildHole": true,
+  "power": 0,
+  "name": "Arms Dealer",
+  "cost": 1800,
+  "buildTime": 28,
+  "footprint": [
+    4,
+    4
+  ],
+  "hp": 2200,
+  "armour": "structure",
+  "vision": 6,
+  "prereqs": [
+    "network_supply_stash"
+  ],
+  "produces": [
+    "network_technical",
+    "network_raider_quad",
+    "network_marauder",
+    "network_sprayer",
+    "network_rocket_buggy",
+    "network_bomb_truck",
+    "network_radar_van"
+  ],
+  "upgrades": [
+    "network_junk_repair",
+    "network_toxin_shells"
+  ],
+  "description": "Builds vehicles."
+}

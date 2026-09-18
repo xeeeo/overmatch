@@ -1,0 +1,53 @@
+{
+  "faction": "directorate",
+  "buildOrder": [
+    "directorate_reactor",
+    "directorate_supply_depot",
+    "directorate_barracks",
+    "directorate_vehicle_plant",
+    "directorate_reactor",
+    "directorate_propaganda_center",
+    "directorate_cyber_center",
+    "directorate_airfield"
+  ],
+  "powerBuilding": "directorate_reactor",
+  "supplyBuilding": "directorate_supply_depot",
+  "defenceBuilding": "directorate_flak_tower",
+  "harvesterUnit": "directorate_supply_truck",
+  "builderUnit": "directorate_engineering_vehicle",
+  "composition": {
+    "directorate_vanguard": 6,
+    "directorate_conscript": 4,
+    "directorate_rocket_squad": 3,
+    "directorate_hailstorm": 1,
+    "directorate_typhoon": 1,
+    "directorate_colossus": 1,
+    "directorate_speaker": 1,
+    "directorate_troop_crawler": 1,
+    "directorate_ghost_van": 1
+  },
+  "upgradeOrder": [
+    "directorate_reactor_overclock",
+    "directorate_nationalism",
+    "directorate_conscript_training",
+    "directorate_uranium_shells",
+    "directorate_subliminal_messaging",
+    "directorate_flak_autoloaders"
+  ],
+  "difficulty": "brutal",
+  "name": "Brutal",
+  "targetBuilders": 3,
+  "targetHarvesters": 5,
+  "maxHarvesters": 8,
+  "defences": 4,
+  "waveSize": 14,
+  "maxArmy": 40,
+  "firstWaveAt": 180,
+  "waveInterval": 75,
+  "retreatFraction": 0.2,
+  "cashReserve": 0,
+  "reactionDelay": 0.5,
+  "incomeMult": 1.5,
+  "harass": true,
+  "expand": true
+}

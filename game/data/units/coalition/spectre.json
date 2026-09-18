@@ -1,0 +1,4 @@
+{ "id": "coalition_spectre", "name": "Spectre", "faction": "coalition", "cost": 2400, "buildTime": 24, "builtAt": "coalition_airfield", "prereqs": ["coalition_tech"],
+  "locomotor": "air", "speed": 12.0, "turnRate": 150, "radius": 1.4, "flightHeight": 9.0, "hp": 420, "armour": "aircraft", "vision": 12, "stealth": true,
+  "weapons": ["spectre_bomb"], "ammo": 1, "rearmTime": 16, "xpValue": 80, "model": "coalition/spectre", "tags": ["aircraft", "jet"],
+  "description": "Stealth bomber. One devastating bomb per sortie; visible only while attacking." }

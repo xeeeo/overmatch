@@ -1,0 +1,39 @@
+{
+  "id": "directorate_hacker",
+  "faction": "directorate",
+  "model": "directorate/hacker",
+  "name": "Hacker",
+  "cost": 500,
+  "buildTime": 8,
+  "builtAt": "directorate_barracks",
+  "locomotor": "infantry",
+  "speed": 2.4,
+  "turnRate": 720,
+  "radius": 0.35,
+  "hp": 90,
+  "armour": "infantry",
+  "vision": 9,
+  "canCapture": true,
+  "xpValue": 20,
+  "tags": [
+    "infantry"
+  ],
+  "abilities": [
+    {
+      "id": "hack",
+      "name": "Hack Building",
+      "cooldown": 40,
+      "target": "building",
+      "range": 8,
+      "effect": {
+        "type": "status",
+        "status": {
+          "type": "disabled",
+          "duration": 30
+        }
+      },
+      "description": "Disables an enemy building for 30 seconds."
+    }
+  ],
+  "description": "Disables buildings. Garrison the Cyber Center to steal funds."
+}

@@ -1,0 +1,23 @@
+{
+  "id": "directorate_engineering_vehicle",
+  "faction": "directorate",
+  "model": "directorate/engineering_vehicle",
+  "name": "Engineering Vehicle",
+  "cost": 1000,
+  "buildTime": 10,
+  "builtAt": "directorate_command_bunker",
+  "locomotor": "tracked",
+  "speed": 3.0,
+  "turnRate": 120,
+  "radius": 0.95,
+  "hp": 340,
+  "armour": "light_vehicle",
+  "vision": 7,
+  "builder": true,
+  "xpValue": 20,
+  "tags": [
+    "vehicle",
+    "builder"
+  ],
+  "description": "Constructs buildings."
+}

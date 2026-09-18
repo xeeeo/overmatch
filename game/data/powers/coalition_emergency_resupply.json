@@ -1,0 +1,14 @@
+{
+  "name": "Emergency Resupply",
+  "rank": 5,
+  "cooldown": 240,
+  "target": "point",
+  "effect": {
+    "type": "heal",
+    "radius": 9,
+    "amount": 0.6
+  },
+  "description": "Airdropped repairs and medics heal everything in the area by 60%.",
+  "id": "coalition_emergency_resupply",
+  "faction": "coalition"
+}

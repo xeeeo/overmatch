@@ -1,0 +1,24 @@
+{
+  "id": "network_toxin_shells",
+  "faction": "network",
+  "name": "Toxin Shells",
+  "cost": 1200,
+  "time": 40,
+  "researchedAt": "network_arms_dealer",
+  "prereqs": [
+    "network_tech"
+  ],
+  "effects": [
+    {
+      "type": "weaponDamage",
+      "weapon": "marauder_cannon",
+      "mult": 1.25
+    },
+    {
+      "type": "weaponDamage",
+      "weapon": "buggy_rockets",
+      "mult": 1.25
+    }
+  ],
+  "description": "Marauders and Rocket Buggies deal 25% more damage."
+}

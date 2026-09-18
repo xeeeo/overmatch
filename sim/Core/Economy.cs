@@ -8,7 +8,7 @@ public static class Economy
         foreach (var p in world.Players) { p.PowerSupply = 0; p.PowerDemand = 0; }
         foreach (var e in world.Entities)
         {
-            if (!e.Operational || e.Building is not { } b) continue;
+            if (!e.Operational || e.Building is not { } b || e.Owner < 0) continue;
             var player = world.Player(e.Owner);
             var power = b.Power + (int)player.PowerAdd(b.Id);
             if (power >= 0) player.PowerSupply += power;
@@ -22,14 +22,15 @@ public static class Economy
         foreach (var e in world.Entities)
         {
             if (!e.Alive) continue;
-            if (e.Building is { Trickle: { } trickle } && e.Operational)
+            if (e.Building is { Trickle: { } trickle } && e.Operational && e.Owner >= 0)
             {
                 var player = world.Player(e.Owner);
-                e.TrickleTimer -= player.LowPower ? dt * 0.5f : dt;
+                e.TrickleTimer -= player.LowPower && e.Building.NeedsPower ? dt * 0.5f : dt;
                 if (e.TrickleTimer <= 0f)
                 {
                     e.TrickleTimer += trickle.Interval;
-                    player.Cash += (int)(trickle.Amount * player.IncomeMult);
+                    var amount = trickle.Amount + e.Building.TricklePerPassenger * e.Passengers.Count;
+                    player.Cash += (int)(amount * player.IncomeMult);
                 }
             }
             else if (e.IsHarvester) Harvest(world, e);

@@ -1,0 +1,19 @@
+{
+  "id": "ied_charge",
+  "damage": 350,
+  "damageType": "explosive",
+  "range": 0.8,
+  "cooldown": 1,
+  "projectile": {
+    "kind": "instant"
+  },
+  "splash": {
+    "radius": 2.5,
+    "falloff": 0.4
+  },
+  "targets": [
+    "ground"
+  ],
+  "suicide": true,
+  "aimTolerance": 180
+}

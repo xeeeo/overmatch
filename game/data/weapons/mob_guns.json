@@ -1,0 +1,14 @@
+{
+  "id": "mob_guns",
+  "damage": 22,
+  "damageType": "small_arms",
+  "range": 6,
+  "cooldown": 0.5,
+  "projectile": {
+    "kind": "instant"
+  },
+  "targets": [
+    "ground"
+  ],
+  "aimTolerance": 30
+}

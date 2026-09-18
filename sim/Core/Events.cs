@@ -30,3 +30,25 @@ public sealed record OrderRejectedEvent(int Player, string Reason) : GameEvent;
 public sealed record PlayerEliminatedEvent(int Player) : GameEvent;
 
 public sealed record MatchEndedEvent(int Winner) : GameEvent;
+
+public sealed record StrikeImpactEvent(Vec2 Pos, float Radius, string Kind) : GameEvent;
+
+public sealed record PowerUsedEvent(int Player, string PowerId, Vec2 Target) : GameEvent;
+
+public sealed record SuperweaponFiredEvent(int Player, string Name, Vec2 Target, float Delay) : GameEvent;
+
+public sealed record SuperweaponReadyEvent(int Player, int BuildingId) : GameEvent;
+
+public sealed record RankUpEvent(int Player, int Rank) : GameEvent;
+
+public sealed record CapturedEvent(int BuildingId, int OldOwner, int NewOwner) : GameEvent;
+
+public sealed record GarrisonEvent(int ContainerId, int UnitId, bool Entered) : GameEvent;
+
+public sealed record HazardEvent(Vec2 Pos, float Radius, float Duration, string DamageType) : GameEvent;
+
+public sealed record CrateEvent(int CrateId, Vec2 Pos, bool Spawned) : GameEvent;
+
+public sealed record AbilityUsedEvent(int UnitId, string AbilityId, Vec2 Target) : GameEvent;
+
+public sealed record HoleEvent(int HoleId, string BuildingId, bool Regrew) : GameEvent;

@@ -1,0 +1,34 @@
+{
+  "id": "directorate_reactor",
+  "faction": "directorate",
+  "model": "directorate/reactor",
+  "tags": [
+    "structure"
+  ],
+  "name": "Reactor",
+  "cost": 700,
+  "buildTime": 18,
+  "footprint": [
+    3,
+    3
+  ],
+  "hp": 1200,
+  "armour": "structure",
+  "vision": 6,
+  "power": 12,
+  "upgrades": [
+    "directorate_reactor_overclock"
+  ],
+  "deathDamage": {
+    "damage": 350,
+    "damageType": "explosive",
+    "radius": 6,
+    "hazard": {
+      "radius": 5,
+      "dps": 12,
+      "damageType": "toxin",
+      "duration": 25
+    }
+  },
+  "description": "12 power. Explodes and irradiates the ground when destroyed."
+}

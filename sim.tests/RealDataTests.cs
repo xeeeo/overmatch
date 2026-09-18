@@ -36,18 +36,22 @@ public class RealDataTests
         Assert.Equal("coalition_command_post", rules.Factions["coalition"].Hq);
     }
 
-    [Fact]
-    public void Coalition_FullTree_BuildsEverythingWithoutRejection()
+    [Theory]
+    [InlineData("coalition")]
+    [InlineData("directorate")]
+    [InlineData("network")]
+    public void FullTree_BuildsEverythingWithoutRejection(string faction)
     {
         var rules = LoadShipped();
-        var w = new World(rules, rules.Map("plain"), new[] { "coalition", "coalition" });
+        var w = new World(rules, rules.Map("plain"), new[] { faction, "coalition" });
         var p = w.Player(0);
         p.Cash = 1_000_000;
-        w.PlaceBuilding("coalition_command_post", 0, 14, 14);
-        var dozer = w.Spawn("coalition_dozer", 0, new Vec2(20, 12));
+        var fd = rules.Factions[faction];
+        w.PlaceBuilding(fd.Hq, 0, 14, 14);
+        var dozer = w.Spawn(fd.Builder, 0, new Vec2(20, 12));
 
-        // Build every Coalition building, always picking one whose prereqs are already met.
-        var remaining = rules.Buildings.Values.Where(b => b.Faction == "coalition" && !b.Hq).OrderBy(b => b.Cost).ToList();
+        // Build every building of the faction, always picking one whose prereqs are already met.
+        var remaining = rules.Buildings.Values.Where(b => b.Faction == faction && !b.Hq).OrderBy(b => b.Cost).ToList();
         var cx = 30; var cy = 4;
         while (remaining.Count > 0)
         {
@@ -65,41 +69,44 @@ public class RealDataTests
             if (cx > 58) { cx = 30; cy += 8; }
         }
         // One plant is not enough for the whole tree; add plants until the base is powered, as a player would.
-        for (var guard = 0; p.LowPower && guard < 5; guard++)
+        var powerId = rules.Ai(faction, "medium").PowerBuilding;
+        for (var guard = 0; p.LowPower && powerId != "" && guard < 6; guard++)
         {
-            w.Submit(new BuildCommand(0, dozer.Id, "coalition_power_plant", 30 + guard * 5, 56));
+            w.Submit(new BuildCommand(0, dozer.Id, powerId, 30 + guard * 5, 56));
             w.Step();
-            var site = w.Entities.Last(e => e.Building?.Id == "coalition_power_plant" && e.Owner == 0);
+            var site = w.Entities.Last(e => e.Building?.Id == powerId && e.Owner == 0);
             TestRules.RunUntil(w, () => !site.UnderConstruction, 20 * 100);
         }
         Assert.False(p.LowPower, $"base should be powered: {p.PowerSupply}/{p.PowerDemand}");
 
         // Produce every unit at its producer and research every upgrade.
-        foreach (var u in rules.Units.Values.Where(u => u.Faction == "coalition"))
+        foreach (var u in rules.Units.Values.Where(u => u.Faction == faction && u.BuiltAt != ""))
         {
-            var producer = w.Entities.First(e => e.Owner == 0 && e.Building?.Produces.Contains(u.Id) == true);
-            w.Submit(new ProduceCommand(0, producer.Id, u.Id));
+            var producer = w.Entities.FirstOrDefault(e => e.Owner == 0 && e.Building?.Produces.Contains(u.Id) == true);
+            Assert.True(producer is not null, $"no building produces {u.Id}");
+            w.Submit(new ProduceCommand(0, producer!.Id, u.Id));
             w.Step();
             var rejected = w.Events.OfType<OrderRejectedEvent>().FirstOrDefault();
             Assert.True(rejected is null, $"{u.Id} rejected: {rejected?.Reason}");
         }
-        foreach (var up in rules.Upgrades.Values.Where(u => u.Faction == "coalition"))
+        foreach (var up in rules.Upgrades.Values.Where(u => u.Faction == faction))
         {
-            var lab = w.Entities.First(e => e.Owner == 0 && e.Building?.Upgrades.Contains(up.Id) == true);
-            w.Submit(new ProduceCommand(0, lab.Id, up.Id));
+            var lab = w.Entities.FirstOrDefault(e => e.Owner == 0 && e.Building?.Upgrades.Contains(up.Id) == true);
+            Assert.True(lab is not null, $"no building researches {up.Id}");
+            w.Submit(new ProduceCommand(0, lab!.Id, up.Id));
             w.Step();
             var rejected = w.Events.OfType<OrderRejectedEvent>().FirstOrDefault();
             Assert.True(rejected is null, $"{up.Id} rejected: {rejected?.Reason}");
         }
         TestRules.RunUntil(w, () => w.Entities.All(e => e.Queue is null || e.Queue.Items.Count == 0), 20 * 300);
-        foreach (var u in rules.Units.Values.Where(u => u.Faction == "coalition"))
+        foreach (var u in rules.Units.Values.Where(u => u.Faction == faction && u.BuiltAt != ""))
             Assert.Contains(w.Entities, e => e.Def.Id == u.Id && e.Owner == 0);
-        foreach (var up in rules.Upgrades.Values.Where(u => u.Faction == "coalition"))
+        foreach (var up in rules.Upgrades.Values.Where(u => u.Faction == faction))
             Assert.True(p.Has(up.Id), $"{up.Id} not researched");
 
-        // The tiltrotor harvests on its own from the supply centre.
-        var tilt = w.Entities.First(e => e.Def.Id == "coalition_tiltrotor");
-        Assert.NotEqual(HarvestState.Idle, tilt.HarvestState);
+        // A produced harvester goes to work on its own.
+        var harvester = w.Entities.Last(e => e.Owner == 0 && e.IsHarvester && e.Def.Id == rules.Ai(faction, "medium").HarvesterUnit);
+        Assert.NotEqual(HarvestState.Idle, harvester.HarvestState);
     }
 
     [Fact]

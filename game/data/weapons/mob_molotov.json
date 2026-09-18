@@ -1,0 +1,21 @@
+{
+  "id": "mob_molotov",
+  "damage": 40,
+  "damageType": "flame",
+  "range": 5,
+  "cooldown": 2.5,
+  "projectile": {
+    "kind": "shell",
+    "speed": 14,
+    "arc": true
+  },
+  "splash": {
+    "radius": 1.5,
+    "falloff": 0.5
+  },
+  "targets": [
+    "ground"
+  ],
+  "clearsGarrison": true,
+  "aimTolerance": 30
+}

@@ -1,0 +1,16 @@
+{
+  "id": "network_salvage_efficiency",
+  "faction": "network",
+  "name": "Salvage Efficiency",
+  "cost": 1000,
+  "time": 30,
+  "researchedAt": "network_black_market",
+  "effects": [
+    {
+      "type": "speed",
+      "tag": "vehicle",
+      "mult": 1.12
+    }
+  ],
+  "description": "Stripped-down vehicles move 12% faster."
+}

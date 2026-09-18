@@ -10,7 +10,8 @@ public partial class MainMenu : CanvasLayer
     private Control _root = null!;
     private VBoxContainer _setup = null!;
     private VBoxContainer _title = null!;
-    private readonly List<(OptionButton kind, OptionButton difficulty)> _slots = new();
+    private readonly List<(OptionButton kind, OptionButton faction, OptionButton difficulty)> _slots = new();
+    private static readonly string[] FactionIds = { "coalition", "directorate", "network", "random" };
     private OptionButton _cash = null!;
 
     public override void _Ready()
@@ -43,9 +44,9 @@ public partial class MainMenu : CanvasLayer
         var st = new Label { Text = "SKIRMISH", HorizontalAlignment = HorizontalAlignment.Center };
         st.AddThemeFontSizeOverride("font_size", 36);
         _setup.AddChild(st);
-        _setup.AddChild(new Label { Text = "Map: Dry Plain (4 players)   Faction: Coalition (others arrive in M4)", Modulate = new Color(1, 1, 1, 0.7f) });
+        _setup.AddChild(new Label { Text = "Map: Dry Plain (4 players)", Modulate = new Color(1, 1, 1, 0.7f) });
 
-        var grid = new GridContainer { Columns = 3 };
+        var grid = new GridContainer { Columns = 4 };
         grid.AddThemeConstantOverride("h_separation", 12);
         grid.AddThemeConstantOverride("v_separation", 6);
         _setup.AddChild(grid);
@@ -62,12 +63,16 @@ public partial class MainMenu : CanvasLayer
                 kind.Selected = i == 1 ? 1 : 0;
             }
             grid.AddChild(kind);
+            var fac = new OptionButton();
+            foreach (var f in new[] { "Coalition", "Directorate", "Network", "Random" }) fac.AddItem(f);
+            fac.Selected = i == 0 ? 0 : 3;
+            grid.AddChild(fac);
             var diff = new OptionButton();
             foreach (var d in new[] { "Easy", "Medium", "Hard", "Brutal" }) diff.AddItem(d);
             diff.Selected = 1;
             diff.Disabled = i == 0;
             grid.AddChild(diff);
-            _slots.Add((kind, diff));
+            _slots.Add((kind, fac, diff));
         }
         var cashRow = new HBoxContainer();
         cashRow.AddChild(new Label { Text = "Starting cash" });
@@ -92,16 +97,19 @@ public partial class MainMenu : CanvasLayer
     private void Start()
     {
         var s = new MatchSettings { StartingCash = new[] { 5000, 10000, 20000, 50000 }[_cash.Selected] };
-        s.Players.Add(new PlayerSlot { Name = "You", Colour = MatchSettings.Palette[0] });
+        var rng = new Random();
+        string Pick(int idx) => FactionIds[idx] == "random" ? FactionIds[rng.Next(3)] : FactionIds[idx];
+        s.Players.Add(new PlayerSlot { Name = "You", Faction = Pick(_slots[0].faction.Selected), Colour = MatchSettings.Palette[0] });
         var n = 1;
         for (var i = 1; i < _slots.Count; i++)
         {
             if (_slots[i].kind.Selected != 1) continue;
             var diff = new[] { "easy", "medium", "hard", "brutal" }[_slots[i].difficulty.Selected];
-            s.Players.Add(new PlayerSlot { Name = $"AI {n} ({diff})", IsAi = true, Difficulty = diff, Colour = MatchSettings.Palette[n % 4] });
+            var fac = Pick(_slots[i].faction.Selected);
+            s.Players.Add(new PlayerSlot { Name = $"AI {n} ({fac} {diff})", Faction = fac, IsAi = true, Difficulty = diff, Colour = MatchSettings.Palette[n % 4] });
             n++;
         }
-        if (s.Players.Count < 2) s.Players.Add(new PlayerSlot { Name = "AI 1 (medium)", IsAi = true, Colour = MatchSettings.Palette[1] });
+        if (s.Players.Count < 2) s.Players.Add(new PlayerSlot { Name = "AI 1 (coalition medium)", IsAi = true, Colour = MatchSettings.Palette[1] });
         App.StartMatch(s);
     }
 }

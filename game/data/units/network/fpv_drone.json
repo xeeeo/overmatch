@@ -1,0 +1,26 @@
+{
+  "id": "network_fpv_drone",
+  "faction": "network",
+  "model": "network/fpv_drone",
+  "name": "FPV Drone",
+  "cost": 100,
+  "buildTime": 1,
+  "builtAt": "",
+  "locomotor": "air",
+  "speed": 11.0,
+  "turnRate": 720,
+  "radius": 0.35,
+  "flightHeight": 3.0,
+  "hp": 30,
+  "armour": "drone",
+  "vision": 7,
+  "weapons": [
+    "drone_charge"
+  ],
+  "xpValue": 4,
+  "tags": [
+    "aircraft",
+    "drone"
+  ],
+  "description": "One-way drone."
+}

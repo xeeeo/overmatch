@@ -1,0 +1,16 @@
+{
+  "id": "network_junk_repair",
+  "faction": "network",
+  "name": "Junk Repair",
+  "cost": 1000,
+  "time": 35,
+  "researchedAt": "network_arms_dealer",
+  "effects": [
+    {
+      "type": "hp",
+      "tag": "vehicle",
+      "mult": 1.25
+    }
+  ],
+  "description": "Vehicles are patched with scrap: +25% hit points."
+}

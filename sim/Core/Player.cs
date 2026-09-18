@@ -17,6 +17,22 @@ public sealed class Player
     /// <summary>Display name for menus and results.</summary>
     public string Name { get; set; } = "";
     public bool IsAi { get; internal set; }
+    public int Rank { get; internal set; } = 1;
+    public int Points { get; internal set; } = 1;
+    private readonly HashSet<string> _powers = new();
+    private readonly Dictionary<string, float> _powerReady = new();
+    public IReadOnlyCollection<string> PowersOwned => _powers;
+    public bool HasPower(string id) => _powers.Contains(id);
+    internal void GrantPower(string id) => _powers.Add(id);
+    /// <summary>Sim time at which the power can be used again.</summary>
+    public float PowerReadyAt(string id) => _powerReady.GetValueOrDefault(id, 0f);
+    internal void SetPowerReadyAt(string id, float t) => _powerReady[id] = t;
+    /// <summary>Fraction of a victim's cost paid on each kill (Cash Bounty).</summary>
+    public float BountyPerKill { get; internal set; }
+    public float DiscountMult { get; internal set; } = 1f;
+    public float DiscountUntil { get; internal set; }
+    /// <summary>Units waiting inside the shared tunnel network.</summary>
+    public List<int> TunnelPool { get; } = new();
 
     private readonly HashSet<string> _upgrades = new();
     private readonly Dictionary<string, float> _weaponDamageMult = new();
@@ -25,6 +41,16 @@ public sealed class Player
     private readonly Dictionary<string, float> _speedMultByUnit = new();
     private readonly Dictionary<string, float> _speedMultByTag = new();
     private readonly Dictionary<string, float> _powerAddByBuilding = new();
+    /// <summary>Damage bonus for horde units in a group (0.25 base, upgrades add).</summary>
+    public float HordeBonus { get; private set; } = 0.25f;
+    private readonly HashSet<string> _stealthTags = new();
+    /// <summary>Upgrades can make whole unit classes stealthy (Network camouflage).</summary>
+    public bool StealthFor(ObjectDef def)
+    {
+        if (_stealthTags.Count == 0) return false;
+        foreach (var t in def.Tags) if (_stealthTags.Contains(t)) return true;
+        return _stealthTags.Contains(def.Id);
+    }
 
     public Player(int id, FactionDef faction)
     {
@@ -55,6 +81,8 @@ public sealed class Player
                     if (fx.Tag != "") Mul(_speedMultByTag, fx.Tag, fx.Mult);
                     break;
                 case "power": _powerAddByBuilding[fx.Building] = _powerAddByBuilding.GetValueOrDefault(fx.Building) + fx.Add; break;
+                case "horde": HordeBonus += fx.Add; break;
+                case "stealth": if (fx.Tag != "") _stealthTags.Add(fx.Tag); if (fx.Unit != "") _stealthTags.Add(fx.Unit); break;
             }
         }
     }

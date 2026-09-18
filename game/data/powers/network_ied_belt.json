@@ -1,0 +1,14 @@
+{
+  "id": "network_ied_belt",
+  "faction": "network",
+  "name": "IED Belt",
+  "rank": 3,
+  "cooldown": 180,
+  "target": "point",
+  "effect": {
+    "type": "spawn",
+    "unit": "network_ied",
+    "count": 8
+  },
+  "description": "Eight hidden charges in the area."
+}

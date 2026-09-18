@@ -1,0 +1,29 @@
+{
+  "id": "directorate_speaker",
+  "faction": "directorate",
+  "model": "directorate/speaker",
+  "name": "Speaker Truck",
+  "cost": 600,
+  "buildTime": 9,
+  "builtAt": "directorate_vehicle_plant",
+  "locomotor": "wheeled",
+  "speed": 4.6,
+  "turnRate": 200,
+  "radius": 0.9,
+  "hp": 240,
+  "armour": "light_vehicle",
+  "vision": 8,
+  "auras": [
+    {
+      "type": "heal",
+      "radius": 7,
+      "amount": 6
+    }
+  ],
+  "xpValue": 30,
+  "tags": [
+    "vehicle",
+    "support"
+  ],
+  "description": "Propaganda truck. Heals nearby units."
+}

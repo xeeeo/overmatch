@@ -1,0 +1,42 @@
+{
+  "id": "directorate_missile_silo",
+  "faction": "directorate",
+  "model": "directorate/missile_silo",
+  "tags": [
+    "structure"
+  ],
+  "name": "Missile Silo",
+  "cost": 5000,
+  "buildTime": 60,
+  "footprint": [
+    4,
+    4
+  ],
+  "hp": 3500,
+  "armour": "structure",
+  "vision": 8,
+  "power": -8,
+  "prereqs": [
+    "directorate_propaganda_center"
+  ],
+  "superweapon": {
+    "name": "Nuclear Missile",
+    "chargeTime": 360,
+    "effect": {
+      "type": "strike",
+      "damage": 4500,
+      "damageType": "explosive",
+      "radius": 10,
+      "falloff": 0.2,
+      "impacts": 1,
+      "delay": 6,
+      "hazard": {
+        "radius": 9,
+        "dps": 25,
+        "damageType": "toxin",
+        "duration": 40
+      }
+    }
+  },
+  "description": "Superweapon: a nuclear missile. 6-minute charge. Leaves radiation."
+}
