@@ -223,7 +223,7 @@ public partial class SelectionController : Control
         var infantry = _selected.Where(id => Root.World.Get(id) is { Def.IsInfantry: true }).ToArray();
         if (infantry.Length > 0)
         {
-            var container = Pick(screen, e => e.Def.GarrisonSlots > 0 && (e.Owner == Player || e.Owner < 0) && !e.Building!.IsHole);
+            var container = Pick(screen, e => e.Def.GarrisonSlots > 0 && (e.Owner == Player || e.Owner < 0) && e.Building is not { IsHole: true } && !_selected.Contains(e.Id));
             if (container is not null && container.Building is not { Capturable: true })
             {
                 Root.World.Submit(new GarrisonCommand(Player, infantry, container.Id));

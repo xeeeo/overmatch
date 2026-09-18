@@ -116,7 +116,7 @@ public sealed class World
     public Entity Spawn(string unitId, int owner, Vec2 pos, float facing = 0f)
     {
         var def = Rules.Unit(unitId);
-        var e = Create(def, owner, pos, facing);
+        var e = Create(def, owner, ClampToMap(pos), facing);
         e.MaxHp = def.Hp * HpMultFor(owner, def);
         e.Hp = e.MaxHp;
         e.Ammo = def.Ammo;
@@ -261,7 +261,7 @@ public sealed class World
     public Vec2 ExitPoint(Entity building, Locomotor loco)
     {
         var (x0, y0, x1, _) = building.Bounds;
-        var want = new Vec2((x0 + x1) * 0.5f, y0 - 1.0f);
+        var want = ClampToMap(new Vec2((x0 + x1) * 0.5f, y0 - 1.0f));
         if (loco == Locomotor.Air) return want;
         var (cx, cy) = MapGrid.CellOf(want);
         var free = Grid.NearestPassable(cx, cy, loco, 8);

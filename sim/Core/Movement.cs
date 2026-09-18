@@ -17,6 +17,8 @@ public static class Movement
         var dt = World.Dt;
         var loco = unit.LocomotorClass;
         var grid = world.Grid;
+        // Targets always lie on the map, whatever produced them (approach points, leaders near an edge, ...).
+        order.Target = world.ClampToMap(order.Target);
 
         var toTarget = order.Target - e.Pos;
         var dist = toTarget.Length;
@@ -64,7 +66,9 @@ public static class Movement
             var speed = unit.Speed * world.Player(e.Owner).SpeedMult(unit);
             var step = MathF.Min(speed * dt, dist);
             var next = e.Pos + Vec2.FromAngle(e.Facing) * step;
-            if (grid.IsPassable(next, loco)) e.Pos = next;
+            // Aircraft ignore terrain entirely; they are only kept over the map. This also rescues one that starts outside it.
+            if (loco == Locomotor.Air) e.Pos = world.ClampToMap(next);
+            else if (grid.IsPassable(next, loco)) e.Pos = next;
             else if (grid.IsPassable(new Vec2(next.X, e.Pos.Y), loco)) e.Pos = new Vec2(next.X, e.Pos.Y);
             else if (grid.IsPassable(new Vec2(e.Pos.X, next.Y), loco)) e.Pos = new Vec2(e.Pos.X, next.Y);
         }
