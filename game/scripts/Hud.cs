@@ -233,6 +233,9 @@ public partial class Hud : CanvasLayer
         if (d.GarrisonSlots > 0) traits.Add($"carries {d.GarrisonSlots}");
         if (d is UnitDef { CanCapture: true }) traits.Add("can capture");
         if (d is BuildingDef b && b.Power != 0) traits.Add(b.Power > 0 ? $"+{b.Power} power" : $"{b.Power} power");
+if (d is BuildingDef { Trickle: { } inc } ib)
+            lines.Add($"Income: ${inc.Amount} every {inc.Interval:0} s" + (ib.TricklePerPassenger > 0 ? $", plus ${ib.TricklePerPassenger} per infantry inside" : "")
+                + $"   (${inc.Amount * 60f / inc.Interval:0} a minute)");
         lines.Add(string.Join("   ", traits));
         if (d.Abilities.Count > 0) lines.Add("Abilities: " + string.Join(", ", d.Abilities.Select(a => a.Name)));
         return string.Join("\n", lines);
@@ -358,6 +361,14 @@ public partial class Hud : CanvasLayer
             var bits = new List<string>();
             if (s.Level > 0) bits.Add("VETERAN " + new string('★', s.Level));
             if (s.SalvageLevel > 0) bits.Add($"SALVAGE {s.SalvageLevel}");
+if (mine && s.Building is { Trickle: { } tr } sb && !s.UnderConstruction)
+            {
+                var pay = (int)((tr.Amount + sb.TricklePerPassenger * s.Passengers.Count) * Root.World.Player(s.Owner).IncomeMult);
+                // Low power halves the rate, so the honest countdown is twice as long.
+                var slowed = sb.NeedsPower && Root.World.Player(s.Owner).LowPower;
+                var left = Mathf.CeilToInt(Mathf.Max(0f, s.TrickleTimer) * (slowed ? 2f : 1f));
+                bits.Add(!s.Operational ? $"INCOME PAUSED  +${pay}" : $"NEXT +${pay} IN {left / 60}:{left % 60:00}" + (slowed ? "  LOW POWER, HALF SPEED" : ""));
+            }
             if (s.IsHarvester) bits.Add($"CARRYING {s.Carried}");
             if (s.Unit is { Ammo: > 0 } au) bits.Add($"AMMO {s.Ammo}/{au.Ammo}");
             if (s.Passengers.Count > 0) bits.Add($"{s.Passengers.Count} INSIDE");

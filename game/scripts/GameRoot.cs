@@ -22,6 +22,7 @@ public partial class GameRoot : Node3D
     public App App { get; set; } = null!;
     public string? SmokePath { get; set; }
     public ResultOverlay Result { get; private set; } = null!;
+    public UnitOverlay Overlay { get; private set; } = null!;
     public AudioManager Audio { get; private set; } = null!;
     public Minimap Minimap { get; private set; } = null!;
     /// <summary>Where the last "under attack" alert happened (Space jumps there).</summary>
@@ -166,6 +167,31 @@ public partial class GameRoot : Node3D
                 GetViewport().GetTexture().GetImage().SavePng(_smokePath!.Replace(".png", "_pause.png"));
                 Result.TogglePause();
             }
+            // An income building, photographed just after it pays so the countdown and the cash popup are both checked.
+            if (_uiStage == 5 && _pauseShotFrames == 0 && !Paused)
+            {
+                _uiStage = 6;
+                var me = w.Player(LocalPlayer);
+                var def = w.Rules.Buildings.Values.FirstOrDefault(b => b.Faction == me.Faction.Id && b.Trickle is not null);
+                var spawn = w.MapDef.Spawns[LocalPlayer];
+                if (def is not null)
+                    for (var r = 8; r < 20 && _incomeId == 0; r++)
+                        for (var a = 0; a < 16 && _incomeId == 0; a++)
+                        {
+                            var cx = (int)(spawn.X + r * Mathf.Cos(a * Mathf.Tau / 16f));
+                            var cy = (int)(spawn.Y + r * Mathf.Sin(a * Mathf.Tau / 16f));
+                            if (w.CanPlace(def, cx, cy, out _)) _incomeId = w.PlaceBuilding(def.Id, LocalPlayer, cx, cy).Id;
+                        }
+            }
+            else if (_uiStage == 6 && _incomeId != 0 && w.Get(_incomeId) is { } bank && Views.ContainsKey(_incomeId))
+            {
+                _uiStage = 7;
+                Selection.SelectOnly(_incomeId);
+                Camera.Position = MapView.ToWorld(bank.Pos);
+            }
+            else if (_uiStage == 7 && w.Events.OfType<IncomeEvent>().Any(i => i.BuildingId == _incomeId)) { _uiStage = 8; _incomeShotFrames = 14; }
+            if (_incomeShotFrames > 0 && --_incomeShotFrames == 0)
+                GetViewport().GetTexture().GetImage().SavePng(_smokePath!.Replace(".png", "_income.png"));
             if (w.Tick / 600 != _lastLogged)
             {
                 _lastLogged = w.Tick / 600;
@@ -249,6 +275,8 @@ public partial class GameRoot : Node3D
     private int _lastLogged = -1;
     private int _uiStage;
     private int _pauseShotFrames;
+    private int _incomeId;
+    private int _incomeShotFrames;
 
     public override void _Process(double delta)
     {
@@ -307,6 +335,12 @@ public partial class GameRoot : Node3D
                     break;
                 case SoldEvent s:
                     RemoveView(s.BuildingId);
+                    break;
+                case IncomeEvent inc when inc.Owner == LocalPlayer:
+                    Overlay.Popup(inc.Pos, $"+${inc.Amount}", 3.5f);
+                    break;
+                case SupplyDeliveredEvent sd when sd.Owner == LocalPlayer && World.Get(sd.HarvesterId) is { } hv:
+                    Overlay.Popup(hv.Pos, $"+${sd.Amount}", 2.2f);
                     break;
                 case OrderRejectedEvent r when r.Player == LocalPlayer:
                     Hud.Say(r.Reason switch
@@ -409,7 +443,8 @@ public partial class GameRoot : Node3D
         AddChild(layer);
         Selection = new SelectionController { Player = LocalPlayer, Root = this };
         layer.AddChild(Selection);
-        layer.AddChild(new UnitOverlay { Root = this });
+        Overlay = new UnitOverlay { Root = this };
+        layer.AddChild(Overlay);
         Hud = new Hud { Root = this, Layer = 2 };
         AddChild(Hud);
         Result = new ResultOverlay { Root = this };

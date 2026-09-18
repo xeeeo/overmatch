@@ -210,6 +210,9 @@ public partial class AudioManager : Node
                 case GarrisonEvent ge when world.Get(ge.UnitId)?.Owner == me:
                     PlayUi("garrison");
                     break;
+                case IncomeEvent inc when inc.Owner == me:
+                    PlayUi("cash");
+                    break;
                 case SupplyDeliveredEvent sd when sd.Owner == me:
                     PlayUi("cash");
                     break;

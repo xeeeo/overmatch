@@ -30,7 +30,9 @@ public static class Economy
                 {
                     e.TrickleTimer += trickle.Interval;
                     var amount = trickle.Amount + e.Building.TricklePerPassenger * e.Passengers.Count;
-                    player.Cash += (int)(amount * player.IncomeMult);
+                    var paid = (int)(amount * player.IncomeMult);
+                    player.Cash += paid;
+                    world.Emit(new IncomeEvent(e.Id, e.Owner, paid, e.Pos));
                 }
             }
             else if (e.IsHarvester) Harvest(world, e);

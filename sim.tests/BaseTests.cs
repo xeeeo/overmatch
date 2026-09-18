@@ -208,6 +208,17 @@ public class BaseTests
     }
 
     [Fact]
+    public void Trickle_EmitsIncomeEventWhenItPays()
+    {
+        var (w, _) = Setup();
+        var bank = w.PlaceBuilding("bank", 0, 20, 20);
+        var seen = new List<IncomeEvent>();
+        for (var i = 0; i < 20 * 2 + 1; i++) { w.Step(); seen.AddRange(w.Events.OfType<IncomeEvent>()); }
+        var ev = Assert.Single(seen);
+        Assert.Equal((bank.Id, 0, 100), (ev.BuildingId, ev.Owner, ev.Amount));
+    }
+
+    [Fact]
     public void Sell_RefundsAndFreesCells()
     {
         var (w, _) = Setup();

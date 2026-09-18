@@ -23,6 +23,9 @@ public sealed record UpgradeCompletedEvent(int Owner, string UpgradeId) : GameEv
 
 public sealed record SoldEvent(int BuildingId, int Owner, int Refund) : GameEvent;
 
+/// <summary>A trickle building (Drop Zone, Cyber Center, Black Market, Oil Derrick) paid out.</summary>
+public sealed record IncomeEvent(int BuildingId, int Owner, int Amount, Vec2 Pos) : GameEvent;
+
 public sealed record SupplyDeliveredEvent(int HarvesterId, int Owner, int Amount) : GameEvent;
 
 public sealed record OrderRejectedEvent(int Player, string Reason) : GameEvent;
