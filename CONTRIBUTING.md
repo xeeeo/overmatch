@@ -19,3 +19,10 @@ Overmatch is built in the open. Issues, playtest reports and pull requests are w
 ## Licensing of contributions
 
 By contributing you agree that code is licensed GPL v3 and assets CC BY 4.0, matching the repository.
+
+## Exporting builds
+
+`game/export_presets.cfg` has `macOS` and `Windows` presets; CI runs both on every push to `main`.
+
+- macOS uses `codesign/codesign=3` (Xcode's `codesign`, ad-hoc). Godot's built-in ad-hoc signer (`=1`) produces an app that macOS kills on launch (SIGKILL, no output) because the loose .NET runtime dylibs are not covered by the signature. Keep it on 3; it needs Xcode command-line tools, which the macOS CI runner has.
+- Windows is exported from Linux in CI; no signing.
