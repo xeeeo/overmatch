@@ -87,4 +87,5 @@ battle performance benchmark has not been run; material consolidation is a possi
 follow-up once the visual direction is approved.
 
 See [captures and validation](../../artifacts/unit-review/bulwark/README.md).
-Stop at this unit for review before beginning the next unit or map textures.
+This unit was approved before the full roster and terrain pass. See the current
+[art review](../art_review/README.md) for the expanded work.

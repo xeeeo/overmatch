@@ -11,6 +11,8 @@ obj/
 # Blender
 tools/blender/out/
 *.blend1
+__pycache__/
+*.pyc
 # OS / editors
 .DS_Store
 Thumbs.db
