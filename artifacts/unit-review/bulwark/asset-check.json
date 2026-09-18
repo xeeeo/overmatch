@@ -1,0 +1,26 @@
+{
+  "model": "coalition/bulwark",
+  "triangles": 4496,
+  "meshes": 2,
+  "materials": 8,
+  "bounds_godot": {
+    "min": [
+      -1.158,
+      0.055,
+      -0.968
+    ],
+    "max": [
+      1.511,
+      1.5885,
+      0.968
+    ]
+  },
+  "turret_pivot_godot": [
+    -0.15000000596046448,
+    1.059999942779541,
+    0
+  ],
+  "material_contract": "TeamColour",
+  "baseline_triangles": 752,
+  "gameplay_changes": false
+}

@@ -1,0 +1,2840 @@
+{
+  "baseline_commit": "3bf70dd",
+  "models": {
+    "coalition/airfield": {
+      "bytes": 104032,
+      "triangles": 1472,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "Identification",
+        "Optics",
+        "TeamColour",
+        "CoalitionArmour",
+        "CoalitionEdge"
+      ],
+      "bounds_min": [
+        -2.855,
+        0.0,
+        -1.905
+      ],
+      "bounds_max": [
+        2.85,
+        3.105,
+        1.85
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/barracks": {
+      "bytes": 63596,
+      "triangles": 816,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Optics",
+        "Utility",
+        "Identification"
+      ],
+      "bounds_min": [
+        -1.35,
+        0.0,
+        -1.35
+      ],
+      "bounds_max": [
+        1.35,
+        1.925,
+        1.35
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/bulwark": {
+      "bytes": 316100,
+      "triangles": 4496,
+      "meshes": 2,
+      "surfaces": 14,
+      "materials": [
+        "BulwarkArmour",
+        "BulwarkEdge",
+        "TeamColour",
+        "Recess",
+        "Steel",
+        "Optics",
+        "Identification",
+        "Track"
+      ],
+      "bounds_min": [
+        -1.158,
+        0.055,
+        -0.968
+      ],
+      "bounds_max": [
+        1.511,
+        1.5885,
+        0.968
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.15,
+            0.0,
+            1.0,
+            0.0,
+            1.06,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.15,
+            0,
+            1,
+            0,
+            1.06,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "coalition/command_post": {
+      "bytes": 98588,
+      "triangles": 1368,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Optics"
+      ],
+      "bounds_min": [
+        -2.35,
+        0.0,
+        -2.35
+      ],
+      "bounds_max": [
+        2.35,
+        3.042,
+        2.35
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/dozer": {
+      "bytes": 164964,
+      "triangles": 2362,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "Mechanics",
+        "Steel",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "Optics",
+        "TeamColour",
+        "Identification",
+        "Utility"
+      ],
+      "bounds_min": [
+        -0.95,
+        0.0625,
+        -0.7841
+      ],
+      "bounds_max": [
+        0.99,
+        1.4155,
+        0.7841
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/drone": {
+      "bytes": 13856,
+      "triangles": 148,
+      "meshes": 1,
+      "surfaces": 4,
+      "materials": [
+        "CoalitionArmour",
+        "TeamColour",
+        "CoalitionEdge",
+        "Optics"
+      ],
+      "bounds_min": [
+        -0.305,
+        0.135,
+        -0.445
+      ],
+      "bounds_max": [
+        0.245,
+        0.2585,
+        0.445
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/drop_zone": {
+      "bytes": 49988,
+      "triangles": 684,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "Identification",
+        "TeamColour",
+        "CoalitionArmour",
+        "Optics",
+        "CoalitionEdge",
+        "Utility"
+      ],
+      "bounds_min": [
+        -1.35,
+        0.0,
+        -1.44
+      ],
+      "bounds_max": [
+        1.445,
+        1.705,
+        1.35
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/hive": {
+      "bytes": 180740,
+      "triangles": 2604,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Mechanics",
+        "Steel",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Identification",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.19,
+        0.0825,
+        -0.9415
+      ],
+      "bounds_max": [
+        1.1915,
+        1.51,
+        0.9415
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/jammer": {
+      "bytes": 189904,
+      "triangles": 2576,
+      "meshes": 2,
+      "surfaces": 13,
+      "materials": [
+        "TeamColour",
+        "Steel",
+        "CoalitionEdge",
+        "CoalitionArmour",
+        "Optics",
+        "Mechanics",
+        "Identification"
+      ],
+      "bounds_min": [
+        -1.1,
+        0.01,
+        -0.7793
+      ],
+      "bounds_max": [
+        1.1115,
+        3.3485,
+        0.7793
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.4,
+            0.0,
+            1.0,
+            0.0,
+            1.45,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.4,
+            0,
+            1,
+            0,
+            1.45,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "coalition/kestrel": {
+      "bytes": 81964,
+      "triangles": 1080,
+      "meshes": 4,
+      "surfaces": 14,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "CoalitionEdge",
+        "CoalitionArmour",
+        "Optics",
+        "TeamColour",
+        "Identification"
+      ],
+      "bounds_min": [
+        -2.65931,
+        0.325,
+        -1.7
+      ],
+      "bounds_max": [
+        1.9,
+        1.7195,
+        1.7
+      ],
+      "articulation": {
+        "RotorMain": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.2,
+            0.0,
+            1.0,
+            0.0,
+            1.55,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            0.2,
+            0,
+            1,
+            0,
+            1.55,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "RotorTail": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -2.55,
+            0.0,
+            1.0,
+            0.0,
+            1.1,
+            0.0,
+            0.0,
+            1.0,
+            -0.16,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -2.55,
+            0,
+            1,
+            0,
+            1.1,
+            0,
+            0,
+            1,
+            -0.16,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.2,
+            0.0,
+            1.0,
+            0.0,
+            0.55,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            1.2,
+            0,
+            1,
+            0,
+            0.55,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "coalition/lancer": {
+      "bytes": 208820,
+      "triangles": 2972,
+      "meshes": 2,
+      "surfaces": 13,
+      "materials": [
+        "Steel",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Mechanics",
+        "Utility",
+        "Optics",
+        "Identification"
+      ],
+      "bounds_min": [
+        -1.36,
+        0.01,
+        -0.8293
+      ],
+      "bounds_max": [
+        1.4865,
+        1.87765,
+        0.8293
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.7,
+            0.0,
+            1.0,
+            0.0,
+            0.85,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.7,
+            0,
+            1,
+            0,
+            0.85,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "coalition/motor_pool": {
+      "bytes": 103864,
+      "triangles": 1384,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "Optics",
+        "TeamColour",
+        "Utility"
+      ],
+      "bounds_min": [
+        -1.85,
+        0.0,
+        -1.85
+      ],
+      "bounds_max": [
+        1.974,
+        2.18,
+        1.86
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/orbital_uplink": {
+      "bytes": 111504,
+      "triangles": 1576,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Optics",
+        "Utility"
+      ],
+      "bounds_min": [
+        -1.85,
+        0.0,
+        -1.85
+      ],
+      "bounds_max": [
+        1.85,
+        3.18472,
+        1.85
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/pathfinder": {
+      "bytes": 90352,
+      "triangles": 1212,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Utility",
+        "Optics",
+        "Steel"
+      ],
+      "bounds_min": [
+        -0.3095,
+        0.0,
+        -0.35913
+      ],
+      "bounds_max": [
+        1.0,
+        1.39,
+        0.35913
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/power_plant": {
+      "bytes": 106900,
+      "triangles": 1636,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Utility"
+      ],
+      "bounds_min": [
+        -1.35,
+        0.0,
+        -1.35
+      ],
+      "bounds_max": [
+        1.8845,
+        1.9535,
+        1.35
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/rifleman": {
+      "bytes": 87436,
+      "triangles": 1144,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Utility",
+        "Optics",
+        "Steel"
+      ],
+      "bounds_min": [
+        -0.3095,
+        0.0,
+        -0.35913
+      ],
+      "bounds_max": [
+        0.75,
+        1.39,
+        0.35913
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/rocket_trooper": {
+      "bytes": 84296,
+      "triangles": 1128,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Utility",
+        "Optics",
+        "Steel"
+      ],
+      "bounds_min": [
+        -0.3095,
+        0.0,
+        -0.387
+      ],
+      "bounds_max": [
+        0.643,
+        1.39,
+        0.35913
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/sentry_battery": {
+      "bytes": 66532,
+      "triangles": 916,
+      "meshes": 2,
+      "surfaces": 11,
+      "materials": [
+        "Steel",
+        "CoalitionArmour",
+        "TeamColour",
+        "CoalitionEdge",
+        "Mechanics",
+        "Optics"
+      ],
+      "bounds_min": [
+        -0.9,
+        0.0,
+        -0.9
+      ],
+      "bounds_max": [
+        1.046,
+        1.388,
+        0.9
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.85,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0.85,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "coalition/spectre": {
+      "bytes": 21892,
+      "triangles": 248,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Steel",
+        "Mechanics",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.68,
+        0.66,
+        -2.98
+      ],
+      "bounds_max": [
+        0.7,
+        1.116,
+        2.98
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/strategy_center": {
+      "bytes": 68136,
+      "triangles": 900,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.85,
+        0.0,
+        -1.85
+      ],
+      "bounds_max": [
+        1.85,
+        3.0195,
+        1.85
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/supply_center": {
+      "bytes": 107444,
+      "triangles": 1456,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "CoalitionArmour",
+        "CoalitionEdge",
+        "TeamColour",
+        "Optics",
+        "Utility",
+        "Identification"
+      ],
+      "bounds_min": [
+        -1.85,
+        0.0,
+        -1.85
+      ],
+      "bounds_max": [
+        2.0,
+        1.8725,
+        1.85
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/tiltrotor": {
+      "bytes": 124948,
+      "triangles": 1696,
+      "meshes": 5,
+      "surfaces": 16,
+      "materials": [
+        "Steel",
+        "Mechanics",
+        "CoalitionArmour",
+        "Optics",
+        "CoalitionEdge",
+        "TeamColour"
+      ],
+      "bounds_min": [
+        -1.99528,
+        0.19321,
+        -3.1
+      ],
+      "bounds_max": [
+        1.71,
+        1.7395,
+        3.1
+      ],
+      "articulation": {
+        "RotorL": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.2,
+            0.0,
+            1.0,
+            0.0,
+            1.55,
+            0.0,
+            0.0,
+            1.0,
+            -2.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.2,
+            0,
+            1,
+            0,
+            1.55,
+            0,
+            0,
+            1,
+            -2,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "RotorR": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.2,
+            0.0,
+            1.0,
+            0.0,
+            1.55,
+            0.0,
+            0.0,
+            1.0,
+            2.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.2,
+            0,
+            1,
+            0,
+            1.55,
+            0,
+            0,
+            1,
+            2,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "coalition/vantage": {
+      "bytes": 50676,
+      "triangles": 668,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "CoalitionArmour",
+        "Optics",
+        "CoalitionEdge",
+        "TeamColour",
+        "Mechanics",
+        "Steel",
+        "Identification"
+      ],
+      "bounds_min": [
+        -1.829,
+        0.51,
+        -1.69
+      ],
+      "bounds_max": [
+        1.28,
+        1.52023,
+        1.69
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "coalition/warden": {
+      "bytes": 163980,
+      "triangles": 2240,
+      "meshes": 2,
+      "surfaces": 12,
+      "materials": [
+        "Mechanics",
+        "CoalitionArmour",
+        "Steel",
+        "Optics",
+        "TeamColour",
+        "CoalitionEdge",
+        "Identification"
+      ],
+      "bounds_min": [
+        -1.1,
+        0.01,
+        -0.7793
+      ],
+      "bounds_max": [
+        1.2665,
+        1.69,
+        0.7793
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.2,
+            0.0,
+            1.0,
+            0.0,
+            1.5,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.2,
+            0,
+            1,
+            0,
+            1.5,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "directorate/airfield": {
+      "bytes": 191692,
+      "triangles": 2488,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "IndustrialSteel",
+        "ReinforcedConcrete",
+        "Mechanics",
+        "SafetyMarking",
+        "ArmourEdge",
+        "Optics",
+        "DirectorateArmour",
+        "TeamColour"
+      ],
+      "bounds_min": [
+        -2.85,
+        0.0,
+        -1.85
+      ],
+      "bounds_max": [
+        2.85,
+        2.8395,
+        1.85
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/barracks": {
+      "bytes": 171296,
+      "triangles": 2188,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "IndustrialSteel",
+        "ReinforcedConcrete",
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.35,
+        0.0,
+        -1.35
+      ],
+      "bounds_max": [
+        1.35,
+        1.7385,
+        1.4115
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/colossus": {
+      "bytes": 220616,
+      "triangles": 3168,
+      "meshes": 2,
+      "surfaces": 12,
+      "materials": [
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "IndustrialSteel",
+        "Optics",
+        "SafetyMarking"
+      ],
+      "bounds_min": [
+        -1.65,
+        0.08,
+        -1.2485
+      ],
+      "bounds_max": [
+        2.398,
+        1.314,
+        1.2485
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.15,
+            0.0,
+            1.0,
+            0.0,
+            0.85,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.15,
+            0,
+            1,
+            0,
+            0.85,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "directorate/command_bunker": {
+      "bytes": 159588,
+      "triangles": 2096,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "IndustrialSteel",
+        "ReinforcedConcrete",
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "Optics"
+      ],
+      "bounds_min": [
+        -2.35,
+        0.0,
+        -2.35
+      ],
+      "bounds_max": [
+        2.35,
+        4.47,
+        2.35
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/conscript": {
+      "bytes": 107096,
+      "triangles": 1368,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "IndustrialSteel",
+        "Skin"
+      ],
+      "bounds_min": [
+        -0.1755,
+        0.0055,
+        -0.367
+      ],
+      "bounds_max": [
+        0.741,
+        1.4,
+        0.367
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/cyber_center": {
+      "bytes": 183120,
+      "triangles": 2428,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "IndustrialSteel",
+        "ReinforcedConcrete",
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.35,
+        0.0,
+        -1.35
+      ],
+      "bounds_max": [
+        1.35,
+        2.62,
+        1.35
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/engineering_vehicle": {
+      "bytes": 200752,
+      "triangles": 2860,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Mechanics",
+        "DirectorateArmour",
+        "IndustrialSteel",
+        "ArmourEdge",
+        "TeamColour",
+        "SafetyMarking",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.16367,
+        0.08,
+        -0.8585
+      ],
+      "bounds_max": [
+        1.0835,
+        1.99404,
+        0.8585
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/flak_tower": {
+      "bytes": 119520,
+      "triangles": 1548,
+      "meshes": 2,
+      "surfaces": 12,
+      "materials": [
+        "Mechanics",
+        "DirectorateArmour",
+        "TeamColour",
+        "IndustrialSteel",
+        "ArmourEdge",
+        "Optics",
+        "ReinforcedConcrete"
+      ],
+      "bounds_min": [
+        -0.9,
+        0.0,
+        -0.9
+      ],
+      "bounds_max": [
+        1.00173,
+        2.48706,
+        0.9
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.85,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1.85,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "directorate/ghost_van": {
+      "bytes": 91664,
+      "triangles": 1300,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "Mechanics",
+        "IndustrialSteel",
+        "ArmourEdge",
+        "DirectorateArmour",
+        "Optics",
+        "TeamColour"
+      ],
+      "bounds_min": [
+        -1.13,
+        0.0,
+        -0.748
+      ],
+      "bounds_max": [
+        1.13,
+        2.38,
+        0.748
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/hacker": {
+      "bytes": 108620,
+      "triangles": 1384,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "IndustrialSteel",
+        "Skin",
+        "Optics"
+      ],
+      "bounds_min": [
+        -0.1755,
+        0.0055,
+        -0.367
+      ],
+      "bounds_max": [
+        0.5475,
+        1.386,
+        0.367
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/hailstorm": {
+      "bytes": 186736,
+      "triangles": 2648,
+      "meshes": 2,
+      "surfaces": 12,
+      "materials": [
+        "Mechanics",
+        "DirectorateArmour",
+        "TeamColour",
+        "IndustrialSteel",
+        "ArmourEdge",
+        "Optics",
+        "SafetyMarking"
+      ],
+      "bounds_min": [
+        -1.15,
+        0.08,
+        -0.9985
+      ],
+      "bounds_max": [
+        1.21337,
+        1.53,
+        0.9985
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.1,
+            0.0,
+            1.0,
+            0.0,
+            0.85,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.1,
+            0,
+            1,
+            0,
+            0.85,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "directorate/missile_silo": {
+      "bytes": 172948,
+      "triangles": 2348,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "IndustrialSteel",
+        "ReinforcedConcrete",
+        "Mechanics",
+        "TeamColour",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "SafetyMarking",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.85,
+        0.0,
+        -1.85
+      ],
+      "bounds_max": [
+        1.85,
+        2.825,
+        1.85
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/propaganda_center": {
+      "bytes": 137504,
+      "triangles": 1856,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "IndustrialSteel",
+        "ReinforcedConcrete",
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour"
+      ],
+      "bounds_min": [
+        -1.85,
+        0.0,
+        -1.85
+      ],
+      "bounds_max": [
+        1.85,
+        3.575,
+        1.85
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/reactor": {
+      "bytes": 169988,
+      "triangles": 2356,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "IndustrialSteel",
+        "ReinforcedConcrete",
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "SafetyMarking"
+      ],
+      "bounds_min": [
+        -1.35,
+        0.0,
+        -1.35
+      ],
+      "bounds_max": [
+        1.35,
+        2.333,
+        1.35
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/rocket_squad": {
+      "bytes": 108196,
+      "triangles": 1396,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "IndustrialSteel",
+        "Skin",
+        "SafetyMarking"
+      ],
+      "bounds_min": [
+        -0.2975,
+        0.0055,
+        -0.391
+      ],
+      "bounds_max": [
+        0.6795,
+        1.4,
+        0.367
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/speaker": {
+      "bytes": 125620,
+      "triangles": 1772,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "Mechanics",
+        "IndustrialSteel",
+        "ArmourEdge",
+        "DirectorateArmour",
+        "Optics",
+        "TeamColour"
+      ],
+      "bounds_min": [
+        -1.06,
+        0.0,
+        -0.748
+      ],
+      "bounds_max": [
+        1.0896,
+        2.175,
+        0.748
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/supply_depot": {
+      "bytes": 180260,
+      "triangles": 2304,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "IndustrialSteel",
+        "ReinforcedConcrete",
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "SafetyMarking"
+      ],
+      "bounds_min": [
+        -1.85,
+        0.0,
+        -1.85
+      ],
+      "bounds_max": [
+        1.85,
+        2.2065,
+        1.85
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/supply_truck": {
+      "bytes": 113892,
+      "triangles": 1608,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "Mechanics",
+        "IndustrialSteel",
+        "ArmourEdge",
+        "DirectorateArmour",
+        "Optics",
+        "TeamColour"
+      ],
+      "bounds_min": [
+        -1.34122,
+        0.0,
+        -0.768
+      ],
+      "bounds_max": [
+        1.40472,
+        1.788,
+        0.768
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/talon": {
+      "bytes": 182856,
+      "triangles": 2536,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "ArmourEdge",
+        "DirectorateArmour",
+        "TeamColour",
+        "Mechanics",
+        "IndustrialSteel",
+        "SafetyMarking",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.699,
+        0.458,
+        -2.0
+      ],
+      "bounds_max": [
+        1.22,
+        1.44,
+        2.0
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/troop_crawler": {
+      "bytes": 216640,
+      "triangles": 3084,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "Mechanics",
+        "DirectorateArmour",
+        "IndustrialSteel",
+        "ArmourEdge",
+        "TeamColour",
+        "SafetyMarking",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.39,
+        0.08,
+        -1.0485
+      ],
+      "bounds_max": [
+        1.39,
+        1.71,
+        1.0485
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "directorate/typhoon": {
+      "bytes": 255872,
+      "triangles": 3668,
+      "meshes": 2,
+      "surfaces": 12,
+      "materials": [
+        "Mechanics",
+        "IndustrialSteel",
+        "ArmourEdge",
+        "DirectorateArmour",
+        "TeamColour",
+        "SafetyMarking",
+        "Optics"
+      ],
+      "bounds_min": [
+        -1.31336,
+        0.08,
+        -0.9985
+      ],
+      "bounds_max": [
+        1.3,
+        2.03472,
+        0.9985
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.5,
+            0.0,
+            1.0,
+            0.0,
+            0.85,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.5,
+            0,
+            1,
+            0,
+            0.85,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "directorate/vanguard": {
+      "bytes": 194748,
+      "triangles": 2760,
+      "meshes": 2,
+      "surfaces": 12,
+      "materials": [
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "IndustrialSteel",
+        "Optics",
+        "SafetyMarking"
+      ],
+      "bounds_min": [
+        -1.15,
+        0.08,
+        -0.9485
+      ],
+      "bounds_max": [
+        1.598,
+        1.314,
+        0.9485
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.15,
+            0.0,
+            1.0,
+            0.0,
+            0.85,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.15,
+            0,
+            1,
+            0,
+            0.85,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "directorate/vehicle_plant": {
+      "bytes": 158772,
+      "triangles": 2144,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "IndustrialSteel",
+        "ReinforcedConcrete",
+        "Mechanics",
+        "DirectorateArmour",
+        "ArmourEdge",
+        "TeamColour",
+        "SafetyMarking"
+      ],
+      "bounds_min": [
+        -1.85,
+        0.0,
+        -1.85
+      ],
+      "bounds_max": [
+        1.85,
+        2.84,
+        1.85
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/angry_mob": {
+      "bytes": 536072,
+      "triangles": 7384,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkRecess",
+        "NetworkSalvage",
+        "NetworkCanvas",
+        "NetworkDustPaint",
+        "NetworkBone",
+        "TeamColour",
+        "NetworkOxide"
+      ],
+      "bounds_min": [
+        -0.75,
+        0.1,
+        -0.81
+      ],
+      "bounds_max": [
+        1.25,
+        1.4,
+        0.71
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/arms_dealer": {
+      "bytes": 316688,
+      "triangles": 4232,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "NetworkBone",
+        "NetworkDustPaint",
+        "NetworkSalvage",
+        "NetworkOxide",
+        "TeamColour",
+        "NetworkRecess"
+      ],
+      "bounds_min": [
+        -1.9,
+        0.0,
+        -1.9
+      ],
+      "bounds_max": [
+        1.9,
+        1.95,
+        1.9
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/black_market": {
+      "bytes": 141168,
+      "triangles": 1864,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkDustPaint",
+        "NetworkSalvage",
+        "NetworkOxide",
+        "TeamColour",
+        "NetworkRecess",
+        "NetworkCanvas",
+        "NetworkBone"
+      ],
+      "bounds_min": [
+        -1.3,
+        0.0,
+        -1.3
+      ],
+      "bounds_max": [
+        1.3,
+        1.6182,
+        1.6941
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/bomb_truck": {
+      "bytes": 251592,
+      "triangles": 3668,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "NetworkOxide",
+        "NetworkDustPaint",
+        "TeamColour",
+        "NetworkOptics",
+        "NetworkSalvage",
+        "NetworkBone",
+        "NetworkRecess",
+        "NetworkCanvas"
+      ],
+      "bounds_min": [
+        -1.2,
+        0.0,
+        -0.8085
+      ],
+      "bounds_max": [
+        1.35,
+        1.65,
+        0.74
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/command_cell": {
+      "bytes": 444056,
+      "triangles": 5928,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkBone",
+        "NetworkDustPaint",
+        "NetworkSalvage",
+        "NetworkOxide",
+        "TeamColour",
+        "NetworkRecess",
+        "NetworkCanvas"
+      ],
+      "bounds_min": [
+        -2.4,
+        0.0,
+        -2.4
+      ],
+      "bounds_max": [
+        2.4,
+        3.8,
+        2.4
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/compound": {
+      "bytes": 162068,
+      "triangles": 2096,
+      "meshes": 1,
+      "surfaces": 6,
+      "materials": [
+        "NetworkDustPaint",
+        "NetworkSalvage",
+        "NetworkOxide",
+        "TeamColour",
+        "NetworkRecess",
+        "NetworkBone"
+      ],
+      "bounds_min": [
+        -1.75,
+        0.0,
+        -1.75
+      ],
+      "bounds_max": [
+        1.75,
+        1.7,
+        1.75
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/drone_workshop": {
+      "bytes": 175032,
+      "triangles": 2352,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkDustPaint",
+        "NetworkSalvage",
+        "NetworkOxide",
+        "TeamColour",
+        "NetworkRecess",
+        "NetworkOptics",
+        "NetworkBone"
+      ],
+      "bounds_min": [
+        -1.2,
+        0.0,
+        -1.3
+      ],
+      "bounds_max": [
+        1.2,
+        2.7,
+        1.35
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/fpv_drone": {
+      "bytes": 75848,
+      "triangles": 1056,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkRecess",
+        "NetworkDustPaint",
+        "TeamColour",
+        "NetworkOxide",
+        "NetworkSalvage",
+        "NetworkBone",
+        "NetworkOptics"
+      ],
+      "bounds_min": [
+        -0.3862,
+        0.06,
+        -0.3862
+      ],
+      "bounds_max": [
+        0.3862,
+        0.27,
+        0.3862
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/fpv_operator": {
+      "bytes": 124936,
+      "triangles": 1640,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkRecess",
+        "NetworkSalvage",
+        "NetworkCanvas",
+        "NetworkDustPaint",
+        "NetworkBone",
+        "TeamColour",
+        "NetworkOptics"
+      ],
+      "bounds_min": [
+        -0.18,
+        0.0,
+        -0.37
+      ],
+      "bounds_max": [
+        0.55,
+        1.45,
+        0.37
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/ied": {
+      "bytes": 55492,
+      "triangles": 708,
+      "meshes": 1,
+      "surfaces": 4,
+      "materials": [
+        "NetworkDustPaint",
+        "NetworkOxide",
+        "NetworkSalvage",
+        "NetworkRecess"
+      ],
+      "bounds_min": [
+        -0.3329,
+        0.0,
+        -0.3454
+      ],
+      "bounds_max": [
+        0.3329,
+        0.105,
+        0.3454
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/launch_site": {
+      "bytes": 367532,
+      "triangles": 5052,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkBone",
+        "NetworkDustPaint",
+        "NetworkSalvage",
+        "NetworkOxide",
+        "NetworkRecess",
+        "TeamColour",
+        "NetworkOptics"
+      ],
+      "bounds_min": [
+        -1.9,
+        -0.005,
+        -1.9
+      ],
+      "bounds_max": [
+        1.9,
+        1.6042,
+        1.9
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/marauder": {
+      "bytes": 293976,
+      "triangles": 4032,
+      "meshes": 2,
+      "surfaces": 13,
+      "materials": [
+        "NetworkOxide",
+        "NetworkDustPaint",
+        "TeamColour",
+        "NetworkSalvage",
+        "NetworkRecess",
+        "NetworkOptics",
+        "NetworkBone"
+      ],
+      "bounds_min": [
+        -1.1,
+        0.09,
+        -0.88
+      ],
+      "bounds_max": [
+        1.3,
+        1.4,
+        0.88
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.1,
+            0.0,
+            1.0,
+            0.0,
+            0.85,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.1,
+            0,
+            1,
+            0,
+            0.85,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "network/radar_van": {
+      "bytes": 205136,
+      "triangles": 2976,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkDustPaint",
+        "NetworkOptics",
+        "NetworkSalvage",
+        "NetworkBone",
+        "NetworkRecess",
+        "TeamColour",
+        "NetworkOxide"
+      ],
+      "bounds_min": [
+        -1.11,
+        0.0,
+        -0.72
+      ],
+      "bounds_max": [
+        1.15,
+        3.15,
+        0.72
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/raider_quad": {
+      "bytes": 172860,
+      "triangles": 2528,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkOxide",
+        "NetworkRecess",
+        "NetworkSalvage",
+        "NetworkDustPaint",
+        "NetworkBone",
+        "TeamColour",
+        "NetworkCanvas"
+      ],
+      "bounds_min": [
+        -0.71,
+        0.0,
+        -0.56
+      ],
+      "bounds_max": [
+        1.05,
+        1.55,
+        0.56
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/rebel": {
+      "bytes": 119404,
+      "triangles": 1556,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkRecess",
+        "NetworkSalvage",
+        "NetworkCanvas",
+        "NetworkDustPaint",
+        "NetworkBone",
+        "TeamColour",
+        "NetworkOxide"
+      ],
+      "bounds_min": [
+        -0.18,
+        0.0,
+        -0.37
+      ],
+      "bounds_max": [
+        0.75,
+        1.37,
+        0.37
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/rocket_buggy": {
+      "bytes": 203544,
+      "triangles": 3076,
+      "meshes": 2,
+      "surfaces": 11,
+      "materials": [
+        "NetworkDustPaint",
+        "NetworkSalvage",
+        "NetworkOxide",
+        "NetworkRecess",
+        "TeamColour",
+        "NetworkBone"
+      ],
+      "bounds_min": [
+        -0.97,
+        0.0,
+        -0.69
+      ],
+      "bounds_max": [
+        0.97,
+        1.3618,
+        0.69
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.5,
+            0.0,
+            1.0,
+            0.0,
+            0.7,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.5,
+            0,
+            1,
+            0,
+            0.7,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "network/rpg_trooper": {
+      "bytes": 117964,
+      "triangles": 1572,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkRecess",
+        "NetworkSalvage",
+        "NetworkCanvas",
+        "NetworkDustPaint",
+        "NetworkBone",
+        "TeamColour",
+        "NetworkOxide"
+      ],
+      "bounds_min": [
+        -0.3,
+        0.0,
+        -0.3923
+      ],
+      "bounds_max": [
+        0.7,
+        1.37,
+        0.37
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/saboteur": {
+      "bytes": 121328,
+      "triangles": 1588,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "NetworkRecess",
+        "NetworkSalvage",
+        "NetworkDustPaint",
+        "NetworkBone",
+        "NetworkCanvas",
+        "TeamColour",
+        "NetworkOxide",
+        "NetworkOptics"
+      ],
+      "bounds_min": [
+        -0.35,
+        0.0,
+        -0.37
+      ],
+      "bounds_max": [
+        0.45,
+        1.37,
+        0.37
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/safehouse": {
+      "bytes": 146896,
+      "triangles": 1912,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkDustPaint",
+        "NetworkSalvage",
+        "NetworkOxide",
+        "TeamColour",
+        "NetworkRecess",
+        "NetworkCanvas",
+        "NetworkBone"
+      ],
+      "bounds_min": [
+        -1.2,
+        0.0,
+        -1.3
+      ],
+      "bounds_max": [
+        1.2,
+        1.4,
+        1.7
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/sprayer": {
+      "bytes": 168276,
+      "triangles": 2444,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "NetworkOxide",
+        "NetworkRecess",
+        "NetworkSalvage",
+        "NetworkDustPaint",
+        "TeamColour",
+        "NetworkOptics",
+        "NetworkCanvas",
+        "NetworkBone"
+      ],
+      "bounds_min": [
+        -1.1,
+        0.08,
+        -1.2
+      ],
+      "bounds_max": [
+        0.8,
+        1.75,
+        1.2
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/stinger_site": {
+      "bytes": 169756,
+      "triangles": 2264,
+      "meshes": 2,
+      "surfaces": 12,
+      "materials": [
+        "NetworkSalvage",
+        "NetworkOxide",
+        "NetworkCanvas",
+        "NetworkRecess",
+        "NetworkDustPaint",
+        "NetworkOptics",
+        "NetworkBone",
+        "TeamColour"
+      ],
+      "bounds_min": [
+        -0.9448,
+        -0.005,
+        -0.95
+      ],
+      "bounds_max": [
+        0.9448,
+        1.5171,
+        0.95
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.6,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0.6,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "network/supply_stash": {
+      "bytes": 325792,
+      "triangles": 4332,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkBone",
+        "NetworkDustPaint",
+        "NetworkSalvage",
+        "NetworkOxide",
+        "TeamColour",
+        "NetworkRecess",
+        "NetworkCanvas"
+      ],
+      "bounds_min": [
+        -1.9254,
+        0.0,
+        -1.9
+      ],
+      "bounds_max": [
+        1.9,
+        1.28,
+        1.9
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "network/technical": {
+      "bytes": 238624,
+      "triangles": 3388,
+      "meshes": 2,
+      "surfaces": 13,
+      "materials": [
+        "NetworkSalvage",
+        "NetworkRecess",
+        "NetworkOxide",
+        "TeamColour",
+        "NetworkDustPaint",
+        "NetworkBone",
+        "NetworkOptics"
+      ],
+      "bounds_min": [
+        -1.1,
+        0.0,
+        -0.69
+      ],
+      "bounds_max": [
+        1.1,
+        1.525,
+        0.69
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            -0.5,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            -0.5,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "network/tunnel_network": {
+      "bytes": 152364,
+      "triangles": 1956,
+      "meshes": 2,
+      "surfaces": 11,
+      "materials": [
+        "NetworkSalvage",
+        "NetworkRecess",
+        "NetworkOxide",
+        "TeamColour",
+        "NetworkDustPaint",
+        "NetworkBone"
+      ],
+      "bounds_min": [
+        -0.9,
+        0.0,
+        -0.9
+      ],
+      "bounds_max": [
+        0.9,
+        1.175,
+        0.9
+      ],
+      "articulation": {
+        "Turret": {
+          "parent": "Hull",
+          "world_matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.95,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "local_matrix": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0.95,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "animations": 0
+    },
+    "network/worker": {
+      "bytes": 108244,
+      "triangles": 1424,
+      "meshes": 1,
+      "surfaces": 7,
+      "materials": [
+        "NetworkRecess",
+        "NetworkSalvage",
+        "NetworkCanvas",
+        "NetworkDustPaint",
+        "NetworkBone",
+        "TeamColour",
+        "NetworkOxide"
+      ],
+      "bounds_min": [
+        -0.18,
+        0.0,
+        -0.37
+      ],
+      "bounds_max": [
+        0.45,
+        1.31,
+        0.37
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "neutral/civilian_block": {
+      "bytes": 243964,
+      "triangles": 3232,
+      "meshes": 1,
+      "surfaces": 5,
+      "materials": [
+        "WeatheredSteel",
+        "Limestone",
+        "PaleStone",
+        "Recess",
+        "Glass"
+      ],
+      "bounds_min": [
+        -1.735,
+        0.0,
+        -1.635
+      ],
+      "bounds_max": [
+        1.776,
+        3.305,
+        1.635
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "neutral/civilian_house": {
+      "bytes": 89360,
+      "triangles": 1104,
+      "meshes": 1,
+      "surfaces": 8,
+      "materials": [
+        "WeatheredSteel",
+        "Limestone",
+        "PaleStone",
+        "Terracotta",
+        "Timber",
+        "Oxide",
+        "Recess",
+        "Glass"
+      ],
+      "bounds_min": [
+        -1.3,
+        0.0,
+        -1.2
+      ],
+      "bounds_max": [
+        1.288,
+        2.404,
+        1.2
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "neutral/hole": {
+      "bytes": 24012,
+      "triangles": 292,
+      "meshes": 1,
+      "surfaces": 3,
+      "materials": [
+        "Limestone",
+        "Recess",
+        "Timber"
+      ],
+      "bounds_min": [
+        -0.51525,
+        0.017,
+        -0.56259
+      ],
+      "bounds_max": [
+        0.54,
+        0.2145,
+        0.54452
+      ],
+      "articulation": {},
+      "animations": 0
+    },
+    "neutral/oil_derrick": {
+      "bytes": 72752,
+      "triangles": 992,
+      "meshes": 1,
+      "surfaces": 5,
+      "materials": [
+        "Limestone",
+        "WeatheredSteel",
+        "Oxide",
+        "Recess",
+        "PaleStone"
+      ],
+      "bounds_min": [
+        -1.3,
+        0.0,
+        -1.3
+      ],
+      "bounds_max": [
+        1.3,
+        2.64,
+        1.3
+      ],
+      "articulation": {},
+      "animations": 0
+    }
+  },
+  "errors": [],
+  "notes": []
+}
