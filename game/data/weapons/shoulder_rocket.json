@@ -1,0 +1,1 @@
+{ "id": "shoulder_rocket", "damage": 45, "damageType": "armour_piercing", "range": 8, "cooldown": 2.5, "projectile": { "kind": "missile", "speed": 25 }, "targets": ["ground", "air"], "aimTolerance": 20 }

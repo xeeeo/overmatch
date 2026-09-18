@@ -1,0 +1,1 @@
+{ "id": "rifle", "damage": 12, "damageType": "small_arms", "range": 6.5, "cooldown": 0.6, "projectile": { "kind": "instant" }, "targets": ["ground"], "aimTolerance": 15 }

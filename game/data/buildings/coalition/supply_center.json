@@ -1,0 +1,4 @@
+{ "id": "coalition_supply_center", "name": "Supply Center", "faction": "coalition", "cost": 2000, "buildTime": 25,
+  "footprint": [4, 4], "hp": 2000, "armour": "structure", "vision": 8, "power": -2, "supplyCenter": true,
+  "produces": ["coalition_tiltrotor"], "model": "coalition/supply_center", "tags": ["structure", "economy"],
+  "description": "Unloads Cargo Tiltrotors. Builds Tiltrotors." }

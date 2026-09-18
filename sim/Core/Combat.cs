@@ -15,9 +15,10 @@ public static class Combat
         var dt = World.Dt;
         foreach (var e in world.Entities)
         {
-            if (!e.Alive || !e.HasWeapons) continue;
+            if (!e.Operational || !e.HasWeapons) continue;
             for (var i = 0; i < e.Cooldowns.Length; i++)
                 if (e.Cooldowns[i] > 0f) e.Cooldowns[i] -= dt;
+            if (e.Building is { NeedsPower: true } && world.Player(e.Owner).LowPower) { e.TargetId = 0; continue; }
 
             var target = ValidateTarget(e, world);
             if (target is null && (world.Tick + e.Id) % AcquireEvery == 0 && CanAutoAcquire(e))
@@ -33,7 +34,7 @@ public static class Combat
     }
 
     private static bool CanAutoAcquire(Entity e) =>
-        e.Move is null || e.Move.Kind != MoveKind.Move;
+        (e.Move is null || e.Move.Kind == MoveKind.AttackMove || e.Move.Kind == MoveKind.Chase) && e.BuildTargetId == 0 && e.HarvestState == HarvestState.Idle;
 
     private static Entity? ValidateTarget(Entity e, World world)
     {
@@ -64,12 +65,15 @@ public static class Combat
         var range = MaxRange(e, world.Rules) + AcquireBonus;
         Entity? best = null;
         var bestD = float.MaxValue;
-        foreach (var c in world.Spatial.Query(e.Pos, range))
+        foreach (var c in world.Spatial.Query(e.Pos, range + 6f))
         {
             if (c.Owner == e.Owner || !c.Alive || !CanHit(e, c, world.Rules)) continue;
             if (!world.Vision.IsVisible(e.Owner, c.Pos)) continue;
-            var d = (c.Pos - e.Pos).LengthSq;
-            if (d < bestD) { bestD = d; best = c; }
+            var d = c.IsBuilding ? World.DistanceToBounds(c, e.Pos) : (c.Pos - e.Pos).Length;
+            if (d > range) continue;
+            // Prefer things that shoot back, then the closest.
+            var score = d + (c.HasWeapons ? 0f : 4f);
+            if (score < bestD) { bestD = score; best = c; }
         }
         if (best is not null)
         {
@@ -104,7 +108,7 @@ public static class Combat
     {
         var rules = world.Rules;
         var toTarget = target.Pos - e.Pos;
-        var dist = toTarget.Length;
+        var dist = target.IsBuilding ? World.DistanceToBounds(target, e.Pos) : toTarget.Length;
         var aim = toTarget.Angle;
 
         // Pick the first weapon that can reach and hit.
@@ -114,12 +118,14 @@ public static class Combat
         {
             var w = rules.Weapon(e.Def.Weapons[i]);
             if (target.Def.IsAir ? !w.CanTargetAir : !w.CanTargetGround) continue;
-            if (dist <= w.Range + target.Radius && dist >= w.MinRange) { weapon = w; weaponIndex = i; break; }
+            var reach = target.IsBuilding ? w.Range : w.Range + target.Radius;
+            if (dist <= reach && dist >= w.MinRange) { weapon = w; weaponIndex = i; break; }
         }
 
         if (weapon is null)
         {
-            // Out of range: close in (unless we were told to just move somewhere).
+            // Out of range: close in (unless we were told to just move somewhere). Buildings cannot.
+            if (e.IsBuilding) { e.TargetId = 0; e.ExplicitTarget = false; return; }
             if (e.Move is null || e.Move.Kind == MoveKind.Chase)
             {
                 if (e.Move is null || (world.Tick + e.Id) % ChaseRefreshTicks == 0)
@@ -138,9 +144,13 @@ public static class Combat
             e.TurretFacing = Angles.TurnToward(e.TurretFacing, aim, Angles.DegToRad(e.Def.TurretTurnRate) * World.Dt);
             aimed = MathF.Abs(Angles.Wrap(aim - e.TurretFacing)) <= Angles.DegToRad(weapon.AimTolerance);
         }
+        else if (e.IsBuilding)
+        {
+            aimed = true;
+        }
         else
         {
-            if (e.Move is null) e.Facing = Angles.TurnToward(e.Facing, aim, Angles.DegToRad(e.Def.TurnRate) * World.Dt);
+            if (e.Move is null) e.Facing = Angles.TurnToward(e.Facing, aim, Angles.DegToRad(e.Unit!.TurnRate) * World.Dt);
             e.TurretFacing = e.Facing;
             aimed = MathF.Abs(Angles.Wrap(aim - e.Facing)) <= Angles.DegToRad(weapon.AimTolerance);
         }
@@ -228,6 +238,7 @@ public static class Combat
     {
         if (!target.Alive) return;
         var amount = baseDamage * world.Rules.Armour.Multiplier(target.Def.Armour, weapon.DamageType);
+        if (attacker is not null) amount *= world.Player(attacker.Owner).WeaponDamageMult(weapon.Id);
         target.Hp -= amount;
         world.Emit(new DamagedEvent(target.Id, amount, attackerId));
         if (target.Hp <= 0f)
@@ -239,7 +250,8 @@ public static class Combat
                 attacker.Kills++;
                 attacker.Xp += target.Def.XpValue;
             }
-            world.Emit(new DiedEvent(target.Id, target.Def.Id, target.Owner, target.Pos, target.Facing, target.TurretFacing, attackerId));
+            if (target.IsBuilding) Production.RefundAll(world, target);
+            world.Emit(new DiedEvent(target.Id, target.Def.Id, target.Owner, target.Pos, target.Facing, target.TurretFacing, attackerId, target.IsBuilding));
         }
     }
 }

@@ -1,0 +1,4 @@
+{ "id": "coalition_orbital_uplink", "name": "Orbital Uplink", "faction": "coalition", "cost": 4000, "buildTime": 60,
+  "footprint": [4, 4], "hp": 3000, "armour": "structure", "vision": 8, "power": -8, "prereqs": ["coalition_strategy_center"],
+  "model": "coalition/orbital_uplink", "tags": ["structure", "superweapon"],
+  "description": "Superweapon: orbital kinetic strike. (Firing arrives in M4.)" }

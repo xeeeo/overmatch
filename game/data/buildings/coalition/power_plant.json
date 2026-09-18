@@ -1,0 +1,4 @@
+{ "id": "coalition_power_plant", "name": "Power Plant", "faction": "coalition", "cost": 800, "buildTime": 20,
+  "footprint": [3, 3], "hp": 1500, "armour": "structure", "vision": 6, "power": 10,
+  "upgrades": ["coalition_turbine_overdrive"], "model": "coalition/power_plant", "tags": ["structure", "power"],
+  "description": "Gas turbine plant. 10 power. Overdrive upgrade adds 5." }

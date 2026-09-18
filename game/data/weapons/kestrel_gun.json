@@ -1,0 +1,1 @@
+{ "id": "kestrel_gun", "damage": 10, "damageType": "small_arms", "range": 8, "cooldown": 0.2, "projectile": { "kind": "instant" }, "targets": ["ground", "air"], "aimTolerance": 25 }

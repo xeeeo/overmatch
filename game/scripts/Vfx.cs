@@ -47,7 +47,13 @@ public partial class Vfx : Node3D
                     Spawn(at + Vector3.Up * 0.8f, new Color(0.25f, 0.23f, 0.21f, 0.6f), 0.8f, 2.6f, 1.1f);
                     Sparks(at, 14, new Color(0.25f, 0.22f, 0.2f), 5f, 1.6f);
                     Sparks(at, 8, new Color(1f, 0.6f, 0.2f), 7f, 0.6f);
-                    if (world.Rules.Units.TryGetValue(d.DefId, out var def) && def.Tags.Contains("vehicle"))
+                    if (d.WasBuilding)
+                    {
+                        Spawn(at, new Color(1f, 0.55f, 0.2f), 2f, 7f, 0.5f);
+                        Sparks(at, 24, new Color(0.3f, 0.28f, 0.26f), 8f, 2.2f);
+                        if (world.Rules.Buildings.TryGetValue(d.DefId, out var bdef)) Rubble(d, bdef.Width, bdef.Height);
+                    }
+                    else if (world.Rules.Units.TryGetValue(d.DefId, out var def) && def.Tags.Contains("vehicle"))
                         Wreck(d, def.Model, team(d.Owner));
                     break;
                 }
@@ -70,6 +76,28 @@ public partial class Vfx : Node3D
         AddChild(wreck);
         _wreckNodes[d.EntityId] = wreck;
         _wrecks[d.EntityId] = 30.0;
+    }
+
+    private void Rubble(DiedEvent d, int w, int h)
+    {
+        var rubble = new Node3D { Position = MapView.ToWorld(d.Pos) };
+        var mat = new StandardMaterial3D { AlbedoColor = new Color(0.16f, 0.15f, 0.14f), Roughness = 1f };
+        var rng = new Random(d.EntityId);
+        rubble.AddChild(new MeshInstance3D { Mesh = new BoxMesh { Size = new Vector3(w - 0.3f, 0.25f, h - 0.3f) }, Position = new Vector3(0, 0.12f, 0), MaterialOverride = mat });
+        for (var i = 0; i < w * h / 2; i++)
+        {
+            var s = 0.4f + (float)rng.NextDouble() * 0.7f;
+            rubble.AddChild(new MeshInstance3D
+            {
+                Mesh = new BoxMesh { Size = new Vector3(s, s * 0.6f, s * 0.8f) },
+                Position = new Vector3(((float)rng.NextDouble() - 0.5f) * (w - 1f), 0.25f + s * 0.3f, ((float)rng.NextDouble() - 0.5f) * (h - 1f)),
+                RotationDegrees = new Vector3(0, (float)rng.NextDouble() * 90f, (float)rng.NextDouble() * 15f),
+                MaterialOverride = mat,
+            });
+        }
+        AddChild(rubble);
+        _wreckNodes[d.EntityId] = rubble;
+        _wrecks[d.EntityId] = 45.0;
     }
 
     private void Beam(Vector3 from, Vector3 to)

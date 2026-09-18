@@ -13,31 +13,49 @@ public sealed class World
     public MapGrid Grid { get; }
     public VisionMap Vision { get; }
     public FlowFieldCache Fields { get; }
-    public int PlayerCount { get; }
+    public IReadOnlyList<Player> Players => _players;
+    public int PlayerCount => _players.Count;
     public int Tick { get; private set; }
     public float Time => Tick * Dt;
 
+    private readonly List<Player> _players = new();
     private readonly List<Entity> _entities = new();
     private readonly Dictionary<int, Entity> _byId = new();
     private readonly List<Projectile> _projectiles = new();
+    private readonly List<SupplyPile> _piles = new();
     private readonly Queue<Command> _pending = new();
     private readonly List<GameEvent> _events = new();
+    /// <summary>Building entity id occupying each cell, 0 for none.</summary>
+    private readonly int[] _cellBuilding;
     private int _nextId = 1;
 
     public IReadOnlyList<Entity> Entities => _entities;
     public IReadOnlyList<Projectile> Projectiles => _projectiles;
+    public IReadOnlyList<SupplyPile> Piles => _piles;
     /// <summary>Events raised during the most recent Step.</summary>
     public IReadOnlyList<GameEvent> Events => _events;
     public SpatialHash Spatial { get; } = new();
 
-    public World(GameRules rules, MapDef map, int playerCount = 2)
+    public World(GameRules rules, MapDef map, IEnumerable<string> playerFactions)
     {
         Rules = rules;
         MapDef = map;
         Grid = MapGrid.FromDef(map);
-        PlayerCount = playerCount;
-        Vision = new VisionMap(Grid.Width, Grid.Height, playerCount);
+        _cellBuilding = new int[Grid.Width * Grid.Height];
+        foreach (var f in playerFactions)
+        {
+            var def = rules.Factions.TryGetValue(f, out var fd) ? fd : new FactionDef { Id = f, Name = f };
+            _players.Add(new Player(_players.Count, def));
+        }
+        Vision = new VisionMap(Grid.Width, Grid.Height, _players.Count);
         Fields = new FlowFieldCache(Grid);
+        foreach (var s in map.Supplies)
+            _piles.Add(new SupplyPile { Id = _nextId++, Pos = new Vec2(s.X, s.Y), Initial = s.Amount, Remaining = s.Amount });
+    }
+
+    public World(GameRules rules, MapDef map, int playerCount = 2)
+        : this(rules, map, Enumerable.Repeat(rules.Factions.Keys.FirstOrDefault() ?? "none", playerCount))
+    {
     }
 
     /// <summary>Convenience for tests: an open map of the given size.</summary>
@@ -46,11 +64,22 @@ public sealed class World
     {
     }
 
+    public Player Player(int id) => _players[id];
     public Entity? Get(int id) => _byId.TryGetValue(id, out var e) && e.Alive ? e : null;
+    public SupplyPile? Pile(int id) => _piles.FirstOrDefault(p => p.Id == id);
 
     public Entity Spawn(string unitId, int owner, Vec2 pos, float facing = 0f)
     {
         var def = Rules.Unit(unitId);
+        var e = Create(def, owner, pos, facing);
+        e.MaxHp = def.Hp * Player(owner).HpMult(def);
+        e.Hp = e.MaxHp;
+        _events.Add(new SpawnedEvent(e.Id));
+        return e;
+    }
+
+    private Entity Create(ObjectDef def, int owner, Vec2 pos, float facing)
+    {
         var e = new Entity
         {
             Id = _nextId++,
@@ -62,20 +91,135 @@ public sealed class World
             PrevFacing = facing,
             TurretFacing = facing,
             PrevTurretFacing = facing,
-            Hp = def.Hp,
             Cooldowns = new float[def.Weapons.Count],
         };
         _entities.Add(e);
         _byId[e.Id] = e;
-        _events.Add(new SpawnedEvent(e.Id));
         return e;
     }
+
+    // ---------------------------------------------------------------- buildings
+
+    public int BuildingAt(int x, int y) => Grid.InBounds(x, y) ? _cellBuilding[y * Grid.Width + x] : 0;
+
+    /// <summary>Can this building go here? Cells must be buildable terrain, in bounds, and not under another building.</summary>
+    public bool CanPlace(BuildingDef def, int cx, int cy, out string reason)
+    {
+        for (var y = cy; y < cy + def.Height; y++)
+            for (var x = cx; x < cx + def.Width; x++)
+            {
+                if (!Grid.InBounds(x, y)) { reason = "off map"; return false; }
+                var t = Grid.Get(x, y);
+                if (t is CellType.Water or CellType.Cliff) { reason = "terrain"; return false; }
+                if (_cellBuilding[y * Grid.Width + x] != 0) { reason = "occupied"; return false; }
+            }
+        reason = "";
+        return true;
+    }
+
+    /// <summary>Does the player own a finished building satisfying every prereq?</summary>
+    public bool HasPrereqs(int player, IEnumerable<string> prereqs, out string missing)
+    {
+        foreach (var p in prereqs)
+        {
+            var ok = false;
+            foreach (var e in _entities)
+            {
+                if (e.Owner != player || !e.Operational || e.Building is not { } b) continue;
+                if (b.Id == p || b.Provides.Contains(p)) { ok = true; break; }
+            }
+            if (!ok) { missing = p; return false; }
+        }
+        missing = "";
+        return true;
+    }
+
+    /// <summary>Place a building instantly (complete). Used for start positions and tests.</summary>
+    public Entity PlaceBuilding(string buildingId, int owner, int cx, int cy, bool complete = true)
+    {
+        var def = Rules.Building(buildingId);
+        var e = Create(def, owner, new Vec2(cx + def.Width * 0.5f, cy + def.Height * 0.5f), 0f);
+        e.CellX = cx;
+        e.CellY = cy;
+        e.MaxHp = def.Hp * Player(owner).HpMult(def);
+        if (complete)
+        {
+            e.Hp = e.MaxHp;
+        }
+        else
+        {
+            e.UnderConstruction = true;
+            e.Hp = e.MaxHp * 0.1f;
+        }
+        if (def.Produces.Count > 0 || def.Upgrades.Count > 0) e.Queue = new ProductionQueue();
+        if (def.Trickle is { } t) e.TrickleTimer = t.Interval;
+        for (var y = cy; y < cy + def.Height; y++)
+            for (var x = cx; x < cx + def.Width; x++)
+            {
+                _cellBuilding[y * Grid.Width + x] = e.Id;
+                Grid.Set(x, y, CellType.Structure);
+            }
+        Economy.RecomputePower(this);
+        _events.Add(new SpawnedEvent(e.Id));
+        if (complete) _events.Add(new ConstructionCompletedEvent(e.Id, owner));
+        return e;
+    }
+
+    internal void FreeFootprint(Entity building)
+    {
+        var b = building.Building!;
+        for (var y = building.CellY; y < building.CellY + b.Height; y++)
+            for (var x = building.CellX; x < building.CellX + b.Width; x++)
+            {
+                if (_cellBuilding[y * Grid.Width + x] != building.Id) continue;
+                _cellBuilding[y * Grid.Width + x] = 0;
+                Grid.Set(x, y, CellType.Ground);
+            }
+    }
+
+    /// <summary>Closest point on the (slightly expanded) footprint to p: where a unit stands to work on it.</summary>
+    public static Vec2 ApproachPoint(Entity building, Vec2 from, float margin)
+    {
+        var (x0, y0, x1, y1) = building.Bounds;
+        var x = Math.Clamp(from.X, x0 - margin, x1 + margin);
+        var y = Math.Clamp(from.Y, y0 - margin, y1 + margin);
+        // Push onto the expanded boundary if we clamped to the inside.
+        if (x > x0 && x < x1 && y > y0 && y < y1)
+        {
+            var dl = x - (x0 - margin); var dr = (x1 + margin) - x; var dd = y - (y0 - margin); var du = (y1 + margin) - y;
+            var m = MathF.Min(MathF.Min(dl, dr), MathF.Min(dd, du));
+            if (m == dl) x = x0 - margin; else if (m == dr) x = x1 + margin; else if (m == dd) y = y0 - margin; else y = y1 + margin;
+        }
+        return new Vec2(x, y);
+    }
+
+    public static float DistanceToBounds(Entity building, Vec2 p)
+    {
+        var (x0, y0, x1, y1) = building.Bounds;
+        var dx = MathF.Max(MathF.Max(x0 - p.X, 0f), p.X - x1);
+        var dy = MathF.Max(MathF.Max(y0 - p.Y, 0f), p.Y - y1);
+        return MathF.Sqrt(dx * dx + dy * dy);
+    }
+
+    /// <summary>Where a produced unit appears: just outside the south edge, nearest free cell.</summary>
+    public Vec2 ExitPoint(Entity building, Locomotor loco)
+    {
+        var (x0, y0, x1, _) = building.Bounds;
+        var want = new Vec2((x0 + x1) * 0.5f, y0 - 1.0f);
+        if (loco == Locomotor.Air) return want;
+        var (cx, cy) = MapGrid.CellOf(want);
+        var free = Grid.NearestPassable(cx, cy, loco, 8);
+        return free is null ? want : MapGrid.Centre(free.Value.x, free.Value.y);
+    }
+
+    // ---------------------------------------------------------------- stepping
 
     public void Submit(Command command) => _pending.Enqueue(command);
 
     internal void Emit(GameEvent ev) => _events.Add(ev);
     internal int NextId() => _nextId++;
     internal void AddProjectile(Projectile p) => _projectiles.Add(p);
+    internal Entity SpawnProduced(UnitDef def, int owner, Vec2 pos, float facing) => Spawn(def.Id, owner, pos, facing);
 
     /// <summary>Advance the world by one tick.</summary>
     public void Step()
@@ -96,11 +240,14 @@ public sealed class World
         Spatial.Rebuild(_entities);
         if (Tick % VisionMap.UpdateInterval == 1) Vision.Recompute(_entities);
 
+        Economy.Update(this);
+        Construction.Update(this);
+        Production.Update(this);
         Combat.Update(this);
 
         foreach (var e in _entities)
         {
-            if (!e.Alive) continue;
+            if (!e.Alive || e.IsBuilding) continue;
             Movement.Update(e, this);
         }
         Movement.Separate(this);
@@ -108,12 +255,16 @@ public sealed class World
         Combat.UpdateProjectiles(this);
 
         // Remove the dead.
+        var removed = false;
         for (var i = _entities.Count - 1; i >= 0; i--)
         {
-            if (_entities[i].Alive) continue;
-            _byId.Remove(_entities[i].Id);
+            var e = _entities[i];
+            if (e.Alive) continue;
+            if (e.IsBuilding) { FreeFootprint(e); removed = true; }
+            _byId.Remove(e.Id);
             _entities.RemoveAt(i);
         }
+        if (removed) Economy.RecomputePower(this);
         _projectiles.RemoveAll(p => !p.Alive);
     }
 
@@ -122,17 +273,18 @@ public sealed class World
         switch (command)
         {
             case MoveCommand m:
-                IssueMove(OwnedAlive(m.Player, m.Units), m.Target, MoveKind.Move);
+                IssueMove(OwnedUnits(m.Player, m.Units), m.Target, MoveKind.Move);
                 break;
             case AttackMoveCommand am:
-                IssueMove(OwnedAlive(am.Player, am.Units), am.Target, MoveKind.AttackMove);
+                IssueMove(OwnedUnits(am.Player, am.Units), am.Target, MoveKind.AttackMove);
                 break;
             case AttackCommand a:
             {
                 var target = Get(a.TargetId);
-                foreach (var u in OwnedAlive(a.Player, a.Units))
+                foreach (var u in OwnedUnits(a.Player, a.Units))
                 {
                     if (target is null || target.Owner == u.Owner || !u.HasWeapons) continue;
+                    ClearJobs(u);
                     u.TargetId = target.Id;
                     u.ExplicitTarget = true;
                     u.Move = null;
@@ -141,15 +293,61 @@ public sealed class World
                 break;
             }
             case StopCommand s:
-                foreach (var u in OwnedAlive(s.Player, s.Units))
+                foreach (var u in OwnedUnits(s.Player, s.Units))
                 {
+                    ClearJobs(u);
                     u.Move = null;
                     u.SuspendedMove = null;
                     u.TargetId = 0;
                     u.ExplicitTarget = false;
                 }
                 break;
+            case BuildCommand b:
+                Construction.Begin(this, b);
+                break;
+            case AssistBuildCommand ab:
+            {
+                var site = Get(ab.BuildingId);
+                if (site is null || site.Owner != ab.Player || !site.UnderConstruction) break;
+                foreach (var u in OwnedUnits(ab.Player, ab.Units))
+                    if (u.IsBuilder) { ClearJobs(u); u.BuildTargetId = site.Id; u.Move = null; }
+                break;
+            }
+            case ProduceCommand p:
+                Production.Enqueue(this, p);
+                break;
+            case CancelProduceCommand c:
+                Production.Cancel(this, c);
+                break;
+            case RallyCommand r:
+            {
+                var b = Get(r.BuildingId);
+                if (b is not null && b.Owner == r.Player && b.IsBuilding) b.Rally = ClampToMap(r.Target);
+                break;
+            }
+            case SellCommand s:
+                Economy.Sell(this, s);
+                break;
+            case HarvestCommand h:
+                foreach (var u in OwnedUnits(h.Player, h.Units))
+                {
+                    if (!u.IsHarvester) continue;
+                    var pile = h.PileId != 0 ? Pile(h.PileId) : Economy.NearestPile(this, u.Pos, float.MaxValue);
+                    if (pile is null || pile.Depleted) continue;
+                    ClearJobs(u);
+                    u.Move = null;
+                    u.PileId = pile.Id;
+                    u.HarvestState = HarvestState.ToPile;
+                }
+                break;
         }
+    }
+
+    private static void ClearJobs(Entity u)
+    {
+        u.BuildTargetId = 0;
+        if (u.HarvestState != HarvestState.Idle && u.HarvestState != HarvestState.Loading && u.HarvestState != HarvestState.Unloading)
+            u.HarvestState = HarvestState.Idle;
     }
 
     private void IssueMove(List<Entity> units, Vec2 target, MoveKind kind)
@@ -159,6 +357,7 @@ public sealed class World
         for (var i = 0; i < units.Count; i++)
         {
             var u = units[i];
+            ClearJobs(u);
             u.Move = new MoveOrder { Target = ClampToMap(targets[i]), Kind = kind };
             u.SuspendedMove = null;
             if (kind == MoveKind.Move)
@@ -173,13 +372,15 @@ public sealed class World
         Math.Clamp(p.X, 0.5f, Grid.Width - 0.5f),
         Math.Clamp(p.Y, 0.5f, Grid.Height - 0.5f));
 
-    private List<Entity> OwnedAlive(int player, int[] ids)
+    private List<Entity> OwnedUnits(int player, int[] ids)
     {
         var list = new List<Entity>(ids.Length);
         foreach (var id in ids)
-            if (_byId.TryGetValue(id, out var e) && e.Alive && e.Owner == player) list.Add(e);
+            if (_byId.TryGetValue(id, out var e) && e.Alive && e.Owner == player && !e.IsBuilding) list.Add(e);
         return list;
     }
 
     public bool AreEnemies(Entity a, Entity b) => a.Owner != b.Owner;
+
+    internal void Reject(int player, string reason) => _events.Add(new OrderRejectedEvent(player, reason));
 }

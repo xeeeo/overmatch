@@ -1,1 +1,1 @@
-{ "id": "coalition", "name": "Coalition", "colour": "#3b7dd8", "builder": "coalition_dozer", "needsPower": true }
+{ "id": "coalition", "name": "Coalition", "colour": "#3b7dd8", "builder": "coalition_dozer", "hq": "coalition_command_post", "needsPower": true, "startingCash": 10000 }

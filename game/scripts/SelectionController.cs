@@ -20,6 +20,14 @@ public partial class SelectionController : Control
 
     public IReadOnlyCollection<int> Selected => _selected;
     public bool AttackMoveArmed => _attackMoveArmed;
+    public void ArmAttackMove() => _attackMoveArmed = _selected.Count > 0;
+    public void SelectOnly(int id)
+    {
+        _selected.Clear();
+        if (id != 0) _selected.Add(id);
+        ApplySelectionVisuals();
+    }
+    public string Signature() => string.Join(",", _selected.OrderBy(i => i));
 
     public override void _Ready()
     {
@@ -29,12 +37,14 @@ public partial class SelectionController : Control
 
     public override void _UnhandledInput(InputEvent @event)
     {
+        if (Root.Placement.Active) return;
         if (@event is InputEventMouseButton mb)
         {
             if (mb.ButtonIndex == MouseButton.Left)
             {
                 if (mb.Pressed)
                 {
+                    if (Root.Hud.IsMouseOverBar(mb.Position)) return;
                     if (_attackMoveArmed)
                     {
                         IssueAttackMove(mb.Position);
@@ -58,7 +68,7 @@ public partial class SelectionController : Control
             else if (mb.ButtonIndex == MouseButton.Right && mb.Pressed)
             {
                 _attackMoveArmed = false;
-                IssueContextOrder(mb.Position);
+                if (!Root.Hud.IsMouseOverBar(mb.Position)) IssueContextOrder(mb.Position);
             }
         }
         else if (@event is InputEventMouseMotion mm && _dragging)
@@ -70,7 +80,7 @@ public partial class SelectionController : Control
         {
             _selected.Clear();
             foreach (var e in Root.World.Entities)
-                if (e.Alive && e.Owner == Player) _selected.Add(e.Id);
+                if (e.Alive && e.Owner == Player && !e.IsBuilding && e.HasWeapons) _selected.Add(e.Id);
             ApplySelectionVisuals();
         }
         else if (@event.IsActionPressed("stop"))
@@ -98,10 +108,11 @@ public partial class SelectionController : Control
         {
             if (!e.Alive || !filter(e)) continue;
             if (!Root.Views.TryGetValue(e.Id, out var view) || !view.Visible) continue;
-            var world = MapView.ToWorld(e.Pos, 0.7f);
+            var world = MapView.ToWorld(e.Pos, 0.7f + (e.Unit?.FlightHeight ?? 0f));
             if (cam.IsPositionBehind(world)) continue;
             var d = (cam.UnprojectPosition(world) - screen).Length();
-            if (d < bestD) { bestD = d; best = e; }
+            var slack = e.IsBuilding ? e.Radius * 12f : 0f; // buildings are big targets
+            if (d - slack < bestD) { bestD = d - slack; best = e; }
         }
         return best;
     }
@@ -109,10 +120,10 @@ public partial class SelectionController : Control
     private void ClickSelect(Vector2 screen, bool additive)
     {
         var hit = Pick(screen, e => e.Owner == Player);
-        if (!additive) _selected.Clear();
+        if (!additive || hit is { IsBuilding: true }) _selected.Clear();
         if (hit is not null)
         {
-            if (additive && !_selected.Add(hit.Id)) _selected.Remove(hit.Id);
+            if (additive && !hit.IsBuilding && !_selected.Add(hit.Id)) _selected.Remove(hit.Id);
             else _selected.Add(hit.Id);
         }
         ApplySelectionVisuals();
@@ -125,11 +136,13 @@ public partial class SelectionController : Control
         if (!additive) _selected.Clear();
         foreach (var e in Root.World.Entities)
         {
-            if (!e.Alive || e.Owner != Player) continue;
-            var world = MapView.ToWorld(e.Pos, 0.5f);
+            if (!e.Alive || e.Owner != Player || e.IsBuilding) continue;
+            var world = MapView.ToWorld(e.Pos, 0.5f + (e.Unit?.FlightHeight ?? 0f));
             if (cam.IsPositionBehind(world)) continue;
             if (rect.HasPoint(cam.UnprojectPosition(world))) _selected.Add(e.Id);
         }
+        // A box that caught units drops any building from the selection.
+        if (_selected.Any(id => Root.World.Get(id) is { IsBuilding: false })) _selected.RemoveWhere(id => Root.World.Get(id) is { IsBuilding: true });
         ApplySelectionVisuals();
     }
 
@@ -138,6 +151,39 @@ public partial class SelectionController : Control
     {
         PruneSelection();
         if (_selected.Count == 0) return;
+        var ground0 = Root.Camera.GroundPoint(screen);
+        // A selected building: right-click sets its rally point.
+        var building = _selected.Select(id => Root.World.Get(id)).FirstOrDefault(e => e is { IsBuilding: true });
+        if (building is not null)
+        {
+            if (ground0 is { } rg)
+            {
+                Root.World.Submit(new RallyCommand(Player, building.Id, MapView.ToSim(rg)));
+                Root.ShowMarker(rg, new Color(0.4f, 0.8f, 1f));
+            }
+            return;
+        }
+        // Harvesters right-clicked on a pile go harvest it; on a site, builders help.
+        if (ground0 is { } g0)
+        {
+            var sim = MapView.ToSim(g0);
+            var pile = Root.World.Piles.FirstOrDefault(p => !p.Depleted && Vec2.Distance(p.Pos, sim) < 2.5f);
+            var harvesters = _selected.Where(id => Root.World.Get(id) is { IsHarvester: true }).ToArray();
+            if (pile is not null && harvesters.Length > 0)
+            {
+                Root.World.Submit(new HarvestCommand(Player, harvesters, pile.Id));
+                Root.ShowMarker(g0, new Color(1f, 0.85f, 0.3f));
+                return;
+            }
+            var site = Pick(screen, e => e.Owner == Player && e.UnderConstruction);
+            var builders = _selected.Where(id => Root.World.Get(id) is { IsBuilder: true }).ToArray();
+            if (site is not null && builders.Length > 0)
+            {
+                Root.World.Submit(new AssistBuildCommand(Player, builders, site.Id));
+                Root.ShowMarker(g0, new Color(0.4f, 0.8f, 1f));
+                return;
+            }
+        }
         var enemy = Pick(screen, e => e.Owner != Player);
         if (enemy is not null)
         {

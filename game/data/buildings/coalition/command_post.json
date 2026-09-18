@@ -1,0 +1,4 @@
+{ "id": "coalition_command_post", "name": "Command Post", "faction": "coalition", "cost": 3000, "buildTime": 45,
+  "footprint": [5, 5], "hp": 4000, "armour": "structure", "vision": 14, "hq": true, "power": 0,
+  "produces": ["coalition_dozer"], "model": "coalition/command_post", "tags": ["structure", "hq"],
+  "description": "Headquarters. Builds Dozers and provides radar." }

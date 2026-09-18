@@ -1,0 +1,4 @@
+{ "id": "coalition_lancer", "name": "Lancer", "faction": "coalition", "cost": 1100, "buildTime": 15, "builtAt": "coalition_motor_pool",
+  "prereqs": ["coalition_tech"],
+  "locomotor": "wheeled", "speed": 4.5, "turnRate": 150, "radius": 1.0, "hp": 240, "armour": "light_vehicle", "vision": 9,
+  "weapons": ["lancer_rockets"], "xpValue": 45, "model": "coalition/lancer", "tags": ["vehicle", "artillery"], "description": "Rocket artillery. Long range, minimum range, slow reload." }

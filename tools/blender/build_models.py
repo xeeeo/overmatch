@@ -88,10 +88,139 @@ def coalition_warden():
     om.export_glb(os.path.join(OUT, "coalition", "warden.glb"))
 
 
+def infantry(name, body_rgb, weapon):
+    """Blocky soldier ~1.4 tall. Torso in team colour, helmet, backpack, and a weapon held forward."""
+    om.reset_scene()
+    skin = om.material("Skin", (0.80, 0.62, 0.50))
+    boots = om.material("Boots", DARK)
+    kit = om.material("Kit", body_rgb)
+    steel = om.material("Steel", STEEL)
+    for side in (1, -1):
+        om.box(f"Leg{side}", (0.22, 0.2, 0.55), (0.0, side * 0.13, 0.28), kit, bevel=0.02)
+        om.box(f"Boot{side}", (0.3, 0.22, 0.1), (0.04, side * 0.13, 0.05), boots, bevel=0.01)
+    om.box("Torso", (0.34, 0.5, 0.5), (0.0, 0.0, 0.82), om.team(), bevel=0.03)
+    om.box("Vest", (0.36, 0.36, 0.3), (0.0, 0.0, 0.85), kit, bevel=0.02)
+    om.box("Pack", (0.15, 0.36, 0.36), (-0.24, 0.0, 0.85), kit, bevel=0.02)
+    om.box("Head", (0.24, 0.24, 0.22), (0.0, 0.0, 1.2), skin, bevel=0.03)
+    om.box("Helmet", (0.3, 0.3, 0.14), (0.0, 0.0, 1.33), kit, bevel=0.04)
+    for side in (1, -1):
+        om.box(f"Arm{side}", (0.5, 0.14, 0.14), (0.2, side * 0.3, 0.9), kit, bevel=0.02)
+    if weapon == "rifle":
+        om.box("Rifle", (0.7, 0.07, 0.1), (0.4, 0.15, 0.92), steel, bevel=0.01)
+    elif weapon == "rocket":
+        om.cylinder("Tube", 0.08, 1.0, (0.2, 0.32, 1.05), steel, verts=8, rot=(0, 90, 0), bevel=0.0)
+    elif weapon == "sniper":
+        om.box("Rifle", (1.0, 0.06, 0.08), (0.5, 0.15, 0.92), steel, bevel=0.01)
+        om.box("Scope", (0.25, 0.05, 0.06), (0.35, 0.15, 0.99), steel, bevel=0.0)
+    om.join_all(name)
+    om.export_glb(os.path.join(OUT, "coalition", f"{name}.glb"))
+
+
+def coalition_rifleman():
+    infantry("rifleman", (0.30, 0.34, 0.30), "rifle")
+
+
+def coalition_rocket_trooper():
+    infantry("rocket_trooper", (0.36, 0.34, 0.28), "rocket")
+
+
+def coalition_pathfinder():
+    infantry("pathfinder", (0.26, 0.30, 0.26), "sniper")
+
+
+def coalition_lancer():
+    """HIMARS-style: 6-wheel truck with a raised rocket pod on the back (the pod is the turret)."""
+    om.reset_scene()
+    body = om.material("Body", (0.30, 0.34, 0.30))
+    tyre = om.material("Tyre", DARK)
+    steel = om.material("Steel", STEEL)
+    glass = om.material("Glass", GLASS, roughness=0.2)
+    om.box("Chassis", (2.8, 1.2, 0.35), (0.0, 0.0, 0.6), body)
+    om.box("Cab", (0.9, 1.2, 0.8), (1.0, 0.0, 1.15), om.team())
+    om.box("Windscreen", (0.08, 1.0, 0.35), (1.46, 0.0, 1.25), glass, bevel=0.0)
+    for x in (1.0, 0.0, -1.0):
+        for side in (1, -1):
+            om.cylinder(f"Wheel{x}{side}", 0.36, 0.3, (x, side * 0.66, 0.36), tyre, verts=14, rot=(90, 0, 0), bevel=0.03)
+    hull = om.join_all("Hull")
+    snap = om.new_parts()
+    om.box("PodBase", (1.2, 0.9, 0.2), (-0.7, 0.0, 0.88), steel, bevel=0.02)
+    om.box("Pod", (1.4, 0.9, 0.6), (-0.6, 0.0, 1.35), steel, bevel=0.03, rot=(0, -25, 0))
+    for y in (-0.25, 0.0, 0.25):
+        for z in (1.25, 1.5):
+            om.cylinder("Tube", 0.09, 0.2, (0.1, y, z), steel, verts=8, rot=(0, 65, 0), bevel=0.0)
+    turret = om.join("Turret", om.parts_since(snap), origin=(-0.7, 0.0, 0.85))
+    om.parent(turret, hull)
+    om.export_glb(os.path.join(OUT, "coalition", "lancer.glb"))
+
+
+def coalition_tiltrotor():
+    """Cargo tiltrotor: fuselage, stub wings, two big rotors (nodes named Rotor* spin in-game)."""
+    om.reset_scene()
+    body = om.material("Body", (0.30, 0.34, 0.30))
+    steel = om.material("Steel", STEEL)
+    glass = om.material("Glass", GLASS, roughness=0.2)
+    om.box("Fuselage", (2.6, 1.0, 0.9), (0.0, 0.0, 0.9), body)
+    om.wedge("Nose", (0.8, 0.9, 0.8), (1.6, 0.0, 0.9), om.team())
+    om.box("Cockpit", (0.4, 0.8, 0.3), (1.35, 0.0, 1.2), glass, bevel=0.0)
+    om.box("Tail", (1.0, 0.12, 0.8), (-1.6, 0.0, 1.4), body, bevel=0.02)
+    om.box("Wing", (0.6, 4.0, 0.12), (-0.2, 0.0, 1.35), om.team(), bevel=0.02)
+    om.box("Cargo", (1.2, 0.9, 0.3), (-0.3, 0.0, 0.35), steel, bevel=0.02)
+    hull = om.join_all("Hull")
+    for side in (1, -1):
+        snap = om.new_parts()
+        om.cylinder("Hub", 0.15, 0.3, (-0.2, side * 2.0, 1.55), steel, verts=8)
+        om.box("Blade1", (2.2, 0.16, 0.03), (-0.2, side * 2.0, 1.7), steel, bevel=0.0)
+        om.box("Blade2", (0.16, 2.2, 0.03), (-0.2, side * 2.0, 1.7), steel, bevel=0.0)
+        rotor = om.join(f"Rotor{'L' if side > 0 else 'R'}", om.parts_since(snap), origin=(-0.2, side * 2.0, 1.55))
+        om.parent(rotor, hull)
+        om.cylinder("Nacelle", 0.25, 0.7, (-0.2, side * 2.0, 1.2), body, verts=10)
+    om.export_glb(os.path.join(OUT, "coalition", "tiltrotor.glb"))
+
+
+def coalition_kestrel():
+    """Attack helicopter: slim fuselage, stub wings with pods, main rotor + tail rotor."""
+    om.reset_scene()
+    body = om.material("Body", (0.26, 0.30, 0.28))
+    steel = om.material("Steel", STEEL)
+    glass = om.material("Glass", GLASS, roughness=0.2)
+    om.wedge("Fuselage", (2.2, 0.7, 0.8), (0.3, 0.0, 0.9), body)
+    om.box("Canopy", (0.8, 0.6, 0.35), (0.9, 0.0, 1.3), glass, bevel=0.03)
+    om.box("Spine", (1.0, 0.5, 0.3), (-0.4, 0.0, 1.35), om.team(), bevel=0.02)
+    om.box("TailBoom", (1.8, 0.25, 0.25), (-1.7, 0.0, 1.1), body, bevel=0.02)
+    om.box("Fin", (0.4, 0.08, 0.6), (-2.5, 0.0, 1.45), om.team(), bevel=0.01)
+    om.box("Wing", (0.5, 2.2, 0.1), (0.2, 0.0, 0.9), body, bevel=0.02)
+    for side in (1, -1):
+        om.cylinder("Pod", 0.12, 0.7, (0.3, side * 0.9, 0.8), steel, verts=8, rot=(0, 90, 0))
+    for side in (1, -1):
+        om.box("Skid", (1.4, 0.06, 0.06), (0.3, side * 0.4, 0.35), steel, bevel=0.0)
+    hull = om.join_all("Hull")
+    snap = om.new_parts()
+    om.cylinder("Hub", 0.12, 0.2, (0.2, 0.0, 1.6), steel, verts=8)
+    om.box("Blade1", (3.4, 0.14, 0.03), (0.2, 0.0, 1.68), steel, bevel=0.0)
+    om.box("Blade2", (0.14, 3.4, 0.03), (0.2, 0.0, 1.68), steel, bevel=0.0)
+    rotor = om.join("RotorMain", om.parts_since(snap), origin=(0.2, 0.0, 1.55))
+    om.parent(rotor, hull)
+    snap = om.new_parts()
+    om.box("TailBlade", (0.06, 0.6, 0.06), (-2.55, 0.16, 1.1), steel, bevel=0.0)
+    tail = om.join("RotorTail", om.parts_since(snap), origin=(-2.55, 0.16, 1.1))
+    om.parent(tail, hull)
+    snap = om.new_parts()
+    om.cylinder("Gun", 0.05, 0.6, (1.5, 0.0, 0.55), steel, verts=8, rot=(0, 90, 0), bevel=0.0)
+    turret = om.join("Turret", om.parts_since(snap), origin=(1.2, 0.0, 0.55))
+    om.parent(turret, hull)
+    om.export_glb(os.path.join(OUT, "coalition", "kestrel.glb"))
+
+
 MODELS = {
     "bulwark": coalition_bulwark,
     "dozer": coalition_dozer,
     "warden": coalition_warden,
+    "rifleman": coalition_rifleman,
+    "rocket_trooper": coalition_rocket_trooper,
+    "pathfinder": coalition_pathfinder,
+    "lancer": coalition_lancer,
+    "tiltrotor": coalition_tiltrotor,
+    "kestrel": coalition_kestrel,
 }
 
 if __name__ == "__main__":

@@ -1,0 +1,2 @@
+{ "id": "coalition_guided_rounds", "name": "Guided Rounds", "faction": "coalition", "cost": 1500, "time": 45, "researchedAt": "coalition_motor_pool", "prereqs": ["coalition_tech"],
+  "effects": [ { "type": "weaponDamage", "weapon": "bulwark_cannon", "mult": 1.25 }, { "type": "weaponDamage", "weapon": "sentry_gun", "mult": 1.25 } ], "description": "Tank and sentry cannons deal 25% more damage." }

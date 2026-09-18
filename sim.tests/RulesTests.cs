@@ -8,7 +8,9 @@ public class RulesTests
     public void Load_ParsesEverything()
     {
         var rules = TestRules.Basic();
-        Assert.Equal(2, rules.Units.Count);
+        Assert.Equal(4, rules.Units.Count);
+        Assert.Equal(6, rules.Buildings.Count);
+        Assert.True(rules.Building("hq").Hq);
         Assert.Equal(4f, rules.Unit("tank").Speed);
         Assert.True(rules.Unit("tank").HasTurret);
         Assert.False(rules.Unit("scout").HasTurret);

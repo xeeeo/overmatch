@@ -1,0 +1,2 @@
+{ "id": "coalition_advanced_training", "name": "Advanced Training", "faction": "coalition", "cost": 800, "time": 30, "researchedAt": "coalition_barracks",
+  "effects": [ { "type": "hp", "tag": "infantry", "mult": 1.25 }, { "type": "speed", "tag": "infantry", "mult": 1.1 } ], "description": "Infantry are tougher and faster." }

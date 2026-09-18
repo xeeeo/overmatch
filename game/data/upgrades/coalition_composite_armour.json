@@ -1,0 +1,2 @@
+{ "id": "coalition_composite_armour", "name": "Composite Armour", "faction": "coalition", "cost": 1500, "time": 45, "researchedAt": "coalition_motor_pool",
+  "effects": [ { "type": "hp", "tag": "vehicle", "mult": 1.25 } ], "description": "Vehicles gain 25% hit points." }

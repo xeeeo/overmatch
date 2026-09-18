@@ -1,0 +1,2 @@
+{ "id": "coalition_drone_autonomy", "name": "Drone Autonomy", "faction": "coalition", "cost": 1200, "time": 40, "researchedAt": "coalition_strategy_center",
+  "effects": [ { "type": "weaponDamage", "weapon": "warden_mg", "mult": 1.3 }, { "type": "speed", "unit": "coalition_warden", "mult": 1.15 } ], "description": "Warden roof drones fire harder; Wardens drive faster." }

@@ -1,0 +1,5 @@
+{ "id": "coalition_motor_pool", "name": "Motor Pool", "faction": "coalition", "cost": 2000, "buildTime": 30,
+  "footprint": [4, 4], "hp": 2500, "armour": "structure", "vision": 6, "power": -3, "prereqs": ["coalition_supply_center"],
+  "produces": ["coalition_warden", "coalition_bulwark", "coalition_lancer"],
+  "upgrades": ["coalition_composite_armour", "coalition_guided_rounds"], "model": "coalition/motor_pool", "tags": ["structure"],
+  "description": "Builds vehicles." }

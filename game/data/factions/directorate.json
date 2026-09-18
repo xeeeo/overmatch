@@ -1,1 +1,1 @@
-{ "id": "directorate", "name": "Directorate", "colour": "#d83b3b", "builder": "directorate_engineering_vehicle", "needsPower": true }
+{ "id": "directorate", "name": "Directorate", "colour": "#d83b3b", "builder": "directorate_engineering_vehicle", "hq": "directorate_command_bunker", "needsPower": true, "startingCash": 10000 }

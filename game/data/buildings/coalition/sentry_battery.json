@@ -1,0 +1,4 @@
+{ "id": "coalition_sentry_battery", "name": "Sentry Battery", "faction": "coalition", "cost": 900, "buildTime": 15,
+  "footprint": [2, 2], "hp": 1200, "armour": "fortification", "vision": 11, "power": -2, "prereqs": ["coalition_barracks"],
+  "weapons": ["sentry_gun", "sentry_missiles"], "turretTurnRate": 300, "model": "coalition/sentry_battery", "tags": ["structure", "defence"],
+  "description": "Automated turret: cannon for ground, missiles for air. Offline without power." }

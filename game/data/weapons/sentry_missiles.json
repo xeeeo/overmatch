@@ -1,0 +1,1 @@
+{ "id": "sentry_missiles", "damage": 60, "damageType": "armour_piercing", "range": 12, "cooldown": 1.5, "projectile": { "kind": "missile", "speed": 40 }, "targets": ["air"], "aimTolerance": 30 }

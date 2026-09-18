@@ -4,22 +4,28 @@ using Overmatch.Sim.Data;
 
 namespace Overmatch.Game;
 
-/// <summary>Owns the sim World, ticks it at a fixed rate, and keeps one EntityView per entity.</summary>
+/// <summary>Owns the sim World, ticks it at a fixed rate, and keeps one view per entity and supply pile.</summary>
 public partial class GameRoot : Node3D
 {
     public World World { get; private set; } = null!;
     public RtsCamera Camera { get; private set; } = null!;
+    public SelectionController Selection { get; private set; } = null!;
+    public PlacementController Placement { get; private set; } = null!;
+    public Hud Hud { get; private set; } = null!;
     public Dictionary<int, EntityView> Views { get; } = new();
+    public int LocalPlayer => 0;
+    public Color LocalColour { get; private set; } = new(0.3f, 0.5f, 0.9f);
+    /// <summary>Sim ticks per real-time tick; 1 is normal speed.</summary>
+    public int Speed { get; set; } = 1;
 
     private Node3D _entitiesRoot = null!;
+    private Node3D _pilesRoot = null!;
+    private readonly List<SupplyPileView> _pileViews = new();
     private Vfx _vfx = null!;
-    private SelectionController _selection = null!;
-    private Label _hud = null!;
     private MeshInstance3D _marker = null!;
     private StandardMaterial3D _markerMat = null!;
     private float _markerTtl;
     private float _accumulator;
-    private const int LocalPlayer = 0;
     private string? _smokePath;
     private int _smokeStage;
 
@@ -27,9 +33,16 @@ public partial class GameRoot : Node3D
 
     public override void _Ready()
     {
+        foreach (var arg in OS.GetCmdlineUserArgs())
+        {
+            if (arg.StartsWith("--smoke=")) _smokePath = arg["--smoke=".Length..];
+            else if (arg.StartsWith("--speed=")) Speed = int.Parse(arg["--speed=".Length..]);
+        }
+
         var rules = DataLoader.LoadRules();
         var map = rules.Map("plain");
-        World = new World(rules, map, 2);
+        World = new World(rules, map, new[] { "coalition", "coalition" });
+        LocalColour = Color.FromHtml(World.Player(LocalPlayer).Faction.Colour);
 
         var mapView = new MapView { Name = "Map" };
         AddChild(mapView);
@@ -47,85 +60,120 @@ public partial class GameRoot : Node3D
 
         _entitiesRoot = new Node3D { Name = "Entities" };
         AddChild(_entitiesRoot);
+        _pilesRoot = new Node3D { Name = "Piles" };
+        AddChild(_pilesRoot);
+        foreach (var pile in World.Piles)
+        {
+            var v = SupplyPileView.Create(pile);
+            _pilesRoot.AddChild(v);
+            _pileViews.Add(v);
+        }
         _vfx = new Vfx { Name = "Vfx" };
         AddChild(_vfx);
+        Placement = new PlacementController { Name = "Placement", Root = this };
+        AddChild(Placement);
 
         BuildMarker();
-        SpawnTestArmies(spawn);
+        SetUpStartPositions(map);
         BuildUi();
-
-        // `--smoke=/path/out.png` (after `--`) drives a scripted attack-move, saves screenshots and quits. Used by Claude/CI for visual checks.
-        foreach (var arg in OS.GetCmdlineUserArgs())
-            if (arg.StartsWith("--smoke=")) _smokePath = arg["--smoke=".Length..];
     }
 
-    private void SpawnTestArmies(Vec2 spawn)
+    /// <summary>Generals-style start: an HQ, a builder, and a few units per player. The enemy gets a small fortified base.</summary>
+    private void SetUpStartPositions(MapDef map)
     {
-        for (var i = 0; i < 12; i++)
-            World.Spawn("coalition_bulwark", LocalPlayer, spawn + new Vec2(-4 + i % 4 * 2.6f, -4 + i / 4 * 2.6f), Angles.DegToRad(45));
-        for (var i = 0; i < 4; i++)
-            World.Spawn("coalition_warden", LocalPlayer, spawn + new Vec2(6 + i * 2.2f, -4), Angles.DegToRad(45));
-        World.Spawn("coalition_dozer", LocalPlayer, spawn + new Vec2(-6, 6), Angles.DegToRad(45));
-        World.Spawn("coalition_dozer", LocalPlayer, spawn + new Vec2(-8, 6), Angles.DegToRad(45));
+        var s0 = new Vec2(map.Spawns[0].X, map.Spawns[0].Y);
+        var hq = World.PlaceBuilding("coalition_command_post", LocalPlayer, (int)s0.X - 2, (int)s0.Y - 2);
+        hq.Rally = new Vec2(s0.X, s0.Y - 6);
+        World.Spawn("coalition_dozer", LocalPlayer, s0 + new Vec2(-5, -3), Angles.DegToRad(-90));
+        World.Spawn("coalition_dozer", LocalPlayer, s0 + new Vec2(5, -3), Angles.DegToRad(-90));
+        for (var i = 0; i < 4; i++) World.Spawn("coalition_bulwark", LocalPlayer, s0 + new Vec2(-7 + i * 2.7f, -6), Angles.DegToRad(45));
+        for (var i = 0; i < 2; i++) World.Spawn("coalition_warden", LocalPlayer, s0 + new Vec2(-8 + i * 2.4f, -9), Angles.DegToRad(45));
 
-        // An enemy picket beyond the rocks, facing us.
-        var enemy = new Vec2(52, 50);
-        for (var i = 0; i < 6; i++)
-            World.Spawn("coalition_bulwark", 1, enemy + new Vec2(i % 3 * 2.6f, i / 3 * 2.6f), Angles.DegToRad(-135));
-        for (var i = 0; i < 3; i++)
-            World.Spawn("coalition_warden", 1, enemy + new Vec2(-3 + i * 2.2f, 6), Angles.DegToRad(-135));
+        var s1 = new Vec2(map.Spawns[1].X, map.Spawns[1].Y);
+        World.PlaceBuilding("coalition_command_post", 1, (int)s1.X - 2, (int)s1.Y - 2);
+        World.PlaceBuilding("coalition_power_plant", 1, (int)s1.X + 5, (int)s1.Y - 1);
+        World.PlaceBuilding("coalition_barracks", 1, (int)s1.X - 8, (int)s1.Y - 1);
+        World.PlaceBuilding("coalition_sentry_battery", 1, (int)s1.X - 3, (int)s1.Y - 8);
+        World.PlaceBuilding("coalition_sentry_battery", 1, (int)s1.X + 3, (int)s1.Y - 8);
+        for (var i = 0; i < 4; i++) World.Spawn("coalition_bulwark", 1, s1 + new Vec2(-4 + i * 2.7f, -11), Angles.DegToRad(-135));
+        for (var i = 0; i < 4; i++) World.Spawn("coalition_rifleman", 1, s1 + new Vec2(-6 + i * 1.2f, -5), Angles.DegToRad(-135));
     }
 
     private void SmokeStep()
     {
         if (_smokePath is null) return;
-        if (_smokeStage == 0 && World.Tick >= 10)
-        {
-            _smokeStage = 1;
-            var ids = World.Entities.Where(e => e.Owner == LocalPlayer && e.HasWeapons).Select(e => e.Id).ToArray();
-            foreach (var id in ids) Views[id].Selected = true;
-            World.Submit(new AttackMoveCommand(LocalPlayer, ids, new Vec2(54, 52)));
-            ShowMarker(MapView.ToWorld(new Vec2(54, 52)), new Color(1f, 0.6f, 0.2f));
-            GD.Print("[Smoke] issued attack-move");
-        }
-        if (_smokeStage == 1 && World.Tick >= 120)
-        {
-            _smokeStage = 2;
-            Save(_smokePath.Replace(".png", "_a.png"));
-        }
-        if (_smokeStage == 2 && World.Tick >= 200)
-        {
-            _smokeStage = 3;
-            Camera.Position = MapView.ToWorld(new Vec2(46, 44));
-        }
-        if (_smokeStage == 3 && World.Tick >= 290)
-        {
-            _smokeStage = 4;
-            Save(_smokePath);
-            GD.Print("[Smoke] done; quitting");
-            GetTree().Quit();
-        }
+        var w = World;
+        var dozers = w.Entities.Where(e => e.Owner == LocalPlayer && e.IsBuilder).ToList();
+        var s0 = new Vec2(w.MapDef.Spawns[0].X, w.MapDef.Spawns[0].Y);
+        int Building(string id) => w.Entities.FirstOrDefault(e => e.Owner == LocalPlayer && e.Building?.Id == id && e.Operational)?.Id ?? 0;
 
-        void Save(string path)
+        switch (_smokeStage)
         {
-            GetViewport().GetTexture().GetImage().SavePng(path);
-            GD.Print($"[Smoke] saved {path} at tick {World.Tick}");
+            case 0 when w.Tick >= 5:
+                w.Submit(new BuildCommand(LocalPlayer, dozers[0].Id, "coalition_power_plant", (int)s0.X + 6, (int)s0.Y + 2));
+                w.Submit(new BuildCommand(LocalPlayer, dozers[1].Id, "coalition_supply_center", (int)s0.X + 4, (int)s0.Y + 7));
+                _smokeStage = 1;
+                GD.Print("[Smoke] ordered power plant + supply center");
+                break;
+            case 1 when Building("coalition_supply_center") != 0:
+                w.Submit(new ProduceCommand(LocalPlayer, Building("coalition_supply_center"), "coalition_tiltrotor"));
+                w.Submit(new ProduceCommand(LocalPlayer, Building("coalition_supply_center"), "coalition_tiltrotor"));
+                var free = dozers.FirstOrDefault(d => d.BuildTargetId == 0) ?? dozers[0];
+                w.Submit(new BuildCommand(LocalPlayer, free.Id, "coalition_barracks", (int)s0.X - 9, (int)s0.Y + 2));
+                _smokeStage = 2;
+                GD.Print("[Smoke] supply center up; queued tiltrotors, ordered barracks");
+                break;
+            case 2 when Building("coalition_barracks") != 0 && Building("coalition_power_plant") != 0:
+                var d0 = dozers.FirstOrDefault(d => d.BuildTargetId == 0) ?? dozers[0];
+                w.Submit(new BuildCommand(LocalPlayer, d0.Id, "coalition_motor_pool", (int)s0.X + 10, (int)s0.Y + 8));
+                w.Submit(new ProduceCommand(LocalPlayer, Building("coalition_barracks"), "coalition_rifleman"));
+                w.Submit(new ProduceCommand(LocalPlayer, Building("coalition_barracks"), "coalition_rifleman"));
+                w.Submit(new ProduceCommand(LocalPlayer, Building("coalition_barracks"), "coalition_rocket_trooper"));
+                w.Submit(new ProduceCommand(LocalPlayer, Building("coalition_power_plant"), "coalition_turbine_overdrive"));
+                _smokeStage = 3;
+                GD.Print("[Smoke] ordered motor pool, infantry, overdrive");
+                break;
+            case 3 when Building("coalition_motor_pool") != 0:
+                w.Submit(new ProduceCommand(LocalPlayer, Building("coalition_motor_pool"), "coalition_bulwark"));
+                w.Submit(new ProduceCommand(LocalPlayer, Building("coalition_motor_pool"), "coalition_warden"));
+                var d1 = dozers.FirstOrDefault(d => d.BuildTargetId == 0) ?? dozers[0];
+                w.Submit(new BuildCommand(LocalPlayer, d1.Id, "coalition_sentry_battery", (int)s0.X - 2, (int)s0.Y - 10));
+                _smokeStage = 4;
+                _smokeTick = w.Tick;
+                GD.Print("[Smoke] motor pool up; queued vehicles, ordered sentry");
+                break;
+            case 4 when w.Tick >= _smokeTick + 20 * 30:
+                Camera.Position = MapView.ToWorld(s0 + new Vec2(2, 0));
+                foreach (var e in w.Entities.Where(e => e.Owner == LocalPlayer && e.Building?.Id == "coalition_supply_center"))
+                    Views[e.Id].Selected = true;
+                Selection.SelectOnly(Building("coalition_supply_center"));
+                _smokeStage = 5;
+                _smokeTick = w.Tick;
+                break;
+            case 5 when w.Tick >= _smokeTick + 3:
+                GetViewport().GetTexture().GetImage().SavePng(_smokePath!);
+                GD.Print($"[Smoke] saved {_smokePath} at tick {w.Tick}; cash {w.Player(LocalPlayer).Cash}; buildings {w.Entities.Count(e => e.Owner == 0 && e.IsBuilding)}; units {w.Entities.Count(e => e.Owner == 0 && !e.IsBuilding)}");
+                GetTree().Quit();
+                _smokeStage = 6;
+                break;
         }
     }
+
+    private int _smokeTick;
 
     public override void _Process(double delta)
     {
         _accumulator += (float)delta;
         var steps = 0;
-        while (_accumulator >= World.Dt && steps < 5)
+        var maxSteps = 5 * Speed;
+        while (_accumulator >= World.Dt / Speed && steps < maxSteps)
         {
             World.Step();
-            _accumulator -= World.Dt;
+            _accumulator -= World.Dt / Speed;
             steps++;
-            _vfx.Consume(World, PlayerColour);
-            RemoveDeadViews();
+            HandleEvents();
         }
-        var alpha = Mathf.Clamp(_accumulator / World.Dt, 0f, 1f);
+        var alpha = Mathf.Clamp(_accumulator * Speed / World.Dt, 0f, 1f);
         SmokeStep();
 
         foreach (var e in World.Entities)
@@ -133,12 +181,14 @@ public partial class GameRoot : Node3D
             if (!Views.TryGetValue(e.Id, out var view))
             {
                 view = EntityView.Create(e, PlayerColour(e.Owner));
+                view.SetTeamColour(PlayerColour(e.Owner));
                 _entitiesRoot.AddChild(view);
                 Views[e.Id] = view;
             }
             view.Sync(alpha);
-            if (e.Owner != LocalPlayer) view.Visible = World.Vision.IsVisible(LocalPlayer, e.Pos);
+            if (e.Owner != LocalPlayer) view.Visible = World.Vision.IsVisible(LocalPlayer, e.Pos) || (e.IsBuilding && World.Vision.Get(LocalPlayer, e.Pos) != Visibility.Shroud);
         }
+        foreach (var pv in _pileViews) pv.Refresh();
         _vfx.SyncProjectiles(World, alpha);
 
         if (_markerTtl > 0)
@@ -147,34 +197,48 @@ public partial class GameRoot : Node3D
             _marker.Visible = _markerTtl > 0;
             _marker.Scale = Vector3.One * (0.6f + _markerTtl);
         }
-
-        var mine = World.Entities.Count(e => e.Owner == LocalPlayer);
-        var theirs = World.Entities.Count(e => e.Owner != LocalPlayer);
-        var mode = _selection.AttackMoveArmed ? "   [ATTACK-MOVE: click target]" : "";
-        _hud.Text = $"OVERMATCH  pre-alpha M1   tick {World.Tick}   {Engine.GetFramesPerSecond()} fps   units {mine} vs {theirs}{mode}\n" +
-                    "Left-drag: select   Shift: add   Right-click: move / attack   A + click: attack-move   Ctrl+A: all   S: stop   Esc: cancel\n" +
-                    "WASD / edges / middle-drag: pan   Q/E: rotate   Wheel / two-finger scroll / + -: zoom";
     }
 
-    private void RemoveDeadViews()
+    private void HandleEvents()
     {
+        _vfx.Consume(World, PlayerColour);
         foreach (var ev in World.Events)
         {
-            if (ev is not DiedEvent d || !Views.TryGetValue(d.EntityId, out var view)) continue;
-            view.QueueFree();
-            Views.Remove(d.EntityId);
+            switch (ev)
+            {
+                case DiedEvent d:
+                    RemoveView(d.EntityId);
+                    break;
+                case SoldEvent s:
+                    RemoveView(s.BuildingId);
+                    break;
+                case OrderRejectedEvent r when r.Player == LocalPlayer:
+                    Hud.Say(r.Reason switch
+                    {
+                        "insufficient funds" => "Insufficient funds",
+                        "occupied" => "Cannot build there",
+                        "terrain" => "Cannot build on that terrain",
+                        _ => r.Reason,
+                    });
+                    break;
+                case ConstructionCompletedEvent c when c.Owner == LocalPlayer && World.Tick > 1:
+                    Hud.Say($"{World.Get(c.BuildingId)?.Def.Name} complete");
+                    break;
+                case UpgradeCompletedEvent u when u.Owner == LocalPlayer:
+                    Hud.Say($"{World.Rules.Upgrade(u.UpgradeId).Name} researched");
+                    break;
+            }
         }
     }
 
-    private Color PlayerColour(int owner)
+    private void RemoveView(int id)
     {
-        if (owner == LocalPlayer)
-        {
-            var faction = World.Rules.Factions.TryGetValue("coalition", out var f) ? f : null;
-            return faction is not null ? Color.FromHtml(faction.Colour) : new Color(0.3f, 0.5f, 0.9f);
-        }
-        return EnemyColour;
+        if (!Views.TryGetValue(id, out var view)) return;
+        view.QueueFree();
+        Views.Remove(id);
     }
+
+    public Color PlayerColour(int owner) => owner == LocalPlayer ? LocalColour : EnemyColour;
 
     public void ShowMarker(Vector3 at, Color colour)
     {
@@ -225,13 +289,10 @@ public partial class GameRoot : Node3D
     {
         var layer = new CanvasLayer();
         AddChild(layer);
-
-        _selection = new SelectionController { Player = LocalPlayer, Root = this };
-        layer.AddChild(_selection);
+        Selection = new SelectionController { Player = LocalPlayer, Root = this };
+        layer.AddChild(Selection);
         layer.AddChild(new UnitOverlay { Root = this });
-
-        _hud = new Label { Position = new Vector2(12, 8), Modulate = new Color(1, 1, 1, 0.9f) };
-        _hud.AddThemeFontSizeOverride("font_size", 14);
-        layer.AddChild(_hud);
+        Hud = new Hud { Root = this, Layer = 2 };
+        AddChild(Hud);
     }
 }

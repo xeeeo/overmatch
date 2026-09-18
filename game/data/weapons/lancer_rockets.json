@@ -1,0 +1,2 @@
+{ "id": "lancer_rockets", "damage": 110, "damageType": "explosive", "range": 20, "minRange": 6, "cooldown": 6.0,
+  "projectile": { "kind": "shell", "speed": 28, "arc": true }, "splash": { "radius": 2.2, "falloff": 0.3 }, "targets": ["ground"], "aimTolerance": 20 }

@@ -10,3 +10,23 @@ public sealed record AttackMoveCommand(int Player, int[] Units, Vec2 Target) : C
 public sealed record AttackCommand(int Player, int[] Units, int TargetId) : Command(Player);
 
 public sealed record StopCommand(int Player, int[] Units) : Command(Player);
+
+/// <summary>Have a builder construct a building with its footprint origin at (CellX, CellY).</summary>
+public sealed record BuildCommand(int Player, int BuilderId, string BuildingId, int CellX, int CellY) : Command(Player);
+
+/// <summary>Queue a unit or upgrade at a building.</summary>
+public sealed record ProduceCommand(int Player, int BuildingId, string ItemId) : Command(Player);
+
+/// <summary>Remove one queue entry (refunds).</summary>
+public sealed record CancelProduceCommand(int Player, int BuildingId, int Index) : Command(Player);
+
+public sealed record RallyCommand(int Player, int BuildingId, Vec2 Target) : Command(Player);
+
+/// <summary>Sell a building for half its cost (full refund while under construction).</summary>
+public sealed record SellCommand(int Player, int BuildingId) : Command(Player);
+
+/// <summary>Send harvesters to a pile (PileId 0 = nearest).</summary>
+public sealed record HarvestCommand(int Player, int[] Units, int PileId) : Command(Player);
+
+/// <summary>Send builders to help on an existing construction site.</summary>
+public sealed record AssistBuildCommand(int Player, int[] Units, int BuildingId) : Command(Player);

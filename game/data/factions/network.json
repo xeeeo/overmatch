@@ -1,1 +1,1 @@
-{ "id": "network", "name": "Network", "colour": "#3bb35a", "builder": "network_worker", "needsPower": false }
+{ "id": "network", "name": "Network", "colour": "#3bb35a", "builder": "network_worker", "hq": "network_command_cell", "needsPower": false, "startingCash": 10000 }

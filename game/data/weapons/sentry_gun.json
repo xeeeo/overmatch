@@ -1,0 +1,1 @@
+{ "id": "sentry_gun", "damage": 45, "damageType": "armour_piercing", "range": 10, "cooldown": 1.2, "projectile": { "kind": "shell", "speed": 45 }, "splash": { "radius": 0.6, "falloff": 0.5 }, "targets": ["ground"], "aimTolerance": 6 }

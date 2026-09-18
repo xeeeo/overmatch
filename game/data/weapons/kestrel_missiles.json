@@ -1,0 +1,1 @@
+{ "id": "kestrel_missiles", "damage": 55, "damageType": "armour_piercing", "range": 9, "cooldown": 1.6, "projectile": { "kind": "missile", "speed": 35 }, "targets": ["ground"], "aimTolerance": 25 }

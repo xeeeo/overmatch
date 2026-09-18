@@ -12,10 +12,10 @@ public static class Movement
     public static void Update(Entity e, World world)
     {
         var order = e.Move;
-        if (order is null) return;
+        if (order is null || e.Unit is not { } unit) return;
 
         var dt = World.Dt;
-        var loco = e.Def.LocomotorClass;
+        var loco = unit.LocomotorClass;
         var grid = world.Grid;
 
         var toTarget = order.Target - e.Pos;
@@ -54,14 +54,15 @@ public static class Movement
         }
 
         var desiredAngle = desired.Angle;
-        var maxTurn = Angles.DegToRad(e.Def.TurnRate) * dt;
+        var maxTurn = Angles.DegToRad(unit.TurnRate) * dt;
         e.Facing = Angles.TurnToward(e.Facing, desiredAngle, maxTurn);
         if (!e.Def.HasTurret) e.TurretFacing = e.Facing;
 
         var headingError = MathF.Abs(Angles.Wrap(desiredAngle - e.Facing));
-        if (headingError <= DriveCone)
+        if (headingError <= DriveCone || loco == Locomotor.Air)
         {
-            var step = MathF.Min(e.Def.Speed * dt, dist);
+            var speed = unit.Speed * world.Player(e.Owner).SpeedMult(unit);
+            var step = MathF.Min(speed * dt, dist);
             var next = e.Pos + Vec2.FromAngle(e.Facing) * step;
             if (grid.IsPassable(next, loco)) e.Pos = next;
             else if (grid.IsPassable(new Vec2(next.X, e.Pos.Y), loco)) e.Pos = new Vec2(next.X, e.Pos.Y);
@@ -86,11 +87,11 @@ public static class Movement
         var grid = world.Grid;
         foreach (var a in entities)
         {
-            if (!a.Alive || a.Def.IsAir) continue;
+            if (!a.Alive || a.Def.IsAir || a.IsBuilding) continue;
             var near = world.Spatial.Query(a.Pos, a.Radius + 2f);
             foreach (var b in near)
             {
-                if (b.Id <= a.Id || !b.Alive || b.Def.IsAir) continue;
+                if (b.Id <= a.Id || !b.Alive || b.Def.IsAir || b.IsBuilding) continue;
                 var minDist = a.Radius + b.Radius;
                 var delta = b.Pos - a.Pos;
                 var d2 = delta.LengthSq;
@@ -120,8 +121,8 @@ public static class Movement
 
         foreach (var e in entities)
         {
-            if (!e.Alive || e.Def.IsAir) continue;
-            var loco = e.Def.LocomotorClass;
+            if (!e.Alive || e.Def.IsAir || e.Unit is not { } u) continue;
+            var loco = u.LocomotorClass;
             if (grid.IsPassable(e.Pos, loco)) continue;
             // Pushed into a wall: fall back to where we were at the start of the tick, else nearest free cell centre.
             if (grid.IsPassable(e.PrevPos, loco)) { e.Pos = e.PrevPos; continue; }

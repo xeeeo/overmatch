@@ -16,7 +16,7 @@ The world has moved on since 2003. Overmatch's battlefield is today's: cheap FPV
 
 ## Status
 
-Pre-alpha. M0 (bootstrap) and M1 (movement, combat, fog of war) are done; M2 (base building and economy) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
+Pre-alpha. M0 (bootstrap), M1 (movement, combat, fog of war) and M2 (base building, economy, production, upgrades, the Coalition tree) are done; M3 (skirmish AI, win/lose, menus) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
 
 ## Building from source
 
@@ -34,7 +34,7 @@ blender -b -P tools/blender/build_models.py   # regenerate all models (optional)
 godot-mono --headless --path game --export-release macOS   # export (see game/export_presets.cfg)
 ```
 
-Smoke test used by CI and by Claude for visual checks: `godot-mono --path game -- --smoke=/tmp/out.png` issues a scripted move order, saves a screenshot and quits.
+Smoke test used by Claude for visual checks: `godot-mono --path game -- --smoke=/tmp/out.png --speed=6` builds a scripted base at 6x speed, saves a screenshot and quits.
 
 ## Repository layout
 

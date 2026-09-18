@@ -1,0 +1,4 @@
+{ "id": "coalition_tiltrotor", "name": "Cargo Tiltrotor", "faction": "coalition", "cost": 1200, "buildTime": 12, "builtAt": "coalition_supply_center",
+  "locomotor": "air", "speed": 7.0, "turnRate": 240, "radius": 1.0, "flightHeight": 4.5, "hp": 320, "armour": "aircraft", "vision": 9,
+  "harvest": { "capacity": 400, "loadTime": 4, "unloadTime": 1.5, "searchRadius": 36 },
+  "xpValue": 30, "model": "coalition/tiltrotor", "tags": ["aircraft", "harvester"], "description": "Flying harvester. Carries 400 supplies per trip." }

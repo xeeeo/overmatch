@@ -1,0 +1,2 @@
+{ "id": "coalition_turbine_overdrive", "name": "Turbine Overdrive", "faction": "coalition", "cost": 500, "time": 20, "researchedAt": "coalition_power_plant",
+  "effects": [ { "type": "power", "building": "coalition_power_plant", "add": 5 } ], "description": "Every Power Plant produces 5 more power." }

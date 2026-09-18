@@ -11,4 +11,18 @@ public sealed record HitEvent(Vec2 Pos, string WeaponId, int TargetId) : GameEve
 
 public sealed record DamagedEvent(int EntityId, float Amount, int AttackerId) : GameEvent;
 
-public sealed record DiedEvent(int EntityId, string DefId, int Owner, Vec2 Pos, float Facing, float TurretFacing, int KillerId) : GameEvent;
+public sealed record DiedEvent(int EntityId, string DefId, int Owner, Vec2 Pos, float Facing, float TurretFacing, int KillerId, bool WasBuilding) : GameEvent;
+
+public sealed record ConstructionStartedEvent(int BuildingId, int Owner) : GameEvent;
+
+public sealed record ConstructionCompletedEvent(int BuildingId, int Owner) : GameEvent;
+
+public sealed record ProductionCompletedEvent(int BuildingId, int Owner, string ItemId, int EntityId) : GameEvent;
+
+public sealed record UpgradeCompletedEvent(int Owner, string UpgradeId) : GameEvent;
+
+public sealed record SoldEvent(int BuildingId, int Owner, int Refund) : GameEvent;
+
+public sealed record SupplyDeliveredEvent(int HarvesterId, int Owner, int Amount) : GameEvent;
+
+public sealed record OrderRejectedEvent(int Player, string Reason) : GameEvent;
