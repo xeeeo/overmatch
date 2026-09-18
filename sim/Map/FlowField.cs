@@ -132,6 +132,21 @@ public sealed class FlowFieldCache
         _capacity = capacity;
     }
 
+    /// <summary>Searches are whole-map; this many cells' worth may be searched per tick before callers are asked to wait.</summary>
+    public int CellBudgetPerTick { get; set; } = 60_000;
+    private int _spent;
+
+    public void BeginTick() => _spent = 0;
+
+    /// <summary>The field if it is cached or there is budget left this tick; otherwise null, and the caller tries again next tick.</summary>
+    public FlowField? TryGet(int tx, int ty, Locomotor loco)
+    {
+        if (_map.TryGetValue((tx, ty, loco), out var node) && node.Value.GridVersion == _grid.Version) return Get(tx, ty, loco);
+        if (_spent > 0 && _spent + _grid.Width * _grid.Height > CellBudgetPerTick) return null;
+        _spent += _grid.Width * _grid.Height;
+        return Get(tx, ty, loco);
+    }
+
     public FlowField Get(int tx, int ty, Locomotor loco)
     {
         var key = (tx, ty, loco);

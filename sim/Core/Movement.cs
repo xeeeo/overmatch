@@ -7,6 +7,10 @@ public static class Movement
     private const float DriveCone = 0.7f;
     /// <summary>Within this distance of the goal, steer straight at it if the line is clear.</summary>
     private const float DirectRange = 2.5f;
+    /// <summary>Inside this range a unit steers straight for a visible goal, and uses its own exact field otherwise.</summary>
+    private const float NearRange = 12f;
+    private const int CoarseCell = 8;
+    private const int LargeMapCells = 20_000;
     private const int StuckLimitTicks = World.TicksPerSecond * 3;
 
     public static void Update(Entity e, World world)
@@ -29,20 +33,52 @@ public static class Movement
             return;
         }
 
-        // Resolve the flow field lazily; snap the goal to the nearest passable cell.
-        if (order.Field is null && loco != Locomotor.Air)
+        // Snap the goal to the nearest passable cell, once.
+        if (!order.Snapped && loco != Locomotor.Air)
         {
             var (tx, ty) = MapGrid.CellOf(order.Target);
             var goal = grid.NearestPassable(tx, ty, loco);
             if (goal is null) { Arrive(e); return; }
             if (goal.Value != (tx, ty)) order.Target = MapGrid.Centre(goal.Value.x, goal.Value.y);
-            order.Field = world.Fields.Get(goal.Value.x, goal.Value.y, loco);
+            order.Snapped = true;
             toTarget = order.Target - e.Pos;
             dist = toTarget.Length;
         }
 
+        // Close to the goal with nothing in the way: steer straight at it, no path field needed.
+        // Large maps only (see LargeMapCells): on the small ones a search costs about a millisecond, and the measured
+        // faction balance there is sensitive to any change in how groups arrive, so their movement is left exactly as it was.
+        var big = grid.Width * grid.Height > LargeMapCells;
+        var direct = loco == Locomotor.Air;
+        if (!direct && dist < (big ? NearRange : DirectRange))
+        {
+            if (dist < DirectRange || (world.Tick + e.Id) % 4 == 0) order.DirectOk = grid.LineClear(e.Pos, order.Target, loco);
+            direct = order.DirectOk;
+        }
+
+        // A flow field is a whole-map search. A group ordered somewhere is given one spread-out goal per unit, and one
+        // search per unit stalls the game on a big map. So while far away, units share the field of a coarse goal
+        // (when that coarse cell has a clear line to the real one); near the goal they take their own if they need one.
+        if (!direct)
+        {
+            var wantCoarse = dist > NearRange && big;
+            if (order.Field is null || (order.FieldIsCoarse && !wantCoarse))
+            {
+                var (gx, gy) = MapGrid.CellOf(order.Target);
+                order.FieldIsCoarse = false;
+                if (wantCoarse)
+                {
+                    var (sx, sy) = (gx / CoarseCell * CoarseCell + CoarseCell / 2, gy / CoarseCell * CoarseCell + CoarseCell / 2);
+                    if (grid.IsPassable(sx, sy, loco) && grid.LineClear(MapGrid.Centre(sx, sy), order.Target, loco)) { (gx, gy) = (sx, sy); order.FieldIsCoarse = true; }
+                }
+                order.Field = big ? world.Fields.TryGet(gx, gy, loco) : world.Fields.Get(gx, gy, loco);
+                // Over this tick's search budget: hold still and ask again next tick. A group sets off over a few ticks.
+                if (order.Field is null) return;
+            }
+        }
+
         Vec2 desired;
-        if (loco == Locomotor.Air || (dist < DirectRange && grid.LineClear(e.Pos, order.Target, loco)))
+        if (direct)
             desired = toTarget.Normalized;
         else
         {

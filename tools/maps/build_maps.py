@@ -66,6 +66,27 @@ def mirror_neutrals(neutrals, size, mode, sizes):
     return out
 
 
+def subtract(r, hole):
+    """r minus hole, as up to four rects. Used to cut bridge gaps out of rivers, because water is painted over road."""
+    x0, y0, x1, y1 = r["x"], r["y"], r["x"] + r["w"], r["y"] + r["h"]
+    hx0, hy0, hx1, hy1 = hole["x"], hole["y"], hole["x"] + hole["w"], hole["y"] + hole["h"]
+    if hx0 >= x1 or hx1 <= x0 or hy0 >= y1 or hy1 <= y0:
+        return [r]
+    out = []
+    if hy0 > y0: out.append(rect(x0, y0, x1 - x0, hy0 - y0))
+    if hy1 < y1: out.append(rect(x0, hy1, x1 - x0, y1 - hy1))
+    top, bottom = max(y0, hy0), min(y1, hy1)
+    if hx0 > x0: out.append(rect(x0, top, hx0 - x0, bottom - top))
+    if hx1 < x1: out.append(rect(hx1, top, x1 - hx1, bottom - top))
+    return out
+
+
+def bridge(water, crossings):
+    for c in crossings:
+        water = [piece for w in water for piece in subtract(w, c)]
+    return water
+
+
 SIZES = {"oil_derrick": (3, 3), "civilian_house": (3, 3), "civilian_block": (4, 4)}
 
 
@@ -137,6 +158,41 @@ def main():
           road=[rect(0, 35, 120, 3)],
           neutrals=[{"id": "oil_derrick", "x": 56, "y": 10}, {"id": "civilian_house", "x": 58, "y": 44}],
           description="Nowhere to hide. Bring armour.")
+
+    # 6. Twilight Frost — 8 players, large. A homage to the layout everyone remembers: a river that splits around a
+    #    central island, a rocky plateau full of tech buildings, two starts on every side. Drawn from scratch.
+    #    Authored for the south-west quadrant and mirrored four ways; the map centre is (96, 96).
+    river = [rect(0, 93, 58, 3), rect(56, 89, 5, 7), rect(60, 84, 5, 8), rect(64, 79, 6, 8), rect(68, 78, 28, 4)]
+    crossings = [rect(30, 90, 4, 8),      # ring-road bridge over the main river
+                 rect(93, 76, 3, 8),      # causeway onto the island
+                 rect(8, 92, 5, 5)]       # a ford by the map edge, for flanking
+    build("twilight_frost", "Twilight Frost (8)", (192, 192), "quad",
+          spawns=[{"x": 66, "y": 16}, {"x": 16, "y": 66}],
+          supplies=[{"x": 50, "y": 9, "amount": 30000}, {"x": 84, "y": 8, "amount": 30000},     # southern start
+                    {"x": 9, "y": 50, "amount": 30000}, {"x": 8, "y": 84, "amount": 30000},     # western start
+                    {"x": 14, "y": 14, "amount": 40000},                                        # the contested corner
+                    {"x": 44, "y": 44, "amount": 25000},
+                    {"x": 72, "y": 66, "amount": 20000}],                                       # on the plateau
+          water=bridge(river, crossings),
+          road=crossings + [rect(30, 0, 4, 96), rect(0, 30, 96, 4),                             # ring road
+                            rect(93, 0, 3, 96),                                                 # north-south highway
+                            rect(34, 60, 22, 3)],                                               # spur to the plateau gate
+          rough=[rect(59, 59, 37, 37),                                                          # the plateau
+                 rect(40, 8, 8, 6), rect(8, 40, 6, 8), rect(20, 74, 8, 8), rect(74, 40, 8, 6)],
+          blocked=[rect(56, 56, 24, 3), rect(88, 56, 5, 3),                                     # plateau south wall, gate at x 80-88
+                   rect(56, 56, 3, 3), rect(56, 64, 3, 12), rect(56, 84, 3, 5),                 # west wall, gates at y 59-64 and 76-84
+                   rect(64, 66, 4, 4), rect(80, 68, 5, 3), rect(70, 86, 3, 4),                  # outcrops on the plateau
+                   rect(40, 20, 6, 3), rect(20, 40, 3, 6), rect(46, 36, 3, 3), rect(36, 46, 3, 3),
+                   rect(12, 24, 4, 3), rect(24, 12, 3, 4), rect(80, 24, 3, 6), rect(24, 80, 6, 3),
+                   rect(44, 72, 5, 3), rect(72, 44, 3, 5), rect(16, 100 - 12, 4, 3), rect(48, 84, 3, 4),
+                   rect(86, 40, 4, 3), rect(40, 86, 3, 3)],
+          neutrals=[{"id": "oil_derrick", "x": 74, "y": 74}, {"id": "oil_derrick", "x": 61, "y": 72},
+                    {"id": "oil_derrick", "x": 38, "y": 38}, {"id": "oil_derrick", "x": 4, "y": 4},
+                    {"id": "civilian_block", "x": 87, "y": 87},                                  # the island town
+                    {"id": "civilian_house", "x": 86, "y": 63}, {"id": "civilian_house", "x": 66, "y": 60},
+                    {"id": "civilian_house", "x": 36, "y": 84}, {"id": "civilian_house", "x": 24, "y": 86},
+                    {"id": "civilian_house", "x": 98 - 12, "y": 50}, {"id": "civilian_block", "x": 36, "y": 24}],
+          description="Eight commanders, one frozen river. It splits around an island town in the middle of a rocky plateau full of oil. Bridges and gates decide everything.")
 
 
 if __name__ == "__main__":

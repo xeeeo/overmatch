@@ -109,3 +109,12 @@ A player is eliminated when they own no buildings and no builders (checked once 
 - **Return to base**: `ReturnToBaseCommand` sends aircraft (not drones) to the nearest own airfield, where they hold until repaired; jets short of ammo rearm on the same trip. Any new order cancels it. In the game: the TO BASE button or right-click an airfield.
 - **Builders repair buildings** for free with `RepairCommand` (right-click a damaged building). A full repair takes 60 s or 1.5x the build time, whichever is longer, and work stops for 6 s after each hit, so a building cannot be held up under fire.
 - **AI**: a builder with nothing else to do patches the worst building under 75%. Hard and Brutal (`retreatAircraft`) also pull aircraft under 35% back to the airfield. Medium does not: in the harness it made Coalition helicopters nearly unkillable for the Network AI (78% win rate).
+
+## Settings, orders and large maps (play-test pass)
+
+- **Interface scaling** goes through the window's content scale factor (`UiScaler`), so text and vector art are rasterised at their final size. The 2D coordinate space is design units, never less than 1600 x 900. Menus always fit the window; the in-game console is a fraction of that (setting, automatic by default), and the HUD anchors its left and right clusters when the space is wider than 1600.
+- **Settings** live in `GameSettings` (`user://settings.cfg`): window, interface size, 3D resolution, MSAA, V-sync, FPS, five audio buses, edge scroll, scroll speed, group tags.
+- **Guard** (`GuardCommand`): attack-move to a post, engage anything seen within 13 cells of it, drop the chase past 19, walk back. **Scatter** (`ScatterCommand`): each unit dashes 6 cells outward. Any order ends guard.
+- **Large maps** (more than 20,000 cells): units far from their goal share the flow field of a coarse 8-cell goal, steer straight at a visible goal within 12 cells, and whole-map searches are budgeted per tick. This took the worst tick on the 192 x 192 map with eight AIs from 150 ms to under 20. It is switched off on smaller maps on purpose: the measured faction balance there moved by 10 to 20 points with any change to how groups arrive.
+- **Eight players**: the menu shows eight compact slots on maps with more than four starts. There are no teams yet; every match is free-for-all. `tools/harness --ffa <map>` runs one AI per start and reports tick times.
+

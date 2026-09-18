@@ -24,6 +24,10 @@ public sealed class MatchSettings
         new(0.85f, 0.25f, 0.25f), // red
         new(0.25f, 0.70f, 0.35f), // green
         new(0.90f, 0.75f, 0.20f), // yellow
+        new(0.62f, 0.36f, 0.85f), // purple
+        new(0.95f, 0.52f, 0.15f), // orange
+        new(0.20f, 0.78f, 0.80f), // cyan
+        new(0.90f, 0.45f, 0.70f), // pink
     };
 
     public static MatchSettings Default(int aiCount = 1, string difficulty = "medium")

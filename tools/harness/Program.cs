@@ -23,6 +23,37 @@ var minutes = int.Parse(opts.GetValueOrDefault("minutes", "25"));
 var verbose = opts.ContainsKey("verbose");
 var factions = rules.Factions.Keys.OrderBy(k => k).ToArray();
 
+if (opts.TryGetValue("ffa", out var ffaMap))
+{
+    // --ffa twilight_frost  every start position gets an AI (factions rotate); reports the speed of the simulation.
+    var fmap = rules.Map(ffaMap);
+    var fw = new World(rules, fmap, fmap.Spawns.Select((_, i) => factions[i % factions.Length]), 1);
+    for (var p = 0; p < fmap.Spawns.Count; p++)
+    {
+        var s = fmap.Spawns[p];
+        var fd = fw.Player(p).Faction;
+        var hq = rules.Building(fd.Hq);
+        fw.PlaceBuilding(fd.Hq, p, (int)s.X - hq.Width / 2, (int)s.Y - hq.Height / 2);
+        fw.Spawn(fd.Builder, p, new Vec2(s.X, s.Y - 5));
+        fw.AddAi(p, rules.Ai(fd.Id, difficulty));
+    }
+    var clock = System.Diagnostics.Stopwatch.StartNew();
+    double worst = 0; long lastMs = 0;
+    while (!fw.Finished && fw.Tick < World.TicksPerSecond * 60 * minutes)
+    {
+        var t0 = clock.Elapsed.TotalMilliseconds;
+        fw.Step();
+        worst = Math.Max(worst, clock.Elapsed.TotalMilliseconds - t0);
+        if (fw.Tick % (World.TicksPerSecond * 300) != 0) continue;
+        var alive = Enumerable.Range(0, fw.PlayerCount).Where(p => !fw.Player(p).Eliminated).ToList();
+        Console.WriteLine($"{fw.Time / 60,4:0}m  entities={fw.Entities.Count,4}  alive={alive.Count}  avg tick={(clock.ElapsedMilliseconds - lastMs) / (double)(World.TicksPerSecond * 300):0.00} ms  worst tick={worst:0.0} ms  " +
+            string.Join(" ", alive.Select(p => $"{fw.Player(p).Faction.Id[..3]}{p}:{fw.Entities.Count(e => e.Owner == p && !e.IsBuilding)}")));
+        lastMs = clock.ElapsedMilliseconds; worst = 0;
+    }
+    Console.WriteLine($"winner: {(fw.Winner >= 0 ? $"player {fw.Winner} ({fw.Player(fw.Winner).Faction.Id})" : "timeout")} at {fw.Time / 60:0.0} min, {clock.Elapsed.TotalSeconds:0.0}s real (tick budget is 50 ms)");
+    return;
+}
+
 if (opts.TryGetValue("timeline", out var tl))
 {
     // --timeline coalition,directorate,plain[,seed]  prints a two-minute timeline of one match.

@@ -143,6 +143,9 @@ public sealed class MoveOrder
     public float ArriveRadius { get; init; } = 0.15f;
 
     internal FlowField? Field;
+    internal bool FieldIsCoarse;
+    internal bool Snapped;
+    internal bool DirectOk;
     internal float BestDist = float.MaxValue;
     internal int StuckTicks;
 }

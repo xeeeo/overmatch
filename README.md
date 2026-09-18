@@ -16,7 +16,7 @@ The world has moved on since 2003. Overmatch's battlefield is today's: cheap FPV
 
 ## Status
 
-Pre-alpha. Playable skirmish with all three factions, sound and six maps. M0–M5 are done: movement, combat, fog of war, base building, economy, production, upgrades, three full faction trees (Coalition, Directorate, Network), generals' promotions and powers, superweapons, garrisons, transports, tunnels, capturable oil derricks, stealth and detection, veterancy, salvage, hazards, a skirmish AI with four difficulty tiers, victory and defeat, menus. M5 added synthesised sound effects, radio voice lines, an announcer, a music loop, a minimap, control groups, six maps, battle-damage effects and a balance pass with a headless AI-vs-AI harness. M6 (packaged releases, contributor and modding docs) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
+Pre-alpha. Playable skirmish with all three factions, sound and seven maps. M0–M5 are done: movement, combat, fog of war, base building, economy, production, upgrades, three full faction trees (Coalition, Directorate, Network), generals' promotions and powers, superweapons, garrisons, transports, tunnels, capturable oil derricks, stealth and detection, veterancy, salvage, hazards, a skirmish AI with four difficulty tiers, victory and defeat, menus. M5 added synthesised sound effects, radio voice lines, an announcer, a music loop, a minimap, control groups, seven maps, battle-damage effects and a balance pass with a headless AI-vs-AI harness. M6 (packaged releases, contributor and modding docs) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
 
 ## Building from source
 

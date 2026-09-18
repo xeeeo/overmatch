@@ -10,6 +10,7 @@ public partial class MainMenu : CanvasLayer
     public App App { get; set; } = null!;
     /// <summary>Open straight on the skirmish setup page (used for screenshots).</summary>
     public bool StartOnSetup { get; set; }
+    public string InitialMap { get; set; } = "plain";
 
     private static readonly string[] FactionIds = { "coalition", "directorate", "network", "random" };
     private static readonly string[] Difficulties = { "easy", "medium", "hard", "brutal" };
@@ -30,14 +31,16 @@ public partial class MainMenu : CanvasLayer
     private double _intelTimer;
     private int _mapIndex;
     private int _cash = 1;
-    private readonly int[] _controllers = { 0, 1, 2, 2 }; // 0 human, 1 AI, 2 closed
-    private readonly int[] _factions = { 0, 3, 3, 3 };
-    private readonly int[] _difficulty = { 1, 1, 1, 1 };
+    private const int MaxSlots = 8;
+    private readonly int[] _controllers = { 0, 1, 2, 2, 2, 2, 2, 2 }; // 0 human, 1 AI, 2 closed
+    private readonly int[] _factions = { 0, 3, 3, 3, 3, 3, 3, 3 };
+    private readonly int[] _difficulty = { 1, 1, 1, 1, 1, 1, 1, 1 };
 
     public override void _Ready()
     {
         _maps = DataLoader.LoadRules().Maps.Values.OrderBy(m => m.Spawns.Count).ThenBy(m => m.Name).ToList();
-        _mapIndex = Math.Max(0, _maps.FindIndex(m => m.Id == "plain"));
+        _mapIndex = Math.Max(0, _maps.FindIndex(m => m.Id == InitialMap));
+        if (_maps[_mapIndex].Spawns.Count > 4) for (var i = 1; i < MaxSlots; i++) _controllers[i] = 1;
         _backdrop = new Backdrop();
         AddChild(_backdrop);
         _canvas = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
@@ -94,7 +97,7 @@ public partial class MainMenu : CanvasLayer
 
         var skirmish = Ui.Button(_page, "", 72, 481, 598, 76, () => Show(true), true);
         Ui.Text(skirmish, "01    SKIRMISH", 31, 8, 470, 33, 25, CommandTheme.Gold, true);
-        Ui.Text(skirmish, "Fight computer commanders on six battlefields", 31, 42, 480, 24, 16, CommandTheme.Muted);
+        Ui.Text(skirmish, "Fight up to seven computer commanders on seven battlefields", 31, 42, 480, 24, 16, CommandTheme.Muted);
         Ui.Text(skirmish, "›", 545, 8, 32, 45, 34, CommandTheme.Gold, true);
 
         var settings = Ui.Button(_page, "", 72, 573, 598, 76, OpenSettings);
@@ -140,7 +143,7 @@ public partial class MainMenu : CanvasLayer
         Ui.Text(_page, "01 / BATTLEFIELD", 90, 273, 430, 28, 19, CommandTheme.Gold, true);
         Ui.Text(_page, "02 / COMMANDERS", 618, 273, 640, 28, 19, CommandTheme.Gold, true);
 
-        var active = Enumerable.Range(0, 4).Where(i => i < map.Spawns.Count && _controllers[i] != 2).ToList();
+        var active = Enumerable.Range(0, MaxSlots).Where(i => i < map.Spawns.Count && _controllers[i] != 2).ToList();
         _page.AddChild(new MapSchematic { Position = new Vector2(90, 312), Size = new Vector2(446, 232), Map = map, ActiveSlots = active });
         var picker = Ui.Picker(_page, _maps.Select(m => m.Name).ToArray(), _mapIndex, 90, 556, 446, 44, 20);
         picker.ItemSelected += n => { _mapIndex = (int)n; Show(true); };
@@ -151,7 +154,9 @@ public partial class MainMenu : CanvasLayer
         Ui.Text(_page, "COMMAND", 701, 322, 190, 27, 15, CommandTheme.Muted, true);
         Ui.Text(_page, "FACTION", 929, 322, 230, 27, 15, CommandTheme.Muted, true);
         Ui.Text(_page, "DIFFICULTY", 1190, 322, 270, 27, 15, CommandTheme.Muted, true);
-        for (var i = 0; i < 4; i++) BuildSlot(i, 359 + i * 70, map);
+        // Four roomy rows, or eight compact ones on the big maps.
+        var rows = map.Spawns.Count > 4 ? MaxSlots : 4;
+        for (var i = 0; i < rows; i++) BuildSlot(i, rows > 4 ? 352 + i * 37 : 359 + i * 70, map, rows > 4);
 
         Ui.Text(_page, "STARTING FUNDS", 619, 663, 203, 28, 16, CommandTheme.Muted, true);
         var cash = Ui.Picker(_page, CashOptions.Select(c => $"$ {c:N0}").ToArray(), _cash, 809, 653, 194);
@@ -166,25 +171,26 @@ public partial class MainMenu : CanvasLayer
         deploy.Disabled = ais == 0;
     }
 
-    private void BuildSlot(int index, float y, MapDef map)
+    private void BuildSlot(int index, float y, MapDef map, bool compact)
     {
+        var (ph, pf) = compact ? (32f, 15) : (51f, 21);
         var available = index < map.Spawns.Count;
         if (!available) _controllers[index] = 2;
         var active = _controllers[index] != 2;
         var colour = MatchSettings.Palette[index % MatchSettings.Palette.Length];
-        _page.AddChild(new ColorRect { Position = new Vector2(619, y + 9), Size = new Vector2(5, 34), Color = active ? colour : colour.Darkened(.6f), MouseFilter = Control.MouseFilterEnum.Ignore });
-        Ui.Text(_page, $"0{index + 1}", 640, y + 5, 50, 40, 24, active ? CommandTheme.Text : CommandTheme.Muted.Darkened(.3f), true);
+        _page.AddChild(new ColorRect { Position = new Vector2(619, y + (compact ? 4 : 9)), Size = new Vector2(5, compact ? 24 : 34), Color = active ? colour : colour.Darkened(.6f), MouseFilter = Control.MouseFilterEnum.Ignore });
+        Ui.Text(_page, $"0{index + 1}", 640, y + (compact ? 2 : 5), 50, compact ? 28 : 40, compact ? 18 : 24, active ? CommandTheme.Text : CommandTheme.Muted.Darkened(.3f), true);
 
-        var command = Ui.Picker(_page, new[] { "Human", "AI Commander", "Closed" }, _controllers[index], 701, y, 203);
+        var command = Ui.Picker(_page, new[] { "Human", "AI Commander", "Closed" }, _controllers[index], 701, y, 203, ph, pf);
         if (index == 0 || !available) command.Disabled = true; else command.SetItemDisabled(0, true);
         if (!available) command.Text = "No start position";
         command.ItemSelected += n => { _controllers[index] = (int)n; Show(true); };
 
-        var faction = Ui.Picker(_page, new[] { "Coalition", "Directorate", "Network", "Random" }, _factions[index], 929, y, 236);
+        var faction = Ui.Picker(_page, new[] { "Coalition", "Directorate", "Network", "Random" }, _factions[index], 929, y, 236, ph, pf);
         faction.Disabled = !active;
         faction.ItemSelected += n => _factions[index] = (int)n;
 
-        var difficulty = Ui.Picker(_page, new[] { "Easy", "Medium", "Hard", "Brutal" }, _difficulty[index], 1190, y, 318);
+        var difficulty = Ui.Picker(_page, new[] { "Easy", "Medium", "Hard", "Brutal" }, _difficulty[index], 1190, y, 318, ph, pf);
         difficulty.Disabled = _controllers[index] != 1;
         if (_controllers[index] == 0) difficulty.Text = "PLAYER CONTROL";
         if (!active) difficulty.Text = "—";
@@ -198,7 +204,7 @@ public partial class MainMenu : CanvasLayer
         string Pick(int idx) => FactionIds[idx] == "random" ? FactionIds[rng.Next(3)] : FactionIds[idx];
         var s = new MatchSettings { StartingCash = CashOptions[_cash], MapId = map.Id };
         var n = 0;
-        for (var i = 0; i < 4 && i < map.Spawns.Count; i++)
+        for (var i = 0; i < MaxSlots && i < map.Spawns.Count; i++)
         {
             if (_controllers[i] == 2) continue;
             var fac = Pick(_factions[i]);

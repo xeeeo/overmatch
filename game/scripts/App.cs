@@ -14,6 +14,7 @@ public partial class App : Node
     private string _enemy = "coalition";
     private string _mapId = "plain";
     private string? _menuShot;
+    private int _ais = 1;
     private int _frames;
 
     public override void _Ready()
@@ -27,6 +28,7 @@ public partial class App : Node
             else if (arg.StartsWith("--enemy=")) _enemy = arg["--enemy=".Length..];
             else if (arg.StartsWith("--map=")) _mapId = arg["--map=".Length..];
             else if (arg.StartsWith("--menu-shot=")) _menuShot = arg["--menu-shot=".Length..];
+            else if (arg.StartsWith("--ais=")) _ais = int.Parse(arg["--ais=".Length..]);
         }
         var scripted = _smokePath is not null || _menuShot is not null;
         GameSettings.Load();
@@ -38,9 +40,10 @@ public partial class App : Node
         GameSettings.ApplyAll(win, window: !scripted && !OS.GetCmdlineArgs().Contains("--resolution"));
         if (_smokePath is not null || _autoDifficulty is not null)
         {
-            var s = MatchSettings.Default(1, _autoDifficulty ?? "medium");
+            var s = MatchSettings.Default(_ais, _autoDifficulty ?? "medium");
             s.Players[0].Faction = _faction;
-            s.Players[1].Faction = _enemy;
+            string[] rotation = { _enemy, "directorate", "network", "coalition" };
+            for (var i = 1; i < s.Players.Count; i++) s.Players[i].Faction = i == 1 ? _enemy : rotation[i % rotation.Length];
             s.MapId = _mapId;
             StartMatch(s);
         }
@@ -54,7 +57,7 @@ public partial class App : Node
         if (_menuShot is null) return;
         _frames++;
         if (_frames == 40) GetViewport().GetTexture().GetImage().SavePng(_menuShot.Replace(".png", "_title.png"));
-        if (_frames == 41) { _menu?.QueueFree(); _menu = new MainMenu { App = this, StartOnSetup = true }; AddChild(_menu); }
+        if (_frames == 41) { _menu?.QueueFree(); _menu = new MainMenu { App = this, StartOnSetup = true, InitialMap = _mapId }; AddChild(_menu); }
         if (_frames == 80) _menu?.OpenSettings();
         if (_frames == 110) GetViewport().GetTexture().GetImage().SavePng(_menuShot.Replace(".png", "_settings.png"));
         if (_frames == 79) GetViewport().GetTexture().GetImage().SavePng(_menuShot);

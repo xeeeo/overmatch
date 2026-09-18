@@ -11,6 +11,8 @@ public static class TerrainArt
 
     public static Palette Colours(string id) => id switch
     {
+        // Snow: pale ground, grey-blue ice on the river, dark wet rock.
+        "twilight_frost" => new("c9d2d6", "e6ecee", "9aa3a6", "5e676c", "6f8fa6", .05f, 1.7f),
         "highlands" => new("505a43", "777953", "69634b", "777c77", "355b5e", .18f, 2.0f),
         "oil_rush" => new("817454", "a09068", "907651", "80765f", "455c50", .9f, 1.25f),
         "open_steppe" => new("74724b", "9a8d5c", "84704d", "807965", "3b645c", .65f, 1.15f),

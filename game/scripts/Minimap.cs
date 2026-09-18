@@ -22,16 +22,18 @@ public partial class Minimap : Control
         ClipContents = true;
         SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         var grid = Root.World.Grid;
+        // Same palette as the terrain, darkened so unit blips stand out.
+        var pal = TerrainArt.Colours(Root.World.MapDef.Id);
         var img = Image.CreateEmpty(grid.Width, grid.Height, false, Image.Format.Rgb8);
         for (var y = 0; y < grid.Height; y++)
             for (var x = 0; x < grid.Width; x++)
                 img.SetPixel(x, grid.Height - 1 - y, grid.Get(x, y) switch
                 {
-                    CellType.Road => new Color(0.42f, 0.40f, 0.36f),
-                    CellType.Rough => new Color(0.40f, 0.34f, 0.23f),
-                    CellType.Water => new Color(0.18f, 0.36f, 0.52f),
-                    CellType.Cliff => new Color(0.24f, 0.24f, 0.23f),
-                    _ => new Color(0.30f, 0.36f, 0.20f),
+                    CellType.Road => new Color(0.30f, 0.30f, 0.29f),
+                    CellType.Rough => new Color(pal.Earth).Darkened(0.35f),
+                    CellType.Water => new Color(pal.Water).Lightened(0.05f),
+                    CellType.Cliff => new Color(pal.Stone).Darkened(0.55f),
+                    _ => new Color(pal.Meadow).Darkened(0.4f),
                 });
         _terrain = ImageTexture.CreateFromImage(img);
         _fogBytes = new byte[grid.Width * grid.Height * 4];

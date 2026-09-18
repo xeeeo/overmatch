@@ -284,6 +284,7 @@ public sealed class World
     {
         Tick++;
         _events.Clear();
+        Fields.BeginTick();
 
         foreach (var e in _entities)
         {

@@ -14,7 +14,7 @@ public class MapTests
         var rules = RealDataTests.LoadShipped();
         var map = rules.Map(mapId);
         Assert.True(map.Spawns.Count >= 2, "needs at least two spawns");
-        Assert.True(map.Spawns.Count <= 4, "at most four players are supported");
+        Assert.True(map.Spawns.Count <= 8, "at most eight players are supported");
 
         // Neutral buildings must sit on buildable ground and not overlap each other.
         var probe = new World(rules, new MapDef { Id = "probe", Width = map.Width, Height = map.Height, Blocked = map.Blocked, Water = map.Water, Rough = map.Rough, Road = map.Road, Supplies = map.Supplies },
