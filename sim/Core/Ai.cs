@@ -77,20 +77,25 @@ public sealed class AiController
         var target = _wave.Count > 0 && _w.Get(_waveTargetId) is { } wt ? wt : enemyHq ?? NearestEnemyBuilding(hq.Pos);
         if (target is null) return;
 
+        // Offensive powers support an attack that has arrived, or answer an attack on our base. Never a cold opening strike.
+        var waveLead = _wave.Count > 0 ? _w.Get(_wave[0]) : null;
+        var waveEngaged = waveLead is not null && (waveLead.Pos - target.Pos).Length < 22f;
+        var intruder = BaseIntruder();
         foreach (var pid in me.PowersOwned)
         {
             var def = _w.Rules.Power(pid);
-            if (def.Target == "none" || _w.Time < me.PowerReadyAt(pid)) continue;
-            var at = def.Effect.Type switch
+            if (_w.Time < me.PowerReadyAt(pid)) continue;
+            Vec2? at = def.Effect.Type switch
             {
-                "heal" => DamagedCluster() ?? target.Pos,
-                "reveal" => target.Pos,
-                "spawn" when def.Effect.Unit.Contains("drone") || def.Effect.Unit.Contains("ied") => target.Pos,
-                "spawn" => _wave.Count > 0 ? target.Pos : _muster,
-                _ => target.Pos,
+                "heal" => DamagedCluster(),
+                "reveal" => _w.Time > _p.FirstWaveAt * 0.5f ? target.Pos : null,
+                "discount" => _w.Time > _p.FirstWaveAt * 0.5f && me.Cash > 2000 ? Vec2.Zero : null,
+                "spawn" when def.Effect.Unit.Contains("ied") => intruder is not null ? null : _muster + _enemyDir * 8f,
+                "status" or "strike" or "damage" or "spawn" => waveEngaged ? target.Pos : intruder?.Pos,
+                _ => null,
             };
-            if (def.Effect.Type == "heal" && DamagedCluster() is null) continue;
-            _w.Submit(new UsePowerCommand(Player, pid, at));
+            if (at is null) continue;
+            _w.Submit(new UsePowerCommand(Player, pid, at.Value));
             break;
         }
 
@@ -100,6 +105,15 @@ public sealed class AiController
             _w.Submit(new FireSuperweaponCommand(Player, b.Id, (enemyHq ?? target).Pos));
             Status = "superweapon fired";
         }
+    }
+
+    /// <summary>An enemy combat unit close to one of our buildings, if any.</summary>
+    private Entity? BaseIntruder()
+    {
+        foreach (var b in Mine.Where(e => e.IsBuilding))
+            foreach (var c in _w.Spatial.Query(b.Pos, 14f))
+                if (c.Owner != Player && c.Owner >= 0 && !c.IsBuilding && c.HasWeapons && !c.IsInside) return c;
+        return null;
     }
 
     private Vec2? DamagedCluster()
@@ -340,9 +354,11 @@ public sealed class AiController
     private void ManageAttack(Entity hq)
     {
         var now = _w.Time;
+        var home = Mine.Where(e => !e.IsBuilding && e.HasWeapons && !e.IsHarvester && !e.IsBuilder && !e.IsInside && e.FollowId == 0 && !_wave.Contains(e.Id)).ToList();
+
         if (_wave.Count > 0)
         {
-            // Wave in progress: retarget when the target dies; retreat when mauled.
+            // A mauled wave comes home and rejoins the pool.
             if (_wave.Count <= _waveStartCount * _p.RetreatFraction)
             {
                 _w.Submit(new MoveCommand(Player, _wave.ToArray(), _muster));
@@ -350,29 +366,26 @@ public sealed class AiController
                 Status = "retreating";
                 return;
             }
-            if (_w.Get(_waveTargetId) is null || (_w.Tick % 100 == 0))
+            // Keep the wave pointed at something alive.
+            if (_w.Get(_waveTargetId) is null || _w.Tick % 100 == 0)
             {
                 var lead = _w.Get(_wave[0])!;
                 var target = PickTarget(lead.Pos);
                 if (target is null) { _wave.Clear(); return; }
-                if (target.Id != _waveTargetId || _w.Tick % 100 == 0)
-                {
-                    _waveTargetId = target.Id;
-                    _w.Submit(new AttackMoveCommand(Player, _wave.ToArray(), target.Pos));
-                }
+                _waveTargetId = target.Id;
+                _w.Submit(new AttackMoveCommand(Player, _wave.ToArray(), target.Pos));
             }
-            return;
         }
 
-        var army = Mine.Where(e => !e.IsBuilding && e.HasWeapons && !e.IsHarvester && !e.IsBuilder).ToList();
+        // Launch a wave, or reinforce the one in the field, whenever enough fresh units have gathered.
         var interval = _lastWaveTime < 0 ? _p.FirstWaveAt : _p.WaveInterval;
         var since = now - (_lastWaveTime < 0 ? 0f : _lastWaveTime);
-        var ready = army.Count >= _p.WaveSize || (since >= interval * 1.5f && army.Count >= Math.Max(3, _p.WaveSize / 2));
+        var ready = home.Count >= _p.WaveSize || (since >= interval * 1.5f && home.Count >= Math.Max(3, _p.WaveSize / 2));
         if (now < _p.FirstWaveAt || since < interval || !ready) return;
 
-        var tgt = PickTarget(_muster);
+        var tgt = _wave.Count > 0 && _w.Get(_waveTargetId) is { } current ? current : PickTarget(_muster);
         if (tgt is null) return;
-        _wave.AddRange(army.Select(a => a.Id));
+        _wave.AddRange(home.Select(a => a.Id));
         _waveStartCount = _wave.Count;
         _waveTargetId = tgt.Id;
         _lastWaveTime = now;

@@ -26,7 +26,17 @@ public static class Powers
         if (p.Points < 1) { world.Reject(cmd.Player, "no promotion points"); return; }
         p.Points--;
         p.GrantPower(def.Id);
-        if (def.Target == "none") Use(world, new UsePowerCommand(cmd.Player, def.Id, Vec2.Zero));
+        if (def.Effect.Type == "bounty")
+        {
+            // Passive powers take effect at once and never need firing.
+            Effects.Apply(world, def.Effect, cmd.Player, Vec2.Zero, null, def.Id);
+            p.SetPowerReadyAt(def.Id, float.MaxValue);
+        }
+        else
+        {
+            // A newly bought power has to charge before its first use, as in Generals.
+            p.SetPowerReadyAt(def.Id, world.Time + def.Cooldown);
+        }
     }
 
     public static void Use(World world, UsePowerCommand cmd)

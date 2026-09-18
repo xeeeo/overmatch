@@ -8,7 +8,8 @@
     "coalition_power_plant",
     "coalition_strategy_center",
     "coalition_airfield",
-    "coalition_drop_zone"
+    "coalition_drop_zone",
+    "coalition_orbital_uplink"
   ],
   "powerBuilding": "coalition_power_plant",
   "supplyBuilding": "coalition_supply_center",

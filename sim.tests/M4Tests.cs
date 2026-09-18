@@ -105,6 +105,12 @@ public class M4Tests
         w.Step();
         Assert.True(p.HasPower("coalition_loitering_swarm"));
         Assert.Equal(0, p.Points);
+        // A newly bought power must charge first.
+        w.Submit(new UsePowerCommand(0, "coalition_loitering_swarm", new Vec2(40, 40)));
+        w.Step();
+        Assert.Contains(w.Events, e => e is OrderRejectedEvent { Reason: "power recharging" });
+        Assert.Equal(0, w.Entities.Count(e => e.Def.Id == "coalition_loiter_drone"));
+        TestRules.Run(w, 20 * 151);
         w.Submit(new UsePowerCommand(0, "coalition_loitering_swarm", new Vec2(40, 40)));
         w.Step();
         Assert.Equal(6, w.Entities.Count(e => e.Def.Id == "coalition_loiter_drone" && e.Owner == 0));
@@ -127,6 +133,7 @@ public class M4Tests
         var p = w.Player(0);
         Powers.AddXp(w, p, 900);
         w.Submit(new BuyPowerCommand(0, "coalition_precision_strike"));
+        TestRules.Run(w, 20 * 181); // charge after purchase
         var victim = w.Spawn("coalition_bulwark", 1, new Vec2(40, 40));
         w.Submit(new UsePowerCommand(0, "coalition_precision_strike", new Vec2(40, 40)));
         TestRules.Run(w, 20 * 2);

@@ -7,7 +7,8 @@
     "network_tunnel_network",
     "network_black_market",
     "network_compound",
-    "network_drone_workshop"
+    "network_drone_workshop",
+    "network_launch_site"
   ],
   "powerBuilding": "",
   "supplyBuilding": "network_supply_stash",

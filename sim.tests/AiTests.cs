@@ -163,6 +163,51 @@ public class FactionAiTests
         Assert.True(Value(0) > Value(1) * 1.5f, $"{strong} brutal should be clearly ahead of {weak} easy after 22 minutes.\n  {Summary(0)}\n  {Summary(1)}");
     }
 
+    [Theory]
+    [InlineData("coalition")]
+    [InlineData("directorate")]
+    [InlineData("network")]
+    public void Ai_DoesNotStrikeTheEnemyBaseInTheOpeningMinutes(string aiFaction)
+    {
+        var rules = RealDataTests.LoadShipped();
+        var map = rules.Map("plain");
+        var w = new World(rules, map, new[] { "coalition", aiFaction });
+        for (var p = 0; p < 2; p++)
+        {
+            var s = map.Spawns[p];
+            var fd = w.Player(p).Faction;
+            var hqDef = rules.Building(fd.Hq);
+            w.PlaceBuilding(fd.Hq, p, (int)s.X - hqDef.Width / 2, (int)s.Y - hqDef.Height / 2);
+            w.Spawn(fd.Builder, p, new Vec2(s.X, s.Y - 5));
+        }
+        w.AddAi(1, rules.Ai(aiFaction, "brutal"));
+        var hq = w.Entities.First(e => e.Owner == 0 && e.IsBuilding);
+        var events = new List<GameEvent>();
+        for (var t = 0; t < 20 * 120; t++)
+        {
+            w.Step();
+            events.AddRange(w.Events.Where(e => e is PowerUsedEvent { Player: 1 } or DamagedEvent));
+        }
+        Assert.Equal(hq.MaxHp, hq.Hp);
+        Assert.DoesNotContain(events, e => e is DamagedEvent d && w.Get(d.EntityId)?.Owner == 0);
+        Assert.DoesNotContain(events, e => e is PowerUsedEvent);
+    }
+
+    [Fact]
+    public void CashBounty_IsPassiveAndImmediate()
+    {
+        var rules = RealDataTests.LoadShipped();
+        var w = new World(rules, new MapDef { Id = "t", Width = 80, Height = 80 }, new[] { "network", "coalition" });
+        w.Submit(new BuyPowerCommand(0, "network_cash_bounty"));
+        w.Step();
+        Assert.True(w.Player(0).BountyPerKill > 0f);
+        var cash = w.Player(0).Cash;
+        var tech = w.Spawn("network_marauder", 0, new Vec2(30, 30));
+        var victim = w.Spawn("coalition_rifleman", 1, new Vec2(33, 30));
+        TestRules.RunUntil(w, () => w.Get(victim.Id) is null, 20 * 30);
+        Assert.True(w.Player(0).Cash > cash, "a kill should pay a bounty");
+    }
+
     [Fact]
     public void Network_HolesRegrowBuildings()
     {

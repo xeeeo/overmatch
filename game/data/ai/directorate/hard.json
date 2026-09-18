@@ -8,7 +8,8 @@
     "directorate_reactor",
     "directorate_propaganda_center",
     "directorate_cyber_center",
-    "directorate_airfield"
+    "directorate_airfield",
+    "directorate_missile_silo"
   ],
   "powerBuilding": "directorate_reactor",
   "supplyBuilding": "directorate_supply_depot",

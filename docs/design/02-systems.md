@@ -94,11 +94,11 @@ A player is eliminated when they own no buildings and no builders (checked once 
 - **Stealth / detection**: stealthed objects are unseen unless within a detector's radius or `revealed` (2 s after firing). Camouflage grants stealth to a unit tag by upgrade.
 - **Garrisons**: infantry enter buildings/transports with slots, fire from inside with +2.5 range, die with the container. Flame/toxin/flashbang weapons hit occupants (`clearsGarrison`). Tunnels share one pool per player; exit at any tunnel.
 - **Capture**: `canCapture` infantry take 12 s next to a `capturable` building (oil derricks pay 150 per 10 s).
-- **Promotions**: player XP from kills; ranks at 300/800/1600/2800; one point per rank; powers cost one point and need rank 1/3/5; cooldowns per power.
+- **Promotions**: player XP from kills; ranks at 300/800/1600/2800; one point per rank; powers cost one point and need rank 1/3/5; cooldowns per power. A newly bought power charges for one full cooldown before its first use; passive powers (Cash Bounty) apply at once.
 - **Superweapons**: buildings with `superweapon` charge over 5–6 minutes (half speed when under-powered), fire an effect at a target, and reset.
 - **Veterancy**: per-unit XP thresholds; +10% damage and HP per level; level 3 self-heals. **Salvage**: Network vehicles pick crates from enemy vehicle wrecks (+30% damage, +25% HP per level, max 2).
 - **Holes**: Network buildings leave a stealthed hole that regrows the building in 60 s unless destroyed.
 - **Spawners**: the Hive keeps four loitering drones that follow it. **Lifetime** units (power drones) expire. **Ammo**: jets fly home to an airfield pad to rearm; pads cap the jet count.
 - **Suicide weapons**: Saboteur, Bomb Truck, IED, FPV and loitering drones detonate on contact. **Death damage**: Reactors explode and irradiate. **Crush**: the Colossus kills infantry it drives over.
 - **Neutral map objects**: civilian houses/blocks to garrison, oil derricks to capture. Neutral owner is -1 and is never auto-targeted.
-- The AI buys powers in faction order, uses targeted powers on its wave target or the enemy HQ, and fires superweapons at the enemy HQ.
+- The AI buys powers in faction order. It uses offensive powers only to support a wave that has reached its target or to hit intruders at its own base, never as a cold opening strike. It fires superweapons at the enemy HQ. Hard and Brutal build the superweapon. Waves reinforce: fresh units join or relaunch the attack whenever enough gather, so a lingering wave cannot leave the AI passive.
