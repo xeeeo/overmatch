@@ -25,6 +25,27 @@ public partial class Vfx : Node3D
         AlbedoColor = new Color(1f, 0.85f, 0.4f), ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
     };
 
+    public RtsCamera? Camera { get; set; }
+
+    private void Kick(Vector3 at, float power)
+    {
+        if (Camera is null) return;
+        var d = (at - Camera.GlobalPosition).Length();
+        if (d < 70f) Camera.Shake(power * (1f - d / 70f));
+    }
+
+    private void Ring(Vector3 at, float radius, float life)
+    {
+        var mat = new StandardMaterial3D { AlbedoColor = new Color(1f, 0.9f, 0.7f, 0.8f), ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded, Transparency = BaseMaterial3D.TransparencyEnum.Alpha };
+        var node = new MeshInstance3D { Mesh = _ringMesh, MaterialOverride = mat, Position = new Vector3(at.X, 0.15f, at.Z), Scale = Vector3.One * 0.2f };
+        AddChild(node);
+        _rings.Add((node, mat, life, life, radius));
+    }
+
+    private readonly TorusMesh _ringMesh = new() { InnerRadius = 0.92f, OuterRadius = 1f, Rings = 32, RingSegments = 4 };
+    private readonly List<(MeshInstance3D node, StandardMaterial3D mat, float life, float max, float radius)> _rings = new();
+    private int _trailTick;
+
     public void Consume(World world, Func<int, Color> team)
     {
         foreach (var ev in world.Events)
@@ -48,6 +69,8 @@ public partial class Vfx : Node3D
                     Spawn(at + Vector3.Up * si.Radius * 0.4f, new Color(0.3f, 0.27f, 0.24f, 0.7f), si.Radius * 0.5f, si.Radius * 1.3f, big ? 3.5f : 1.2f);
                     Sparks(at, big ? 40 : 10, new Color(1f, 0.6f, 0.2f), si.Radius * 1.5f, big ? 1.8f : 0.8f);
                     if (big) Sparks(at, 30, new Color(0.25f, 0.22f, 0.2f), si.Radius, 3f);
+                    Ring(at, si.Radius * 1.4f, big ? 1.2f : 0.5f);
+                    Kick(at, big ? 1.4f : 0.35f);
                     break;
                 }
                 case SuperweaponFiredEvent sf:
@@ -65,6 +88,8 @@ public partial class Vfx : Node3D
                     Sparks(at, 8, new Color(1f, 0.6f, 0.2f), 7f, 0.6f);
                     if (d.WasBuilding)
                     {
+                        Kick(at, 0.6f);
+                        Ring(at, 5f, 0.6f);
                         Spawn(at, new Color(1f, 0.55f, 0.2f), 2f, 7f, 0.5f);
                         Sparks(at, 24, new Color(0.3f, 0.28f, 0.26f), 8f, 2.2f);
                         if (world.Rules.Buildings.TryGetValue(d.DefId, out var bdef)) Rubble(d, bdef.Width, bdef.Height);
@@ -235,6 +260,9 @@ public partial class Vfx : Node3D
             var pos = Vec2.Lerp(p.PrevPos, p.Pos, alpha);
             var arc = p.Weapon.Projectile.Arc ? Mathf.Sin(Mathf.Clamp(p.Progress, 0, 1) * Mathf.Pi) * p.TotalDistance * 0.15f : 0f;
             node.Position = MapView.ToWorld(pos, 1.2f + arc);
+            // Missiles and lobbed rockets leave a smoke trail.
+            if ((p.Homing || p.Weapon.Projectile.Arc) && (_trailTick + p.Id) % 3 == 0)
+                Spawn(node.Position, new Color(0.75f, 0.75f, 0.75f, 0.45f), 0.18f, 0.55f, 0.5f);
             var dir = p.Aim - p.Pos;
             if (dir.LengthSq > 1e-4f) node.Rotation = new Vector3(0, dir.Angle, 0);
         }
@@ -249,6 +277,17 @@ public partial class Vfx : Node3D
     public override void _Process(double delta)
     {
         var dt = (float)delta;
+        _trailTick++;
+        for (var i = _rings.Count - 1; i >= 0; i--)
+        {
+            var (node, mat, life, max, radius) = _rings[i];
+            life -= dt;
+            if (life <= 0f) { node.QueueFree(); _rings.RemoveAt(i); continue; }
+            var t = 1f - life / max;
+            node.Scale = Vector3.One * Mathf.Lerp(0.2f, radius, Mathf.Sqrt(t));
+            mat.AlbedoColor = new Color(1f, 0.9f, 0.7f, 0.8f * (1f - t));
+            _rings[i] = (node, mat, life, max, radius);
+        }
         for (var i = _flashes.Count - 1; i >= 0; i--)
         {
             var f = _flashes[i];

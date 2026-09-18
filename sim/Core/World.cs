@@ -39,6 +39,7 @@ public sealed class World
     internal readonly List<(string defId, int owner, int cx, int cy)> PendingHoles = new();
     /// <summary>Deterministic randomness for scatter and the like.</summary>
     public Random Rng { get; }
+    public int Seed { get; }
     /// <summary>Building entity id occupying each cell, 0 for none.</summary>
     private readonly int[] _cellBuilding;
     private int _nextId = 1;
@@ -50,7 +51,7 @@ public sealed class World
     public IReadOnlyList<GameEvent> Events => _events;
     public SpatialHash Spatial { get; } = new();
 
-    public World(GameRules rules, MapDef map, IEnumerable<string> playerFactions)
+    public World(GameRules rules, MapDef map, IEnumerable<string> playerFactions, int seed = 0)
     {
         Rules = rules;
         MapDef = map;
@@ -63,7 +64,8 @@ public sealed class World
         }
         Vision = new VisionMap(Grid.Width, Grid.Height, _players.Count);
         Fields = new FlowFieldCache(Grid);
-        Rng = new Random(map.Width * 7919 + map.Height * 31 + _players.Count);
+        Rng = new Random(map.Width * 7919 + map.Height * 31 + _players.Count + seed * 104729);
+        Seed = seed;
         foreach (var s in map.Supplies)
             _piles.Add(new SupplyPile { Id = _nextId++, Pos = new Vec2(s.X, s.Y), Initial = s.Amount, Remaining = s.Amount });
         foreach (var n in map.Neutrals)

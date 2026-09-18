@@ -16,7 +16,7 @@ The world has moved on since 2003. Overmatch's battlefield is today's: cheap FPV
 
 ## Status
 
-Pre-alpha. Playable skirmish with all three factions. M0–M4 are done: movement, combat, fog of war, base building, economy, production, upgrades, three full faction trees (Coalition, Directorate, Network), generals' promotions and powers, superweapons, garrisons, transports, tunnels, capturable oil derricks, stealth and detection, veterancy, salvage, hazards, a skirmish AI with four difficulty tiers, victory and defeat, menus. M5 (feel: sound, voices, minimap, more maps, balance) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
+Pre-alpha. Playable skirmish with all three factions, sound and six maps. M0–M5 are done: movement, combat, fog of war, base building, economy, production, upgrades, three full faction trees (Coalition, Directorate, Network), generals' promotions and powers, superweapons, garrisons, transports, tunnels, capturable oil derricks, stealth and detection, veterancy, salvage, hazards, a skirmish AI with four difficulty tiers, victory and defeat, menus. M5 added synthesised sound effects, radio voice lines, an announcer, a music loop, a minimap, control groups, six maps, battle-damage effects and a balance pass with a headless AI-vs-AI harness. M6 (packaged releases, contributor and modding docs) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
 
 ## Building from source
 
@@ -36,6 +36,35 @@ godot-mono --headless --path game --export-release macOS   # export (see game/ex
 
 Smoke test used by Claude for visual checks: `godot-mono --path game -- --smoke=/tmp/out.png --speed=8 --ai=medium` skips the menu, plays a Medium AI for six game minutes at 8x, screenshots its base and quits. `--ai=<difficulty>` alone starts a match straight away.
 
+## Controls
+
+| | |
+|---|---|
+| Left-drag / click | select; Shift adds; double-click selects every unit of that type on screen |
+| Right-click | move, attack, enter a building or transport, capture a tech building, harvest, help build, set a rally point |
+| A then click | attack-move |
+| S | stop |
+| Ctrl+1–9 / 1–9 | set / recall a control group; double-tap to jump to it |
+| H | jump to headquarters |
+| Space | jump to the last alert |
+| Click anything not yours | inspect it |
+| WASD, screen edges, middle-drag | pan; Q/E rotate; wheel, two-finger scroll or +/- zoom |
+| Minimap | left-click to look, right-click to send the selection |
+| M | music on/off; Esc pauses |
+
+Hover any build, unit, upgrade or power button to read what it costs, what it needs, and what it can attack (ground, air or both).
+
+## Tools
+
+```bash
+dotnet run --project tools/harness -c Release -- --seeds 3          # AI-vs-AI balance matrix
+dotnet run --project tools/harness -c Release -- --timeline coalition,network,plain
+python3 tools/maps/build_maps.py        # regenerate the symmetric maps
+python3 tools/audio/build_sfx.py        # synthesise sound effects (pure Python)
+python3 tools/audio/build_voices.py     # voice lines; needs `brew install espeak-ng`
+python3 tools/audio/build_music.py      # the ambient loop
+```
+
 ## Repository layout
 
 ```
@@ -46,6 +75,8 @@ game/              Godot 4.7 project (presentation, input, UI)
 tools/blender/     Python scripts that generate every model as glTF
 tools/voices/      TTS scripts for unit voice lines
 tools/harness/     headless AI-vs-AI match runner
+tools/maps/        map generator
+tools/audio/       sound, voice and music generators
 ```
 
 ## Licence

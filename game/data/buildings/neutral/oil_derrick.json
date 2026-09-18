@@ -1,2 +1,26 @@
-{ "id": "oil_derrick", "name": "Oil Derrick", "faction": "", "cost": 0, "buildTime": 1, "footprint": [3, 3], "hp": 1500, "armour": "structure", "vision": 6,
-  "capturable": true, "needsPower": false, "trickle": { "amount": 150, "interval": 10 }, "model": "neutral/oil_derrick", "tags": ["structure", "tech"], "description": "Capture with infantry for a steady income." }
+{
+  "id": "oil_derrick",
+  "name": "Oil Derrick",
+  "faction": "",
+  "cost": 0,
+  "buildTime": 1,
+  "footprint": [
+    3,
+    3
+  ],
+  "hp": 1500,
+  "armour": "structure",
+  "vision": 6,
+  "capturable": true,
+  "needsPower": false,
+  "trickle": {
+    "amount": 100,
+    "interval": 12
+  },
+  "model": "neutral/oil_derrick",
+  "tags": [
+    "structure",
+    "tech"
+  ],
+  "description": "Capture with infantry for a steady income."
+}

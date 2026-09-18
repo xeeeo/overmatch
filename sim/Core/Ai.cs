@@ -22,6 +22,10 @@ public sealed class AiController
     private int _defenceIndex;
     /// <summary>Units given a job by a command submitted this think (commands apply next tick, so the entity does not show it yet).</summary>
     private readonly HashSet<int> _assigned = new();
+    /// <summary>True while the AI is holding back unit production to afford something essential (an expansion).</summary>
+    private bool _saving;
+    /// <summary>Cost of the most important thing the AI wanted this think but could not afford. Unit production leaves room for it.</summary>
+    private int _pendingCost;
 
     public string Status { get; private set; } = "";
 
@@ -30,7 +34,7 @@ public sealed class AiController
         _w = world;
         _p = profile;
         Player = player;
-        _nextThink = world.Tick + player * 7 + 5;
+        _nextThink = world.Tick + player * 7 + 5 + world.Seed % 11;
     }
 
     private Player Me => _w.Player(Player);
@@ -46,6 +50,7 @@ public sealed class AiController
         UpdateEnemyDirection(hq);
         _wave.RemoveAll(id => _w.Get(id) is null);
         _assigned.Clear();
+        _pendingCost = 0;
 
         ManageBuilders(hq);
         ManageBase(hq);
@@ -146,6 +151,10 @@ public sealed class AiController
         return best;
     }
 
+    /// <summary>Armed, mobile, commandable: not a building, harvester, builder, escort drone, mine or passenger.</summary>
+    private static bool IsArmyUnit(Entity e) =>
+        !e.IsBuilding && e.HasWeapons && !e.IsHarvester && !e.IsBuilder && !e.IsInside && e.FollowId == 0 && e.LifetimeLeft <= 0f && e.Unit is { Speed: > 0f };
+
     private int Count(string defId) => Mine.Count(e => e.Def.Id == defId);
     private int CountIncludingQueued(string unitId) => Count(unitId) + Mine.Sum(e => e.Queue?.Items.Count(i => !i.IsUpgrade && i.Id == unitId) ?? 0);
     private bool Owns(string buildingId) => Mine.Any(e => e.Building?.Id == buildingId);
@@ -177,11 +186,13 @@ public sealed class AiController
         return null;
     }
 
+    /// <summary>Two free cells all round: lanes wide enough for a tank or a loaded truck to pass its neighbours.</summary>
     private bool CanPlaceWithMargin(BuildingDef def, int cx, int cy)
     {
         if (!_w.CanPlace(def, cx, cy, out _)) return false;
-        for (var y = cy - 1; y <= cy + def.Height; y++)
-            for (var x = cx - 1; x <= cx + def.Width; x++)
+        const int margin = 2;
+        for (var y = cy - margin; y < cy + def.Height + margin; y++)
+            for (var x = cx - margin; x < cx + def.Width + margin; x++)
             {
                 if (!_w.Grid.InBounds(x, y)) return false;
                 if (_w.BuildingAt(x, y) != 0) return false;
@@ -196,7 +207,7 @@ public sealed class AiController
         if (!_w.Rules.Buildings.TryGetValue(buildingId, out var def)) return false;
         if (Constructing(buildingId)) return false;
         if (!_w.HasPrereqs(Player, def.Prereqs, out _)) return false;
-        if (!CanAfford(def.Cost)) return false;
+        if (!CanAfford(def.Cost)) { _pendingCost = Math.Max(_pendingCost, def.Cost); return false; }
         var builder = IdleBuilder();
         if (builder is null) return false;
         var spot = FindPlacement(def, anchor, minDist, maxDist, bias);
@@ -232,6 +243,25 @@ public sealed class AiController
             }
         }
 
+        // Expansion comes before everything else once the supplies near our centres are nearly gone: no income, no army.
+        _saving = false;
+        if (_p.Expand && _p.SupplyBuilding != "" && !Constructing(_p.SupplyBuilding))
+        {
+            var centres = Mine.Where(e => e.Building is { SupplyCenter: true }).ToList();
+            var nearby = centres.Sum(c => _w.Piles.Where(pl => (pl.Pos - c.Pos).Length < 22f).Sum(pl => pl.Remaining));
+            if (centres.Count > 0 && centres.All(c => c.Operational) && nearby < 6000)
+            {
+                var pile = _w.Piles.Where(pl => !pl.Depleted && pl.Remaining > 8000 && !centres.Any(c => (c.Pos - pl.Pos).Length < 22f))
+                    .OrderBy(pl => (pl.Pos - hq.Pos).LengthSq).FirstOrDefault();
+                if (pile is not null)
+                {
+                    if (TryBuild(_p.SupplyBuilding, pile.Pos, 4f, 12f, (hq.Pos - pile.Pos).Normalized)) return;
+                    _saving = !CanAfford(_w.Rules.Building(_p.SupplyBuilding).Cost);
+                    if (_saving) { Status = "saving for an expansion"; return; }
+                }
+            }
+        }
+
         // The build order.
         foreach (var b in _p.BuildOrder)
         {
@@ -254,16 +284,7 @@ public sealed class AiController
             if (TryBuild(_p.DefenceBuilding, hq.Pos + _enemyDir * 10f + perp, 0.5f, 6f, _enemyDir)) return;
         }
 
-        // Expansion: all piles near our supply centres empty → new centre at another pile.
-        if (_p.Expand && _p.SupplyBuilding != "" && !Constructing(_p.SupplyBuilding))
-        {
-            var centres = Mine.Where(e => e.Operational && e.Building is { SupplyCenter: true }).ToList();
-            if (centres.Count > 0 && !centres.Any(c => Economy.NearestPile(_w, c.Pos, 30f) is not null))
-            {
-                var pile = Economy.NearestPile(_w, hq.Pos, 200f);
-                if (pile is not null && TryBuild(_p.SupplyBuilding, pile.Pos, 4f, 12f, (hq.Pos - pile.Pos).Normalized)) return;
-            }
-        }
+
     }
 
     private void ManageHarvesters()
@@ -279,14 +300,16 @@ public sealed class AiController
                 if (Economy.NearestPile(_w, h.Pos, 60f) is not null) { _w.Submit(new HarvestCommand(Player, new[] { h.Id }, 0)); _assigned.Add(h.Id); }
         if (have >= target || _w.Piles.All(p => p.Depleted)) return;
         var producer = Producers(_p.HarvesterUnit).FirstOrDefault(e => e.Queue is { Items.Count: 0 });
-        if (producer is null || !CanAfford(_w.Rules.Unit(_p.HarvesterUnit).Cost)) return;
+        if (producer is null) return;
+        var harvesterCost = _w.Rules.Unit(_p.HarvesterUnit).Cost;
+        if (!CanAfford(harvesterCost)) { _pendingCost = Math.Max(_pendingCost, harvesterCost); return; }
         _w.Submit(new ProduceCommand(Player, producer.Id, _p.HarvesterUnit));
     }
 
     private void ManageProduction()
     {
-        var army = Mine.Count(e => !e.IsBuilding && e.HasWeapons);
-        if (army >= _p.MaxArmy || _p.Composition.Count == 0) return;
+        var army = Mine.Count(IsArmyUnit);
+        if (army >= _p.MaxArmy || _p.Composition.Count == 0 || _saving) return;
         foreach (var producer in Mine.Where(e => e.Operational && e.Queue is not null && e.Building!.Produces.Count > 0))
         {
             if (producer.Queue!.Items.Count >= 2) continue;
@@ -305,7 +328,9 @@ public sealed class AiController
             }
             if (pick is null) continue;
             var cost = _w.Rules.Unit(pick).Cost;
-            if (!CanAfford(cost)) continue;
+            // Leave room for a pending essential purchase once there is a minimal defence force.
+            var reserve = army >= 6 ? (int)(_pendingCost * 0.7f) : 0;
+            if (Me.Cash < cost + _p.CashReserve + reserve) continue;
             _w.Submit(new ProduceCommand(Player, producer.Id, pick));
             _produced[pick] = _produced.GetValueOrDefault(pick) + 1;
         }
@@ -344,8 +369,7 @@ public sealed class AiController
         }
         if (threat is null) return;
         _lastDefenceTime = _w.Time;
-        var defenders = Mine.Where(e => !e.IsBuilding && e.HasWeapons && !_wave.Contains(e.Id) && !e.IsHarvester && !e.IsBuilder)
-            .Select(e => e.Id).ToArray();
+        var defenders = Mine.Where(e => IsArmyUnit(e) && !_wave.Contains(e.Id)).Select(e => e.Id).ToArray();
         if (defenders.Length == 0) return;
         _w.Submit(new AttackMoveCommand(Player, defenders, threat.Pos));
         Status = "defending";
@@ -354,7 +378,7 @@ public sealed class AiController
     private void ManageAttack(Entity hq)
     {
         var now = _w.Time;
-        var home = Mine.Where(e => !e.IsBuilding && e.HasWeapons && !e.IsHarvester && !e.IsBuilder && !e.IsInside && e.FollowId == 0 && !_wave.Contains(e.Id)).ToList();
+        var home = Mine.Where(e => IsArmyUnit(e) && !_wave.Contains(e.Id)).ToList();
 
         if (_wave.Count > 0)
         {

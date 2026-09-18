@@ -349,6 +349,7 @@ public sealed class MapDef
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
+    public string Description { get; set; } = "";
     public int Width { get; set; } = 64;
     public int Height { get; set; } = 64;
     public List<RectDef> Blocked { get; set; } = new();

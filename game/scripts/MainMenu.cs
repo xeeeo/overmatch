@@ -13,6 +13,9 @@ public partial class MainMenu : CanvasLayer
     private readonly List<(OptionButton kind, OptionButton faction, OptionButton difficulty)> _slots = new();
     private static readonly string[] FactionIds = { "coalition", "directorate", "network", "random" };
     private OptionButton _cash = null!;
+    private OptionButton _map = null!;
+    private Label _mapInfo = null!;
+    private List<Overmatch.Sim.Data.MapDef> _maps = new();
 
     public override void _Ready()
     {
@@ -44,7 +47,17 @@ public partial class MainMenu : CanvasLayer
         var st = new Label { Text = "SKIRMISH", HorizontalAlignment = HorizontalAlignment.Center };
         st.AddThemeFontSizeOverride("font_size", 36);
         _setup.AddChild(st);
-        _setup.AddChild(new Label { Text = "Map: Dry Plain (4 players)", Modulate = new Color(1, 1, 1, 0.7f) });
+        _maps = DataLoader.LoadRules().Maps.Values.OrderBy(m => m.Spawns.Count).ThenBy(m => m.Name).ToList();
+        var mapRow = new HBoxContainer();
+        mapRow.AddChild(new Label { Text = "Map", CustomMinimumSize = new Vector2(120, 0) });
+        _map = new OptionButton();
+        foreach (var m in _maps) _map.AddItem(m.Name);
+        _map.Selected = Math.Max(0, _maps.FindIndex(m => m.Id == "plain"));
+        _map.ItemSelected += _ => MapChanged();
+        mapRow.AddChild(_map);
+        _setup.AddChild(mapRow);
+        _mapInfo = new Label { Modulate = new Color(1, 1, 1, 0.7f) };
+        _setup.AddChild(_mapInfo);
 
         var grid = new GridContainer { Columns = 4 };
         grid.AddThemeConstantOverride("h_separation", 12);
@@ -82,8 +95,21 @@ public partial class MainMenu : CanvasLayer
         cashRow.AddChild(_cash);
         _setup.AddChild(cashRow);
         _setup.AddChild(new Control { CustomMinimumSize = new Vector2(0, 10) });
+        MapChanged();
         _setup.AddChild(Button("Start", Start));
         _setup.AddChild(Button("Back", () => { _setup.Visible = false; _title.Visible = true; }));
+    }
+
+    private void MapChanged()
+    {
+        var m = _maps[_map.Selected];
+        _mapInfo.Text = $"{m.Width}x{m.Height}, up to {m.Spawns.Count} players. {m.Description}";
+        for (var i = 1; i < _slots.Count; i++)
+        {
+            var allowed = i < m.Spawns.Count;
+            _slots[i].kind.Disabled = !allowed;
+            if (!allowed) _slots[i].kind.Selected = 0;
+        }
     }
 
     private static Button Button(string text, Action onPress)
@@ -96,7 +122,7 @@ public partial class MainMenu : CanvasLayer
 
     private void Start()
     {
-        var s = new MatchSettings { StartingCash = new[] { 5000, 10000, 20000, 50000 }[_cash.Selected] };
+        var s = new MatchSettings { StartingCash = new[] { 5000, 10000, 20000, 50000 }[_cash.Selected], MapId = _maps[_map.Selected].Id };
         var rng = new Random();
         string Pick(int idx) => FactionIds[idx] == "random" ? FactionIds[rng.Next(3)] : FactionIds[idx];
         s.Players.Add(new PlayerSlot { Name = "You", Faction = Pick(_slots[0].faction.Selected), Colour = MatchSettings.Palette[0] });

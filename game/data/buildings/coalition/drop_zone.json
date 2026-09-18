@@ -1,4 +1,28 @@
-{ "id": "coalition_drop_zone", "name": "Drop Zone", "faction": "coalition", "cost": 1500, "buildTime": 25,
-  "footprint": [3, 3], "hp": 1000, "armour": "structure", "vision": 6, "power": -1, "prereqs": ["coalition_supply_center"],
-  "trickle": { "amount": 400, "interval": 60 }, "model": "coalition/drop_zone", "tags": ["structure", "economy"],
-  "description": "Receives an aerial supply drop every minute." }
+{
+  "id": "coalition_drop_zone",
+  "name": "Drop Zone",
+  "faction": "coalition",
+  "cost": 1500,
+  "buildTime": 25,
+  "footprint": [
+    3,
+    3
+  ],
+  "hp": 1000,
+  "armour": "structure",
+  "vision": 6,
+  "power": -1,
+  "prereqs": [
+    "coalition_supply_center"
+  ],
+  "trickle": {
+    "amount": 500,
+    "interval": 60
+  },
+  "model": "coalition/drop_zone",
+  "tags": [
+    "structure",
+    "economy"
+  ],
+  "description": "Receives an aerial supply drop every minute."
+}

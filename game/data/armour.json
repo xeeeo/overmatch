@@ -37,9 +37,9 @@
     "laser": 0.9
   },
   "aircraft": {
-    "small_arms": 0.2,
-    "armour_piercing": 0.0,
-    "explosive": 0.0,
+    "small_arms": 0.25,
+    "armour_piercing": 0.9,
+    "explosive": 0.8,
     "flame": 0.0,
     "toxin": 0.0,
     "sniper": 0.0,
@@ -47,8 +47,8 @@
   },
   "drone": {
     "small_arms": 1.0,
-    "armour_piercing": 0.0,
-    "explosive": 0.5,
+    "armour_piercing": 0.5,
+    "explosive": 1.0,
     "flame": 0.0,
     "toxin": 0.0,
     "sniper": 0.5,

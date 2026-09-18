@@ -136,6 +136,38 @@ public partial class EntityView : Node3D
     private Color? _teamColour;
     public void SetTeamColour(Color c) => _teamColour = c;
 
+    private CpuParticles3D? _smoke;
+    private CpuParticles3D? _fire;
+
+    private CpuParticles3D MakeEmitter(Color colour, float size, float speed, float life, int amount)
+    {
+        var p = new CpuParticles3D
+        {
+            Amount = amount, Lifetime = life, Position = new Vector3(0, Entity.IsBuilding ? 1.2f : 0.9f, 0),
+            Direction = Vector3.Up, Spread = 18f, InitialVelocityMin = speed * 0.6f, InitialVelocityMax = speed,
+            Gravity = new Vector3(0.6f, 0.4f, 0), ScaleAmountMin = size * 0.6f, ScaleAmountMax = size,
+            EmissionShape = CpuParticles3D.EmissionShapeEnum.Sphere, EmissionSphereRadius = MathF.Max(0.3f, Entity.Radius * 0.5f),
+            Mesh = new SphereMesh { Radius = 0.5f, Height = 1f, RadialSegments = 6, Rings = 3 },
+            MaterialOverride = new StandardMaterial3D { AlbedoColor = colour, ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded, Transparency = BaseMaterial3D.TransparencyEnum.Alpha },
+            Emitting = false,
+        };
+        AddChild(p);
+        return p;
+    }
+
+    /// <summary>Battle damage reads at a glance: smoke under half health, fire under a quarter.</summary>
+    private void UpdateDamageLook()
+    {
+        if (Entity.IsInfantryLike()) return;
+        var f = Entity.HpFraction;
+        var wantSmoke = f < 0.5f && !Entity.UnderConstruction;
+        var wantFire = f < 0.25f && !Entity.UnderConstruction;
+        if (wantSmoke && _smoke is null) _smoke = MakeEmitter(new Color(0.18f, 0.17f, 0.16f, 0.55f), Entity.IsBuilding ? 1.1f : 0.6f, 2.2f, 1.8f, Entity.IsBuilding ? 14 : 8);
+        if (wantFire && _fire is null) _fire = MakeEmitter(new Color(1f, 0.55f, 0.15f, 0.8f), Entity.IsBuilding ? 0.7f : 0.4f, 1.6f, 0.6f, Entity.IsBuilding ? 12 : 6);
+        if (_smoke is not null) _smoke.Emitting = wantSmoke;
+        if (_fire is not null) _fire.Emitting = wantFire;
+    }
+
     private float _lookAlpha = 1f;
     private bool _lookDisabled;
     private StandardMaterial3D? _ghostMat;
@@ -205,6 +237,7 @@ public partial class EntityView : Node3D
             var t = Angles.LerpAngle(e.PrevTurretFacing, e.TurretFacing, alpha);
             _turret.Rotation = new Vector3(0f, Angles.Wrap(t - Rotation.Y), 0f);
         }
+        UpdateDamageLook();
         if (_rotors.Count > 0)
         {
             _rotorAngle += 0.6f;

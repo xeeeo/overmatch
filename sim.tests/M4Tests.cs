@@ -65,8 +65,8 @@ public class M4Tests
         Assert.Equal(0, derrick.Owner);
         Assert.Contains(w.Events, e => e is CapturedEvent { NewOwner: 0 });
         var cash = w.Player(0).Cash;
-        TestRules.Run(w, 20 * 11);
-        Assert.Equal(cash + 150, w.Player(0).Cash);
+        TestRules.Run(w, 20 * 13);
+        Assert.Equal(cash + 100, w.Player(0).Cash);
     }
 
     [Fact]

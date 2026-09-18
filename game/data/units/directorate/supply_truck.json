@@ -14,10 +14,10 @@
   "armour": "harvester",
   "vision": 7,
   "harvest": {
-    "capacity": 300,
-    "loadTime": 3,
-    "unloadTime": 1.2,
-    "searchRadius": 34
+    "capacity": 220,
+    "loadTime": 8,
+    "unloadTime": 3,
+    "searchRadius": 40
   },
   "xpValue": 25,
   "tags": [

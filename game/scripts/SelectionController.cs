@@ -7,7 +7,6 @@ namespace Overmatch.Game;
 public partial class SelectionController : Control
 {
     private const float ClickTolerance = 6f;
-    private const float PickRadiusPx = 24f;
 
     public int Player { get; set; }
     public GameRoot Root { get; set; } = null!;
@@ -22,7 +21,95 @@ public partial class SelectionController : Control
     public sealed record Pending(string Kind, string Id, int BuildingId, string Label, bool NeedsEntity);
     public Pending? PendingTarget { get; private set; }
 
+    private readonly Dictionary<int, HashSet<int>> _groups = new();
+    private int _lastGroup = -1;
+    private ulong _lastGroupTime;
+
     public IReadOnlyCollection<int> Selected => _selected;
+
+    /// <summary>Right-click on the minimap: move (or attack-move if armed) to a map position.</summary>
+    public void OrderMoveTo(Vec2 target)
+    {
+        PruneSelection();
+        var units = _selected.Where(id => Root.World.Get(id) is { IsBuilding: false }).ToArray();
+        if (units.Length == 0) return;
+        if (_attackMoveArmed) Root.World.Submit(new AttackMoveCommand(Player, units, target));
+        else Root.World.Submit(new MoveCommand(Player, units, target));
+        _attackMoveArmed = false;
+        Respond("move");
+    }
+
+    private void Respond(string ev)
+    {
+        var first = _selected.Select(id => Root.World.Get(id)).FirstOrDefault(e => e is not null);
+        if (first is not null) Root.Audio.UnitResponse(first, ev);
+    }
+
+    private bool HandleKey(InputEventKey key)
+    {
+        if (!key.Pressed || key.Echo) return false;
+        var digit = key.Keycode >= Key.Key0 && key.Keycode <= Key.Key9 ? (int)(key.Keycode - Key.Key0) : -1;
+        if (digit >= 0)
+        {
+            if (key.CtrlPressed || key.MetaPressed)
+            {
+                _groups[digit] = new HashSet<int>(_selected.Where(id => Root.World.Get(id) is { IsBuilding: false }));
+                Root.Hud.Say($"Group {digit} set ({_groups[digit].Count})");
+            }
+            else if (_groups.TryGetValue(digit, out var g))
+            {
+                g.RemoveWhere(id => Root.World.Get(id) is null);
+                if (g.Count == 0) return true;
+                var now = Time.GetTicksMsec();
+                var again = _lastGroup == digit && now - _lastGroupTime < 400;
+                _lastGroup = digit;
+                _lastGroupTime = now;
+                _selected.Clear();
+                foreach (var id in g) _selected.Add(id);
+                InspectId = 0;
+                ApplySelectionVisuals();
+                Respond("select");
+                if (again)
+                {
+                    // Double-tap: centre the camera on the group.
+                    var alive = g.Select(id => Root.World.Get(id)!).ToList();
+                    var c = new Vec2(alive.Average(e => e.Pos.X), alive.Average(e => e.Pos.Y));
+                    Root.Camera.Position = MapView.ToWorld(c);
+                }
+            }
+            return true;
+        }
+        switch (key.Keycode)
+        {
+            case Key.H:
+                var hq = Root.World.Entities.FirstOrDefault(e => e.Owner == Player && e.Building is { Hq: true }) ?? Root.World.Entities.FirstOrDefault(e => e.Owner == Player && e.IsBuilding);
+                if (hq is not null) { Root.Camera.Position = MapView.ToWorld(hq.Pos); SelectOnly(hq.Id); }
+                return true;
+            case Key.Space:
+                if (Root.LastAlert is { } a) Root.Camera.Position = MapView.ToWorld(a);
+                return true;
+            case Key.M:
+                Root.Audio.ToggleMusic();
+                Root.Hud.Say(Root.Audio.MusicOn ? "Music on" : "Music off");
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Double-click: every unit of the same type on screen.</summary>
+    private void SelectSameTypeOnScreen(Entity like)
+    {
+        var cam = Root.Camera.Camera;
+        var rect = GetViewport().GetVisibleRect();
+        _selected.Clear();
+        foreach (var e in Root.World.Entities)
+        {
+            if (!e.Alive || e.Owner != Player || e.IsBuilding || e.IsInside || e.Def.Id != like.Def.Id) continue;
+            var world = MapView.ToWorld(e.Pos, 0.5f + (e.Unit?.FlightHeight ?? 0f));
+            if (!cam.IsPositionBehind(world) && rect.HasPoint(cam.UnprojectPosition(world))) _selected.Add(e.Id);
+        }
+        ApplySelectionVisuals();
+    }
     public bool AttackMoveArmed => _attackMoveArmed || PendingTarget is not null;
     public void ArmAttackMove() => _attackMoveArmed = _selected.Count > 0;
     public void Arm(Pending p) { PendingTarget = p; _attackMoveArmed = false; }
@@ -44,6 +131,12 @@ public partial class SelectionController : Control
     public override void _UnhandledInput(InputEvent @event)
     {
         if (Root.Placement.Active) return;
+        if (@event is InputEventKey k && HandleKey(k)) { GetViewport().SetInputAsHandled(); return; }
+        if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true, DoubleClick: true } dc && !Root.Hud.IsMouseOverBar(dc.Position) && PendingTarget is null)
+        {
+            var like = Pick(dc.Position, e => e.Owner == Player && !e.IsBuilding);
+            if (like is not null) { SelectSameTypeOnScreen(like); _dragging = false; return; }
+        }
         if (@event is InputEventMouseButton mb)
         {
             if (mb.ButtonIndex == MouseButton.Left)
@@ -73,6 +166,7 @@ public partial class SelectionController : Control
                     if (_boxActive) BoxSelect(_dragStart, mb.Position, additive);
                     else ClickSelect(mb.Position, additive);
                     _boxActive = false;
+                    if (_selected.Count > 0) Respond("select");
                     QueueRedraw();
                 }
             }
@@ -125,6 +219,16 @@ public partial class SelectionController : Control
             case "ability":
                 Root.World.Submit(new AbilityCommand(Player, _selected.ToArray(), p.Id, target.Value, entity?.Id ?? 0));
                 break;
+            case "capture":
+                if (entity?.Building is { Capturable: true } && entity.Owner != Player)
+                    Root.World.Submit(new CaptureCommand(Player, _selected.Where(id => Root.World.Get(id)?.Unit?.CanCapture == true).ToArray(), entity.Id));
+                else { Root.Hud.Say("That cannot be captured"); return; }
+                break;
+            case "garrison":
+                if (entity is not null && entity.Def.GarrisonSlots > 0 && (entity.Owner == Player || entity.Owner < 0))
+                    Root.World.Submit(new GarrisonCommand(Player, _selected.Where(id => Root.World.Get(id) is { Def.IsInfantry: true }).ToArray(), entity.Id));
+                else { Root.Hud.Say("Infantry cannot enter that"); return; }
+                break;
             case "superweapon":
                 Root.World.Submit(new FireSuperweaponCommand(Player, p.BuildingId, target.Value));
                 break;
@@ -133,28 +237,37 @@ public partial class SelectionController : Control
         Disarm();
     }
 
-    /// <summary>Nearest entity to a screen point, filtered; null if none within the pick radius.</summary>
-    private Entity? Pick(Vector2 screen, Func<Entity, bool> filter)
+    private Entity? Pick(Vector2 screen, Func<Entity, bool> filter) => Picking.PickAt(Root, screen, filter);
+
+    /// <summary>A neutral or enemy object the player clicked to read about. No commands apply to it.</summary>
+    public int InspectId { get; private set; }
+
+    /// <summary>What a right-click would do at this point, for the hover hint.</summary>
+    public string HoverHint(Vector2 screen)
     {
-        var cam = Root.Camera.Camera;
-        Entity? best = null;
-        var bestD = PickRadiusPx;
-        foreach (var e in Root.World.Entities)
-        {
-            if (!e.Alive || e.IsInside || !filter(e)) continue;
-            if (!Root.Views.TryGetValue(e.Id, out var view) || !view.Visible) continue;
-            var world = MapView.ToWorld(e.Pos, 0.7f + (e.Unit?.FlightHeight ?? 0f));
-            if (cam.IsPositionBehind(world)) continue;
-            var d = (cam.UnprojectPosition(world) - screen).Length();
-            var slack = e.IsBuilding ? e.Radius * 12f : 0f; // buildings are big targets
-            if (d - slack < bestD) { bestD = d - slack; best = e; }
-        }
-        return best;
+        if (_selected.Count == 0 || Root.Hud.IsMouseOverBar(screen)) return "";
+        var infantry = _selected.Any(id => Root.World.Get(id) is { Def.IsInfantry: true });
+        var target = Pick(screen, e => !_selected.Contains(e.Id));
+        if (target is null) return "";
+        if (target.Building is { Capturable: true } && target.Owner != Player)
+            return _selected.Any(id => Root.World.Get(id)?.Unit?.CanCapture == true) ? $"Right-click: capture {target.Def.Name}" : $"{target.Def.Name}: capture it with basic infantry";
+        if (infantry && target.Def.GarrisonSlots > 0 && (target.Owner == Player || target.Owner < 0) && target.Building is not { IsHole: true })
+            return $"Right-click: enter {target.Def.Name}";
+        if (target.Owner != Player && target.Owner >= 0) return $"Right-click: attack {target.Def.Name}";
+        if (target.UnderConstruction && target.Owner == Player && _selected.Any(id => Root.World.Get(id) is { IsBuilder: true })) return "Right-click: help build";
+        return "";
     }
 
     private void ClickSelect(Vector2 screen, bool additive)
     {
         var hit = Pick(screen, e => e.Owner == Player);
+        InspectId = 0;
+        if (hit is null && !additive)
+        {
+            // Nothing of ours under the cursor: let the player read about whatever is there.
+            var other = Pick(screen, e => e.Owner != Player);
+            if (other is not null) { _selected.Clear(); InspectId = other.Id; ApplySelectionVisuals(); return; }
+        }
         if (!additive || hit is { IsBuilding: true }) _selected.Clear();
         if (hit is not null)
         {
@@ -244,12 +357,14 @@ public partial class SelectionController : Control
         {
             Root.World.Submit(new AttackCommand(Player, _selected.ToArray(), enemy.Id));
             Root.ShowMarker(MapView.ToWorld(enemy.Pos), new Color(1f, 0.35f, 0.3f));
+            Respond("attack");
             return;
         }
         var ground = Root.Camera.GroundPoint(screen);
         if (ground is not { } g) return;
         Root.World.Submit(new MoveCommand(Player, _selected.ToArray(), MapView.ToSim(g)));
         Root.ShowMarker(g, new Color(0.4f, 1f, 0.4f));
+        Respond("move");
     }
 
     private void IssueAttackMove(Vector2 screen)
@@ -260,6 +375,7 @@ public partial class SelectionController : Control
         if (ground is not { } g) return;
         Root.World.Submit(new AttackMoveCommand(Player, _selected.ToArray(), MapView.ToSim(g)));
         Root.ShowMarker(g, new Color(1f, 0.6f, 0.2f));
+        Respond("attack");
     }
 
     private void PruneSelection() => _selected.RemoveWhere(id => Root.World.Get(id) is null);

@@ -21,9 +21,9 @@
   ],
   "garrisonSlots": 4,
   "trickle": {
-    "amount": 100,
+    "amount": 120,
     "interval": 20
   },
-  "tricklePerPassenger": 150,
-  "description": "Hacks funds: 100 every 20 s, plus 150 per Hacker garrisoned inside."
+  "tricklePerPassenger": 60,
+  "description": "Hacks funds: 120 every 20 s, plus 60 per Hacker garrisoned inside."
 }

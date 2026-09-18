@@ -315,6 +315,8 @@ public static class Combat
         var attackerId = attacker?.Id ?? 0;
         var killerOwner = attacker?.Owner ?? owner;
         if (attacker is { Alive: true }) { attacker.Kills++; attacker.Xp += target.Def.XpValue; }
+        if (!silent && target.Owner >= 0) world.Player(target.Owner).UnitsLost++;
+        if (!silent && killerOwner >= 0 && killerOwner != target.Owner) world.Player(killerOwner).UnitsKilled++;
         if (killerOwner >= 0 && killerOwner != target.Owner && !silent)
         {
             var killer = world.Player(killerOwner);

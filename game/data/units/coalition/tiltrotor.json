@@ -14,10 +14,10 @@
   "armour": "aircraft",
   "vision": 9,
   "harvest": {
-    "capacity": 400,
-    "loadTime": 4,
-    "unloadTime": 1.5,
-    "searchRadius": 36
+    "capacity": 500,
+    "loadTime": 10,
+    "unloadTime": 4,
+    "searchRadius": 40
   },
   "xpValue": 30,
   "model": "coalition/tiltrotor",
@@ -25,6 +25,6 @@
     "aircraft",
     "harvester"
   ],
-  "description": "Flying harvester. Carries 400 supplies per trip.",
+  "description": "Flying harvester. Carries 500 supplies per trip and ignores terrain.",
   "garrisonSlots": 8
 }

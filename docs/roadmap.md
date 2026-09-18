@@ -9,7 +9,7 @@ Each milestone ends in something you can run.
 | **M2 A base** ✅ | Builder, buildings and placement, power, supply economy, production queues, upgrades, full Coalition tree, first real map | Build a full Coalition base from one Dozer and field every unit |
 | **M3 Skirmish** ✅ | AI that expands, defends and attacks; difficulty tiers; win/lose; main menu; skirmish setup | Beat a Medium AI in a Coalition mirror match |
 | **M4 Three factions** ✅ | Directorate and Network trees, abilities, promotions and powers, superweapons, garrisons, capturables, veterancy | Any faction vs any faction, full feature set |
-| **M5 Feel** | SFX, voice lines, VFX, UI polish, minimap, 4–6 maps, balance pass via AI-vs-AI harness | It feels like Generals |
+| **M5 Feel** ✅ | SFX, voice lines, VFX, UI polish, minimap, 4–6 maps, balance pass via AI-vs-AI harness | It feels like Generals |
 | **M6 Ship v0.1** | Mac and Windows builds, GitHub release, itch.io page, contributor and modding docs | Strangers can download and play |
 
 ## Later

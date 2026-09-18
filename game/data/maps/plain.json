@@ -162,7 +162,7 @@
     {
       "id": "oil_derrick",
       "x": 48,
-      "y": 70
+      "y": 66
     },
     {
       "id": "oil_derrick",
@@ -209,5 +209,6 @@
       "x": 48,
       "y": 82
     }
-  ]
+  ],
+  "description": "Rocks, a highway, and a town in the middle."
 }

@@ -7,7 +7,18 @@ public sealed class Player
 {
     public int Id { get; }
     public FactionDef Faction { get; }
-    public int Cash { get; set; }
+    private int _cash;
+    /// <summary>Money in the bank. Increases are tallied in TotalEarned for statistics.</summary>
+    public int Cash
+    {
+        get => _cash;
+        set { if (value > _cash && _started) TotalEarned += value - _cash; _cash = value; }
+    }
+    private bool _started;
+    /// <summary>Everything that ever came in (harvest, trickle, bounty, refunds), excluding starting cash.</summary>
+    public long TotalEarned { get; private set; }
+    public int UnitsLost { get; internal set; }
+    public int UnitsKilled { get; internal set; }
     public int PowerSupply { get; internal set; }
     public int PowerDemand { get; internal set; }
     public bool Eliminated { get; internal set; }
@@ -57,6 +68,7 @@ public sealed class Player
         Id = id;
         Faction = faction;
         Cash = faction.StartingCash;
+        _started = true;
     }
 
     public IReadOnlyCollection<string> Upgrades => _upgrades;

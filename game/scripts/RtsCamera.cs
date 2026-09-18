@@ -21,6 +21,11 @@ public partial class RtsCamera : Node3D
     private float _distance = 32f;
     private float _targetDistance = 32f;
     private bool _middleDrag;
+    private float _shake;
+    private readonly Random _shakeRng = new();
+
+    /// <summary>Kick the camera; bigger for nearer, larger blasts.</summary>
+    public void Shake(float amount) => _shake = Mathf.Min(1.5f, MathF.Max(_shake, amount));
 
     public override void _Ready()
     {
@@ -115,6 +120,11 @@ public partial class RtsCamera : Node3D
         var offset = new Vector3(0f, -Mathf.Sin(pitch) * _distance, Mathf.Cos(pitch) * _distance);
         Camera.Position = offset;
         Camera.LookAt(GlobalPosition, Vector3.Up);
+        if (_shake > 0.01f)
+        {
+            Camera.Position += new Vector3((float)_shakeRng.NextDouble() - 0.5f, (float)_shakeRng.NextDouble() - 0.5f, (float)_shakeRng.NextDouble() - 0.5f) * _shake;
+            _shake *= 0.88f;
+        }
     }
 
     /// <summary>Intersect the mouse ray with the ground plane (y = 0). Returns null if looking at the sky.</summary>

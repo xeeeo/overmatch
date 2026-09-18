@@ -79,6 +79,9 @@ public static class Movement
         else if (++order.StuckTicks > StuckLimitTicks) Arrive(e);
     }
 
+    private const int GhostAfterTicks = World.TicksPerSecond;
+    private static bool IsGhosting(Entity e) => e.Move is { StuckTicks: > GhostAfterTicks };
+
     private static void Arrive(Entity e)
     {
         e.Move = null;
@@ -107,6 +110,10 @@ public static class Movement
             foreach (var b in near)
             {
                 if (b.Id <= a.Id || !b.Alive || b.Def.IsAir || b.IsBuilding || b.IsInside) continue;
+                // Working harvesters pass through each other, and a unit that has been stuck for a second stops colliding
+                // until it makes progress again. Both prevent gridlock in narrow lanes between buildings.
+                if (a.HarvestState != HarvestState.Idle && b.HarvestState != HarvestState.Idle && a.Owner == b.Owner) continue;
+                if (IsGhosting(a) || IsGhosting(b)) continue;
                 // Crushing: a heavy vehicle rolling over enemy infantry kills it.
                 if (a.Def.Crusher && b.Def.IsInfantry && world.AreEnemies(a, b) && a.IsMoving && (b.Pos - a.Pos).Length < a.Radius)
                 { Combat.DirectDamage(world, b, 1000f, "crush", a); continue; }

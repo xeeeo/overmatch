@@ -22,6 +22,10 @@ public partial class GameRoot : Node3D
     public App App { get; set; } = null!;
     public string? SmokePath { get; set; }
     public ResultOverlay Result { get; private set; } = null!;
+    public AudioManager Audio { get; private set; } = null!;
+    public Minimap Minimap { get; private set; } = null!;
+    /// <summary>Where the last "under attack" alert happened (Space jumps there).</summary>
+    public Vec2? LastAlert { get; private set; }
     private bool _resultShown;
     private float _attackAlertCooldown;
 
@@ -76,8 +80,10 @@ public partial class GameRoot : Node3D
             _pilesRoot.AddChild(v);
             _pileViews.Add(v);
         }
-        _vfx = new Vfx { Name = "Vfx" };
+        _vfx = new Vfx { Name = "Vfx", Camera = Camera };
         AddChild(_vfx);
+        Audio = new AudioManager { Name = "Audio", Root = this };
+        AddChild(Audio);
         Placement = new PlacementController { Name = "Placement", Root = this };
         AddChild(Placement);
 
@@ -112,6 +118,30 @@ public partial class GameRoot : Node3D
         {
             // Skirmish smoke: watch the AI for six minutes of game time, then photograph its base.
             var minutes = w.Time / 60f;
+            // Exercise the interface as a player would, so HUD exceptions surface here and not in a play test.
+            if (_uiStage == 0 && minutes >= 0.5f)
+            {
+                _uiStage = 1;
+                var hq = w.Entities.FirstOrDefault(e => e.Owner == LocalPlayer && e.IsBuilding);
+                if (hq is not null) Selection.SelectOnly(hq.Id);
+            }
+            else if (_uiStage == 1 && minutes >= 1f)
+            {
+                _uiStage = 2;
+                var builder = w.Entities.FirstOrDefault(e => e.Owner == LocalPlayer && e.IsBuilder);
+                if (builder is not null) Selection.SelectOnly(builder.Id);
+                var size = GetViewport().GetVisibleRect().Size;
+                for (var x = 0.1f; x < 1f; x += 0.2f)
+                    for (var y = 0.1f; y < 0.8f; y += 0.2f)
+                        Selection.HoverHint(new Vector2(size.X * x, size.Y * y));
+                foreach (var d in w.Rules.Units.Values.Cast<Overmatch.Sim.Data.ObjectDef>().Concat(w.Rules.Buildings.Values)) Hud.Describe(d);
+                GD.Print("[Smoke] UI paths exercised");
+            }
+            else if (_uiStage == 2 && minutes >= 1.2f)
+            {
+                _uiStage = 3;
+                GetViewport().GetTexture().GetImage().SavePng(_smokePath!.Replace(".png", "_ui.png"));
+            }
             if (w.Tick / 600 != _lastLogged)
             {
                 _lastLogged = w.Tick / 600;
@@ -193,6 +223,7 @@ public partial class GameRoot : Node3D
 
     private int _smokeTick;
     private int _lastLogged = -1;
+    private int _uiStage;
 
     public override void _Process(double delta)
     {
@@ -241,6 +272,7 @@ public partial class GameRoot : Node3D
     private void HandleEvents()
     {
         _vfx.Consume(World, PlayerColour);
+        Audio.Consume(World);
         foreach (var ev in World.Events)
         {
             switch (ev)
@@ -266,9 +298,18 @@ public partial class GameRoot : Node3D
                 case UpgradeCompletedEvent u when u.Owner == LocalPlayer:
                     Hud.Say($"{World.Rules.Upgrade(u.UpgradeId).Name} researched");
                     break;
-                case DamagedEvent dmg when _attackAlertCooldown <= 0 && World.Get(dmg.EntityId) is { Owner: 0, IsBuilding: true }:
-                    Hud.Say("Base under attack");
-                    _attackAlertCooldown = 12f;
+                case DamagedEvent dmg when _attackAlertCooldown <= 0 && dmg.AttackerId != 0 && World.Get(dmg.EntityId) is { } hurt && hurt.Owner == LocalPlayer:
+                    // Only alert for things happening off screen.
+                    var onScreen = !Camera.Camera.IsPositionBehind(MapView.ToWorld(hurt.Pos)) && GetViewport().GetVisibleRect().HasPoint(Camera.Camera.UnprojectPosition(MapView.ToWorld(hurt.Pos)));
+                    LastAlert = hurt.Pos;
+                    Minimap.Ping(hurt.Pos);
+                    if (!onScreen)
+                    {
+                        Hud.Say(hurt.IsBuilding ? "Base under attack  (Space to look)" : "Units under attack  (Space to look)");
+                        Audio.PlayUi("alert");
+                        Audio.Announce(hurt.IsBuilding ? "base_under_attack" : "unit_under_attack", 15000);
+                    }
+                    _attackAlertCooldown = 8f;
                     break;
                 case PlayerEliminatedEvent pe when pe.Player != LocalPlayer:
                     Hud.Say($"{World.Player(pe.Player).Name} eliminated");
@@ -348,5 +389,8 @@ public partial class GameRoot : Node3D
         AddChild(Hud);
         Result = new ResultOverlay { Root = this };
         AddChild(Result);
+        Minimap = new Minimap { Root = this };
+        Hud.MinimapSlot.AddChild(Minimap);
+        if (_smokePath is null) Audio.Announce("welcome", 1000);
     }
 }

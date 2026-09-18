@@ -15,10 +15,10 @@
   "vision": 7,
   "builder": true,
   "harvest": {
-    "capacity": 150,
-    "loadTime": 3,
-    "unloadTime": 1,
-    "searchRadius": 34
+    "capacity": 90,
+    "loadTime": 5,
+    "unloadTime": 2,
+    "searchRadius": 40
   },
   "xpValue": 8,
   "tags": [
