@@ -6,6 +6,7 @@ The simulation (`sim/`) is a deterministic fixed-tick model with no engine depen
 - Logic runs at **20 ticks/second**. All sim numbers (speeds, cooldowns, build times) are expressed in seconds in data and converted to ticks at load.
 - Rendering interpolates between the last two sim states.
 - Game speed is a multiplier on ticks per real second; pause stops ticks.
+- Determinism holds for the same build on the same CPU architecture (replays, AI harness, tests). Float results differ between x64 and arm64, so cross-platform lockstep multiplayer would need the sim moved to fixed-point arithmetic. Noted, not planned for v1.
 
 ## World
 - The map is a **heightfield** with a **cell grid** (1 cell = 1 world unit; a tank is ~1 cell wide). Typical skirmish map 200×200 cells.
