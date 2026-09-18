@@ -218,10 +218,13 @@ public sealed class GameRules
     public IReadOnlyDictionary<string, UpgradeDef> Upgrades { get; }
     public IReadOnlyDictionary<string, FactionDef> Factions { get; }
     public IReadOnlyDictionary<string, MapDef> Maps { get; }
+    /// <summary>Keyed "faction/difficulty".</summary>
+    public IReadOnlyDictionary<string, AiProfile> AiProfiles { get; }
     public ArmourTable Armour { get; }
 
     private GameRules(Dictionary<string, UnitDef> units, Dictionary<string, BuildingDef> buildings, Dictionary<string, WeaponDef> weapons,
-        Dictionary<string, UpgradeDef> upgrades, Dictionary<string, FactionDef> factions, Dictionary<string, MapDef> maps, ArmourTable armour)
+        Dictionary<string, UpgradeDef> upgrades, Dictionary<string, FactionDef> factions, Dictionary<string, MapDef> maps,
+        Dictionary<string, AiProfile> ai, ArmourTable armour)
     {
         Units = units;
         Buildings = buildings;
@@ -229,6 +232,7 @@ public sealed class GameRules
         Upgrades = upgrades;
         Factions = factions;
         Maps = maps;
+        AiProfiles = ai;
         Armour = armour;
     }
 
@@ -248,6 +252,7 @@ public sealed class GameRules
         var upgrades = new Dictionary<string, UpgradeDef>();
         var factions = new Dictionary<string, FactionDef>();
         var maps = new Dictionary<string, MapDef>();
+        var ai = new Dictionary<string, AiProfile>();
         var armour = new ArmourTable();
 
         foreach (var file in files)
@@ -260,6 +265,7 @@ public sealed class GameRules
             else if (path.StartsWith("upgrades/")) Add(upgrades, Parse<UpgradeDef>(file), d => d.Id, path);
             else if (path.StartsWith("factions/")) Add(factions, Parse<FactionDef>(file), d => d.Id, path);
             else if (path.StartsWith("maps/")) Add(maps, Parse<MapDef>(file), d => d.Id, path);
+            else if (path.StartsWith("ai/")) Add(ai, Parse<AiProfile>(file), d => $"{d.Faction}/{d.Difficulty}", path);
             else if (path == "armour.json") armour = ArmourTable.Parse(file.Json);
         }
 
@@ -274,7 +280,7 @@ public sealed class GameRules
                 if (!upgrades.ContainsKey(u)) throw new InvalidDataException($"Building '{b.Id}' offers unknown upgrade '{u}'");
         }
 
-        return new GameRules(units, buildings, weapons, upgrades, factions, maps, armour);
+        return new GameRules(units, buildings, weapons, upgrades, factions, maps, ai, armour);
     }
 
     private static T Parse<T>(DataFile file) =>
@@ -304,6 +310,9 @@ public sealed class GameRules
 
     public MapDef Map(string id) =>
         Maps.TryGetValue(id, out var d) ? d : throw new KeyNotFoundException($"Unknown map '{id}'");
+
+    public AiProfile Ai(string faction, string difficulty) =>
+        AiProfiles.TryGetValue($"{faction}/{difficulty}", out var d) ? d : throw new KeyNotFoundException($"No AI profile for {faction}/{difficulty}");
 }
 
 /// <summary>armourType → damageType → multiplier. Missing entries are 1.0.</summary>

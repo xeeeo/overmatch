@@ -1,0 +1,50 @@
+{
+  "faction": "coalition",
+  "buildOrder": [
+    "coalition_power_plant",
+    "coalition_supply_center",
+    "coalition_barracks",
+    "coalition_motor_pool",
+    "coalition_power_plant",
+    "coalition_strategy_center",
+    "coalition_airfield",
+    "coalition_drop_zone"
+  ],
+  "powerBuilding": "coalition_power_plant",
+  "supplyBuilding": "coalition_supply_center",
+  "defenceBuilding": "coalition_sentry_battery",
+  "harvesterUnit": "coalition_tiltrotor",
+  "builderUnit": "coalition_dozer",
+  "composition": {
+    "coalition_bulwark": 5,
+    "coalition_warden": 2,
+    "coalition_rocket_trooper": 3,
+    "coalition_rifleman": 2,
+    "coalition_lancer": 1,
+    "coalition_kestrel": 1
+  },
+  "upgradeOrder": [
+    "coalition_turbine_overdrive",
+    "coalition_composite_armour",
+    "coalition_advanced_training",
+    "coalition_guided_rounds",
+    "coalition_drone_autonomy",
+    "coalition_countermeasures"
+  ],
+  "difficulty": "hard",
+  "name": "Hard",
+  "targetBuilders": 2,
+  "targetHarvesters": 4,
+  "maxHarvesters": 6,
+  "defences": 3,
+  "waveSize": 12,
+  "maxArmy": 32,
+  "firstWaveAt": 240,
+  "waveInterval": 90,
+  "retreatFraction": 0.25,
+  "cashReserve": 100,
+  "reactionDelay": 1.0,
+  "incomeMult": 1.0,
+  "harass": true,
+  "expand": true
+}

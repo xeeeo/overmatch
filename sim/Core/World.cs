@@ -17,6 +17,9 @@ public sealed class World
     public int PlayerCount => _players.Count;
     public int Tick { get; private set; }
     public float Time => Tick * Dt;
+    /// <summary>-1 while the match runs; the winning player id once it ends (-2 for a draw).</summary>
+    public int Winner { get; private set; } = -1;
+    public bool Finished => Winner != -1;
 
     private readonly List<Player> _players = new();
     private readonly List<Entity> _entities = new();
@@ -25,6 +28,7 @@ public sealed class World
     private readonly List<SupplyPile> _piles = new();
     private readonly Queue<Command> _pending = new();
     private readonly List<GameEvent> _events = new();
+    private readonly List<AiController> _ais = new();
     /// <summary>Building entity id occupying each cell, 0 for none.</summary>
     private readonly int[] _cellBuilding;
     private int _nextId = 1;
@@ -65,6 +69,18 @@ public sealed class World
     }
 
     public Player Player(int id) => _players[id];
+    public IReadOnlyList<AiController> Ais => _ais;
+
+    /// <summary>Hand a player to the computer.</summary>
+    public AiController AddAi(int player, AiProfile profile)
+    {
+        var p = Player(player);
+        p.IsAi = true;
+        p.IncomeMult = profile.IncomeMult;
+        var ai = new AiController(this, player, profile);
+        _ais.Add(ai);
+        return ai;
+    }
     public Entity? Get(int id) => _byId.TryGetValue(id, out var e) && e.Alive ? e : null;
     public SupplyPile? Pile(int id) => _piles.FirstOrDefault(p => p.Id == id);
 
@@ -113,6 +129,13 @@ public sealed class World
                 if (t is CellType.Water or CellType.Cliff) { reason = "terrain"; return false; }
                 if (_cellBuilding[y * Grid.Width + x] != 0) { reason = "occupied"; return false; }
             }
+        // Keep supply piles reachable.
+        foreach (var pile in _piles)
+        {
+            if (pile.Depleted) continue;
+            if (pile.Pos.X > cx - 2f && pile.Pos.X < cx + def.Width + 2f && pile.Pos.Y > cy - 2f && pile.Pos.Y < cy + def.Height + 2f)
+            { reason = "too close to supplies"; return false; }
+        }
         reason = "";
         return true;
     }
@@ -235,6 +258,9 @@ public sealed class World
         }
         foreach (var p in _projectiles) p.PrevPos = p.Pos;
 
+        if (!Finished)
+            foreach (var ai in _ais) ai.Think();
+
         while (_pending.Count > 0) Apply(_pending.Dequeue());
 
         Spatial.Rebuild(_entities);
@@ -266,6 +292,27 @@ public sealed class World
         }
         if (removed) Economy.RecomputePower(this);
         _projectiles.RemoveAll(p => !p.Alive);
+
+        if (Tick % TicksPerSecond == 0) CheckElimination();
+    }
+
+    /// <summary>A player is out when they have no buildings and no builders. Last one standing wins.</summary>
+    private void CheckElimination()
+    {
+        if (Finished) return;
+        foreach (var p in _players)
+        {
+            if (p.Eliminated) continue;
+            var alive = false;
+            foreach (var e in _entities)
+                if (e.Alive && e.Owner == p.Id && (e.IsBuilding || e.IsBuilder)) { alive = true; break; }
+            if (alive) continue;
+            p.Eliminated = true;
+            _events.Add(new PlayerEliminatedEvent(p.Id));
+        }
+        var remaining = _players.Where(p => !p.Eliminated).ToList();
+        if (remaining.Count == 1 && _players.Count > 1) { Winner = remaining[0].Id; _events.Add(new MatchEndedEvent(Winner)); }
+        else if (remaining.Count == 0) { Winner = -2; _events.Add(new MatchEndedEvent(-2)); }
     }
 
     private void Apply(Command command)

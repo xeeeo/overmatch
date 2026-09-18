@@ -12,6 +12,11 @@ public sealed class Player
     public int PowerDemand { get; internal set; }
     public bool Eliminated { get; internal set; }
     public int Xp { get; internal set; }
+    /// <summary>Multiplier on harvested and trickled income (AI handicap).</summary>
+    public float IncomeMult { get; set; } = 1f;
+    /// <summary>Display name for menus and results.</summary>
+    public string Name { get; set; } = "";
+    public bool IsAi { get; internal set; }
 
     private readonly HashSet<string> _upgrades = new();
     private readonly Dictionary<string, float> _weaponDamageMult = new();

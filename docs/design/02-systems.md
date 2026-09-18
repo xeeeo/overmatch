@@ -73,7 +73,10 @@ Per faction and difficulty, a **profile** (data) drives four managers on a 1 s c
 Difficulty scales: reaction delay, wave size, use of powers, harassment, and (Brutal only) an income multiplier.
 
 ## Win condition
-A player is eliminated when they own no buildings and no builders. Last player (or team) standing wins.
+A player is eliminated when they own no buildings and no builders (checked once a second). Last player standing wins; teams come later. Eliminated players' remaining units linger but their AI stops.
+
+## Skirmish AI (as built in M3)
+`AiController` lives in the sim and issues ordinary commands, so AI games are deterministic and replayable. A profile in `data/ai/<faction>/<difficulty>.json` gives it a build order, unit composition weights, upgrade order, wave sizes and timings, cash reserve, reaction delay, and an income multiplier (Brutal cheats; Easy is handicapped). Each think: builders → power headroom → build order → defences toward the enemy → expansion when nearby piles run dry → harvesters → weighted round-robin production → upgrades → defend when enemies come within range of a building → attack waves that retarget and retreat when mauled. Placement is a spiral search around the HQ with a one-cell margin. The AI reads the world directly for base decisions, as the original did.
 
 ## Presentation contract (game/)
 - Reads sim state each frame; owns nothing gameplay-relevant.

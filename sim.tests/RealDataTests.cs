@@ -48,7 +48,7 @@ public class RealDataTests
 
         // Build every Coalition building, always picking one whose prereqs are already met.
         var remaining = rules.Buildings.Values.Where(b => b.Faction == "coalition" && !b.Hq).OrderBy(b => b.Cost).ToList();
-        var cx = 22; var cy = 4;
+        var cx = 30; var cy = 4;
         while (remaining.Count > 0)
         {
             var b = remaining.FirstOrDefault(x => w.HasPrereqs(0, x.Prereqs, out _));
@@ -62,12 +62,12 @@ public class RealDataTests
             TestRules.RunUntil(w, () => !site.UnderConstruction, 20 * 200);
             Assert.False(site.UnderConstruction, $"{b.Id} never finished");
             cx += b.Width + 2;
-            if (cx > 80) { cx = 22; cy += 8; }
+            if (cx > 58) { cx = 30; cy += 8; }
         }
         // One plant is not enough for the whole tree; add plants until the base is powered, as a player would.
         for (var guard = 0; p.LowPower && guard < 5; guard++)
         {
-            w.Submit(new BuildCommand(0, dozer.Id, "coalition_power_plant", 22 + guard * 5, 30));
+            w.Submit(new BuildCommand(0, dozer.Id, "coalition_power_plant", 30 + guard * 5, 56));
             w.Step();
             var site = w.Entities.Last(e => e.Building?.Id == "coalition_power_plant" && e.Owner == 0);
             TestRules.RunUntil(w, () => !site.UnderConstruction, 20 * 100);

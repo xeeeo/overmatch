@@ -17,6 +17,13 @@ public partial class GameRoot : Node3D
     public Color LocalColour { get; private set; } = new(0.3f, 0.5f, 0.9f);
     /// <summary>Sim ticks per real-time tick; 1 is normal speed.</summary>
     public int Speed { get; set; } = 1;
+    public bool Paused { get; set; }
+    public MatchSettings Settings { get; set; } = MatchSettings.Default();
+    public App App { get; set; } = null!;
+    public string? SmokePath { get; set; }
+    public ResultOverlay Result { get; private set; } = null!;
+    private bool _resultShown;
+    private float _attackAlertCooldown;
 
     private Node3D _entitiesRoot = null!;
     private Node3D _pilesRoot = null!;
@@ -29,20 +36,21 @@ public partial class GameRoot : Node3D
     private string? _smokePath;
     private int _smokeStage;
 
-    private static readonly Color EnemyColour = new(0.85f, 0.25f, 0.25f);
-
     public override void _Ready()
     {
-        foreach (var arg in OS.GetCmdlineUserArgs())
-        {
-            if (arg.StartsWith("--smoke=")) _smokePath = arg["--smoke=".Length..];
-            else if (arg.StartsWith("--speed=")) Speed = int.Parse(arg["--speed=".Length..]);
-        }
-
+        _smokePath = SmokePath;
         var rules = DataLoader.LoadRules();
-        var map = rules.Map("plain");
-        World = new World(rules, map, new[] { "coalition", "coalition" });
-        LocalColour = Color.FromHtml(World.Player(LocalPlayer).Faction.Colour);
+        var map = rules.Map(Settings.MapId);
+        World = new World(rules, map, Settings.Players.Select(p => p.Faction));
+        for (var i = 0; i < Settings.Players.Count; i++)
+        {
+            var slot = Settings.Players[i];
+            var player = World.Player(i);
+            player.Name = slot.Name;
+            player.Cash = Settings.StartingCash;
+            if (slot.IsAi) World.AddAi(i, rules.Ai(slot.Faction, slot.Difficulty));
+        }
+        LocalColour = Settings.Players[LocalPlayer].Colour;
 
         var mapView = new MapView { Name = "Map" };
         AddChild(mapView);
@@ -78,31 +86,55 @@ public partial class GameRoot : Node3D
         BuildUi();
     }
 
-    /// <summary>Generals-style start: an HQ, a builder, and a few units per player. The enemy gets a small fortified base.</summary>
+    /// <summary>Generals-style start: every player gets a Command Post and one Dozer at their spawn.</summary>
     private void SetUpStartPositions(MapDef map)
     {
-        var s0 = new Vec2(map.Spawns[0].X, map.Spawns[0].Y);
-        var hq = World.PlaceBuilding("coalition_command_post", LocalPlayer, (int)s0.X - 2, (int)s0.Y - 2);
-        hq.Rally = new Vec2(s0.X, s0.Y - 6);
-        World.Spawn("coalition_dozer", LocalPlayer, s0 + new Vec2(-5, -3), Angles.DegToRad(-90));
-        World.Spawn("coalition_dozer", LocalPlayer, s0 + new Vec2(5, -3), Angles.DegToRad(-90));
-        for (var i = 0; i < 4; i++) World.Spawn("coalition_bulwark", LocalPlayer, s0 + new Vec2(-7 + i * 2.7f, -6), Angles.DegToRad(45));
-        for (var i = 0; i < 2; i++) World.Spawn("coalition_warden", LocalPlayer, s0 + new Vec2(-8 + i * 2.4f, -9), Angles.DegToRad(45));
-
-        var s1 = new Vec2(map.Spawns[1].X, map.Spawns[1].Y);
-        World.PlaceBuilding("coalition_command_post", 1, (int)s1.X - 2, (int)s1.Y - 2);
-        World.PlaceBuilding("coalition_power_plant", 1, (int)s1.X + 5, (int)s1.Y - 1);
-        World.PlaceBuilding("coalition_barracks", 1, (int)s1.X - 8, (int)s1.Y - 1);
-        World.PlaceBuilding("coalition_sentry_battery", 1, (int)s1.X - 3, (int)s1.Y - 8);
-        World.PlaceBuilding("coalition_sentry_battery", 1, (int)s1.X + 3, (int)s1.Y - 8);
-        for (var i = 0; i < 4; i++) World.Spawn("coalition_bulwark", 1, s1 + new Vec2(-4 + i * 2.7f, -11), Angles.DegToRad(-135));
-        for (var i = 0; i < 4; i++) World.Spawn("coalition_rifleman", 1, s1 + new Vec2(-6 + i * 1.2f, -5), Angles.DegToRad(-135));
+        for (var p = 0; p < World.PlayerCount; p++)
+        {
+            var spawn = map.Spawns[p % map.Spawns.Count];
+            var s = new Vec2(spawn.X, spawn.Y);
+            var faction = World.Player(p).Faction;
+            var hqId = faction.Hq != "" ? faction.Hq : "coalition_command_post";
+            var hqDef = World.Rules.Building(hqId);
+            var hq = World.PlaceBuilding(hqId, p, (int)s.X - hqDef.Width / 2, (int)s.Y - hqDef.Height / 2);
+            var toCentre = (new Vec2(map.Width / 2f, map.Height / 2f) - s).Normalized;
+            hq.Rally = s + toCentre * 7f;
+            var builder = faction.Builder != "" ? faction.Builder : "coalition_dozer";
+            World.Spawn(builder, p, s + toCentre * 5f, toCentre.Angle);
+        }
     }
 
     private void SmokeStep()
     {
         if (_smokePath is null) return;
         var w = World;
+        if (Settings.Players.Any(p => p.IsAi))
+        {
+            // Skirmish smoke: watch the AI for six minutes of game time, then photograph its base.
+            var minutes = w.Time / 60f;
+            if (w.Tick / 600 != _lastLogged)
+            {
+                _lastLogged = w.Tick / 600;
+                GD.Print($"[Smoke] real={Time.GetTicksMsec() / 1000f:0.0}s t={minutes:0.0}min tick={w.Tick} fps={Engine.GetFramesPerSecond()} ai='{w.Ais[0].Status}' aiBuildings={w.Entities.Count(e => e.Owner == 1 && e.IsBuilding)} aiUnits={w.Entities.Count(e => e.Owner == 1 && !e.IsBuilding)} cash={w.Player(1).Cash} entities={w.Entities.Count}");
+            }
+            if (_smokeStage == 0 && minutes >= 6f)
+            {
+                var ai = w.Entities.FirstOrDefault(e => e.Owner == 1 && e.Building is { Hq: true });
+                if (ai is not null) Camera.Position = MapView.ToWorld(ai.Pos + new Vec2(-4, -6));
+                w.Vision.RevealAll(LocalPlayer); // photograph the AI base without fog
+                _smokeStage = 101;
+                _smokeTick = w.Tick;
+            }
+            else if (_smokeStage == 101 && w.Tick >= _smokeTick + 3)
+            {
+                GetViewport().GetTexture().GetImage().SavePng(_smokePath!);
+                var ai = w.Ais[0];
+                GD.Print($"[Smoke] saved {_smokePath} at {w.Time / 60f:0.0} min; AI cash {w.Player(1).Cash}; buildings {w.Entities.Count(e => e.Owner == 1 && e.IsBuilding)}; units {w.Entities.Count(e => e.Owner == 1 && !e.IsBuilding)}; status '{ai.Status}'; finished {w.Finished} winner {w.Winner}");
+                GetTree().Quit();
+                _smokeStage = 102;
+            }
+            return;
+        }
         var dozers = w.Entities.Where(e => e.Owner == LocalPlayer && e.IsBuilder).ToList();
         var s0 = new Vec2(w.MapDef.Spawns[0].X, w.MapDef.Spawns[0].Y);
         int Building(string id) => w.Entities.FirstOrDefault(e => e.Owner == LocalPlayer && e.Building?.Id == id && e.Operational)?.Id ?? 0;
@@ -160,13 +192,14 @@ public partial class GameRoot : Node3D
     }
 
     private int _smokeTick;
+    private int _lastLogged = -1;
 
     public override void _Process(double delta)
     {
-        _accumulator += (float)delta;
+        if (!Paused) _accumulator += (float)delta;
         var steps = 0;
         var maxSteps = 5 * Speed;
-        while (_accumulator >= World.Dt / Speed && steps < maxSteps)
+        while (!Paused && _accumulator >= World.Dt / Speed && steps < maxSteps)
         {
             World.Step();
             _accumulator -= World.Dt / Speed;
@@ -197,6 +230,7 @@ public partial class GameRoot : Node3D
             _marker.Visible = _markerTtl > 0;
             _marker.Scale = Vector3.One * (0.6f + _markerTtl);
         }
+        if (_attackAlertCooldown > 0) _attackAlertCooldown -= (float)delta;
     }
 
     private void HandleEvents()
@@ -227,6 +261,19 @@ public partial class GameRoot : Node3D
                 case UpgradeCompletedEvent u when u.Owner == LocalPlayer:
                     Hud.Say($"{World.Rules.Upgrade(u.UpgradeId).Name} researched");
                     break;
+                case DamagedEvent dmg when _attackAlertCooldown <= 0 && World.Get(dmg.EntityId) is { Owner: 0, IsBuilding: true }:
+                    Hud.Say("Base under attack");
+                    _attackAlertCooldown = 12f;
+                    break;
+                case PlayerEliminatedEvent pe when pe.Player != LocalPlayer:
+                    Hud.Say($"{World.Player(pe.Player).Name} eliminated");
+                    break;
+                case MatchEndedEvent m when !_resultShown:
+                    _resultShown = true;
+                    var won = m.Winner == LocalPlayer;
+                    var detail = m.Winner >= 0 ? $"{World.Player(m.Winner).Name} wins after {World.Time / 60f:0} minutes" : "Draw";
+                    Result.ShowResult(won, detail);
+                    break;
             }
         }
     }
@@ -238,7 +285,7 @@ public partial class GameRoot : Node3D
         Views.Remove(id);
     }
 
-    public Color PlayerColour(int owner) => owner == LocalPlayer ? LocalColour : EnemyColour;
+    public Color PlayerColour(int owner) => owner >= 0 && owner < Settings.Players.Count ? Settings.Players[owner].Colour : new Color(0.5f, 0.5f, 0.5f);
 
     public void ShowMarker(Vector3 at, Color colour)
     {
@@ -294,5 +341,7 @@ public partial class GameRoot : Node3D
         layer.AddChild(new UnitOverlay { Root = this });
         Hud = new Hud { Root = this, Layer = 2 };
         AddChild(Hud);
+        Result = new ResultOverlay { Root = this };
+        AddChild(Result);
     }
 }

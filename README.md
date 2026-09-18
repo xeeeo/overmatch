@@ -16,7 +16,7 @@ The world has moved on since 2003. Overmatch's battlefield is today's: cheap FPV
 
 ## Status
 
-Pre-alpha. M0 (bootstrap), M1 (movement, combat, fog of war) and M2 (base building, economy, production, upgrades, the Coalition tree) are done; M3 (skirmish AI, win/lose, menus) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
+Pre-alpha. Playable skirmish. M0–M3 are done: movement, combat, fog of war, base building, economy, production, upgrades, the Coalition tree, a skirmish AI with four difficulty tiers, victory and defeat, a main menu and skirmish setup. M4 (the Directorate and Network factions, generals' powers, superweapons) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
 
 ## Building from source
 
@@ -34,7 +34,7 @@ blender -b -P tools/blender/build_models.py   # regenerate all models (optional)
 godot-mono --headless --path game --export-release macOS   # export (see game/export_presets.cfg)
 ```
 
-Smoke test used by Claude for visual checks: `godot-mono --path game -- --smoke=/tmp/out.png --speed=6` builds a scripted base at 6x speed, saves a screenshot and quits.
+Smoke test used by Claude for visual checks: `godot-mono --path game -- --smoke=/tmp/out.png --speed=8 --ai=medium` skips the menu, plays a Medium AI for six game minutes at 8x, screenshots its base and quits. `--ai=<difficulty>` alone starts a match straight away.
 
 ## Repository layout
 

@@ -26,3 +26,7 @@ public sealed record SoldEvent(int BuildingId, int Owner, int Refund) : GameEven
 public sealed record SupplyDeliveredEvent(int HarvesterId, int Owner, int Amount) : GameEvent;
 
 public sealed record OrderRejectedEvent(int Player, string Reason) : GameEvent;
+
+public sealed record PlayerEliminatedEvent(int Player) : GameEvent;
+
+public sealed record MatchEndedEvent(int Winner) : GameEvent;

@@ -29,7 +29,7 @@ public static class Economy
                 if (e.TrickleTimer <= 0f)
                 {
                     e.TrickleTimer += trickle.Interval;
-                    player.Cash += trickle.Amount;
+                    player.Cash += (int)(trickle.Amount * player.IncomeMult);
                 }
             }
             else if (e.IsHarvester) Harvest(world, e);
@@ -134,8 +134,9 @@ public static class Economy
             {
                 h.StateTimer -= dt;
                 if (h.StateTimer > 0f) return;
-                world.Player(h.Owner).Cash += h.Carried;
-                world.Emit(new SupplyDeliveredEvent(h.Id, h.Owner, h.Carried));
+                var delivered = (int)(h.Carried * world.Player(h.Owner).IncomeMult);
+                world.Player(h.Owner).Cash += delivered;
+                world.Emit(new SupplyDeliveredEvent(h.Id, h.Owner, delivered));
                 h.Carried = 0;
                 var pile = world.Pile(h.PileId);
                 if (pile is null || pile.Depleted) pile = NearestPile(world, h.Pos, def.SearchRadius);

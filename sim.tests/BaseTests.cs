@@ -246,7 +246,6 @@ public class BaseTests
         TestRules.RunUntil(w, () => w.Get(power.Id) is null, 20 * 60);
         Assert.Null(w.Get(power.Id));
         Assert.True(w.Grid.IsPassable(21, 21, Locomotor.Tracked), "footprint should be freed");
-        Assert.Contains(w.Events.Concat(Array.Empty<GameEvent>()), _ => true);
     }
 
     [Fact]
