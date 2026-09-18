@@ -16,7 +16,7 @@ The world has moved on since 2003. Overmatch's battlefield is today's: cheap FPV
 
 ## Status
 
-Pre-alpha. Milestone 0 (bootstrap) in progress. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
+Pre-alpha. M0 (bootstrap) and M1 (movement, combat, fog of war) are done; M2 (base building and economy) is next. See [docs/design](docs/design/) for the design and [docs/roadmap.md](docs/roadmap.md) for where this is going.
 
 ## Building from source
 

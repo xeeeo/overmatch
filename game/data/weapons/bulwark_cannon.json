@@ -1,0 +1,11 @@
+{
+  "id": "bulwark_cannon",
+  "damage": 60,
+  "damageType": "armour_piercing",
+  "range": 8.5,
+  "cooldown": 2.2,
+  "projectile": { "kind": "shell", "speed": 45, "arc": false },
+  "splash": { "radius": 0.8, "falloff": 0.4 },
+  "targets": ["ground"],
+  "aimTolerance": 5
+}

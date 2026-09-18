@@ -85,8 +85,8 @@ def wedge(name, size, loc, mat, bevel=0.03):
     return obj
 
 
-def join_all(name):
-    objs = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+def join(name, objs, origin=None):
+    """Join objs into one mesh named `name`. `origin` (x, y, z) sets the pivot (needed for turrets)."""
     bpy.ops.object.select_all(action="DESELECT")
     for o in objs:
         o.select_set(True)
@@ -94,7 +94,30 @@ def join_all(name):
     bpy.ops.object.join()
     root = bpy.context.active_object
     root.name = name
+    if origin is not None:
+        bpy.context.scene.cursor.location = origin
+        bpy.ops.object.origin_set(type="ORIGIN_CURSOR")
+        bpy.context.scene.cursor.location = (0, 0, 0)
     return root
+
+
+def join_all(name):
+    return join(name, [o for o in bpy.context.scene.objects if o.type == "MESH"])
+
+
+def parent(child, parent_obj):
+    """Parent without moving the child in world space."""
+    child.parent = parent_obj
+    child.matrix_parent_inverse = parent_obj.matrix_world.inverted()
+
+
+def new_parts():
+    """Snapshot of mesh objects so callers can diff before/after to collect the parts they just made."""
+    return set(o.name for o in bpy.context.scene.objects if o.type == "MESH")
+
+
+def parts_since(snapshot):
+    return [o for o in bpy.context.scene.objects if o.type == "MESH" and o.name not in snapshot]
 
 
 def export_glb(path):

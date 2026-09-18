@@ -8,11 +8,13 @@
   "locomotor": "tracked",
   "speed": 4.0,
   "turnRate": 150,
-  "radius": 0.9,
+  "turretTurnRate": 200,
+  "radius": 1.1,
   "hp": 420,
   "armour": "tank",
   "vision": 9,
-  "weapons": [],
+  "weapons": ["bulwark_cannon"],
+  "xpValue": 40,
   "model": "coalition/bulwark",
   "tags": ["vehicle", "tank"]
 }

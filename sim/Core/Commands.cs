@@ -5,4 +5,8 @@ public abstract record Command(int Player);
 
 public sealed record MoveCommand(int Player, int[] Units, Vec2 Target) : Command(Player);
 
+public sealed record AttackMoveCommand(int Player, int[] Units, Vec2 Target) : Command(Player);
+
+public sealed record AttackCommand(int Player, int[] Units, int TargetId) : Command(Player);
+
 public sealed record StopCommand(int Player, int[] Units) : Command(Player);

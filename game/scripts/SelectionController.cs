@@ -3,11 +3,11 @@ using Overmatch.Sim;
 
 namespace Overmatch.Game;
 
-/// <summary>Click, shift-click and drag-box selection; right-click move orders. Draws the selection box as a 2D overlay.</summary>
+/// <summary>Click, shift-click and drag-box selection; right-click move/attack; A + click attack-move. Draws the selection box.</summary>
 public partial class SelectionController : Control
 {
     private const float ClickTolerance = 6f;
-    private const float PickRadiusPx = 22f;
+    private const float PickRadiusPx = 24f;
 
     public int Player { get; set; }
     public GameRoot Root { get; set; } = null!;
@@ -16,8 +16,10 @@ public partial class SelectionController : Control
     private Vector2 _dragStart;
     private bool _dragging;
     private bool _boxActive;
+    private bool _attackMoveArmed;
 
     public IReadOnlyCollection<int> Selected => _selected;
+    public bool AttackMoveArmed => _attackMoveArmed;
 
     public override void _Ready()
     {
@@ -33,6 +35,12 @@ public partial class SelectionController : Control
             {
                 if (mb.Pressed)
                 {
+                    if (_attackMoveArmed)
+                    {
+                        IssueAttackMove(mb.Position);
+                        _attackMoveArmed = false;
+                        return;
+                    }
                     _dragStart = mb.Position;
                     _dragging = true;
                     _boxActive = false;
@@ -49,7 +57,8 @@ public partial class SelectionController : Control
             }
             else if (mb.ButtonIndex == MouseButton.Right && mb.Pressed)
             {
-                IssueMove(mb.Position);
+                _attackMoveArmed = false;
+                IssueContextOrder(mb.Position);
             }
         }
         else if (@event is InputEventMouseMotion mm && _dragging)
@@ -66,28 +75,45 @@ public partial class SelectionController : Control
         }
         else if (@event.IsActionPressed("stop"))
         {
+            _attackMoveArmed = false;
             if (_selected.Count > 0) Root.World.Submit(new StopCommand(Player, _selected.ToArray()));
         }
+        else if (@event.IsActionPressed("attack_move"))
+        {
+            if (_selected.Count > 0) _attackMoveArmed = true;
+        }
+        else if (@event.IsActionPressed("cancel"))
+        {
+            _attackMoveArmed = false;
+        }
+    }
+
+    /// <summary>Nearest entity to a screen point, filtered; null if none within the pick radius.</summary>
+    private Entity? Pick(Vector2 screen, Func<Entity, bool> filter)
+    {
+        var cam = Root.Camera.Camera;
+        Entity? best = null;
+        var bestD = PickRadiusPx;
+        foreach (var e in Root.World.Entities)
+        {
+            if (!e.Alive || !filter(e)) continue;
+            if (!Root.Views.TryGetValue(e.Id, out var view) || !view.Visible) continue;
+            var world = MapView.ToWorld(e.Pos, 0.7f);
+            if (cam.IsPositionBehind(world)) continue;
+            var d = (cam.UnprojectPosition(world) - screen).Length();
+            if (d < bestD) { bestD = d; best = e; }
+        }
+        return best;
     }
 
     private void ClickSelect(Vector2 screen, bool additive)
     {
-        var cam = Root.Camera.Camera;
-        int best = -1;
-        var bestD = PickRadiusPx;
-        foreach (var e in Root.World.Entities)
-        {
-            if (!e.Alive || e.Owner != Player) continue;
-            var world = new Vector3(e.Pos.X, 0.5f, -e.Pos.Y);
-            if (cam.IsPositionBehind(world)) continue;
-            var d = (cam.UnprojectPosition(world) - screen).Length();
-            if (d < bestD) { bestD = d; best = e.Id; }
-        }
+        var hit = Pick(screen, e => e.Owner == Player);
         if (!additive) _selected.Clear();
-        if (best >= 0)
+        if (hit is not null)
         {
-            if (additive && !_selected.Add(best)) _selected.Remove(best);
-            else _selected.Add(best);
+            if (additive && !_selected.Add(hit.Id)) _selected.Remove(hit.Id);
+            else _selected.Add(hit.Id);
         }
         ApplySelectionVisuals();
     }
@@ -100,21 +126,42 @@ public partial class SelectionController : Control
         foreach (var e in Root.World.Entities)
         {
             if (!e.Alive || e.Owner != Player) continue;
-            var world = new Vector3(e.Pos.X, 0.5f, -e.Pos.Y);
+            var world = MapView.ToWorld(e.Pos, 0.5f);
             if (cam.IsPositionBehind(world)) continue;
             if (rect.HasPoint(cam.UnprojectPosition(world))) _selected.Add(e.Id);
         }
         ApplySelectionVisuals();
     }
 
-    private void IssueMove(Vector2 screen)
+    /// <summary>Right-click: attack an enemy under the cursor, otherwise move.</summary>
+    private void IssueContextOrder(Vector2 screen)
     {
+        PruneSelection();
+        if (_selected.Count == 0) return;
+        var enemy = Pick(screen, e => e.Owner != Player);
+        if (enemy is not null)
+        {
+            Root.World.Submit(new AttackCommand(Player, _selected.ToArray(), enemy.Id));
+            Root.ShowMarker(MapView.ToWorld(enemy.Pos), new Color(1f, 0.35f, 0.3f));
+            return;
+        }
+        var ground = Root.Camera.GroundPoint(screen);
+        if (ground is not { } g) return;
+        Root.World.Submit(new MoveCommand(Player, _selected.ToArray(), MapView.ToSim(g)));
+        Root.ShowMarker(g, new Color(0.4f, 1f, 0.4f));
+    }
+
+    private void IssueAttackMove(Vector2 screen)
+    {
+        PruneSelection();
         if (_selected.Count == 0) return;
         var ground = Root.Camera.GroundPoint(screen);
         if (ground is not { } g) return;
-        Root.World.Submit(new MoveCommand(Player, _selected.ToArray(), new Vec2(g.X, -g.Z)));
-        Root.ShowMoveMarker(g);
+        Root.World.Submit(new AttackMoveCommand(Player, _selected.ToArray(), MapView.ToSim(g)));
+        Root.ShowMarker(g, new Color(1f, 0.6f, 0.2f));
     }
+
+    private void PruneSelection() => _selected.RemoveWhere(id => Root.World.Get(id) is null);
 
     private void ApplySelectionVisuals()
     {

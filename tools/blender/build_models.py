@@ -30,12 +30,16 @@ def coalition_bulwark():
         om.box(f"Track{side}", (2.3, 0.36, 0.42), (0.0, side * 0.72, 0.30), track, bevel=0.04)
         om.box(f"Skirt{side}", (2.0, 0.08, 0.25), (0.0, side * 0.92, 0.45), hull, bevel=0.01)
     om.cylinder("TurretBase", 0.55, 0.12, (-0.15, 0.0, 1.0), steel, verts=16)
-    om.wedge("Turret", (1.1, 0.95, 0.38), (-0.2, 0.0, 1.25), om.team())
+    hull_obj = om.join_all("Hull")
+
+    snap = om.new_parts()
+    om.wedge("TurretBody", (1.1, 0.95, 0.38), (-0.2, 0.0, 1.25), om.team())
     om.cylinder("Gun", 0.07, 1.5, (0.75, 0.0, 1.27), steel, verts=10, rot=(0, 90, 0))
     om.cylinder("Muzzle", 0.10, 0.2, (1.42, 0.0, 1.27), steel, verts=10, rot=(0, 90, 0))
     om.box("Hatch", (0.3, 0.3, 0.08), (-0.45, 0.25, 1.47), steel, bevel=0.01)
     om.box("Sensor", (0.18, 0.18, 0.22), (-0.2, -0.3, 1.5), steel, bevel=0.01)
-    om.join_all("coalition_bulwark")
+    turret = om.join("Turret", om.parts_since(snap), origin=(-0.15, 0.0, 1.06))
+    om.parent(turret, hull_obj)
     om.export_glb(os.path.join(OUT, "coalition", "bulwark.glb"))
 
 
@@ -58,9 +62,36 @@ def coalition_dozer():
     om.export_glb(os.path.join(OUT, "coalition", "dozer.glb"))
 
 
+def coalition_warden():
+    """Light armoured vehicle. Tall boxy cab, angled bonnet, roof-mounted remote gun as the turret."""
+    om.reset_scene()
+    body = om.material("Body", (0.30, 0.34, 0.30))
+    tyre = om.material("Tyre", DARK)
+    steel = om.material("Steel", STEEL)
+    glass = om.material("Glass", GLASS, roughness=0.2)
+    om.box("Chassis", (2.2, 1.1, 0.35), (0.0, 0.0, 0.55), body)
+    om.wedge("Bonnet", (0.9, 1.05, 0.45), (0.75, 0.0, 0.95), body)
+    om.box("Cab", (1.15, 1.1, 0.75), (-0.2, 0.0, 1.1), om.team())
+    om.box("Windscreen", (0.1, 0.9, 0.35), (0.38, 0.0, 1.2), glass, bevel=0.0)
+    om.box("Bumper", (0.15, 1.15, 0.2), (1.2, 0.0, 0.6), steel, bevel=0.02)
+    for x in (0.7, -0.7):
+        for side in (1, -1):
+            om.cylinder(f"Wheel{x}{side}", 0.36, 0.3, (x, side * 0.62, 0.36), tyre, verts=14, rot=(90, 0, 0), bevel=0.03)
+    hull_obj = om.join_all("Hull")
+
+    snap = om.new_parts()
+    om.cylinder("Mount", 0.18, 0.1, (-0.2, 0.0, 1.52), steel, verts=10)
+    om.box("GunBody", (0.5, 0.22, 0.16), (-0.05, 0.0, 1.62), steel, bevel=0.02)
+    om.cylinder("Barrel", 0.035, 0.6, (0.45, 0.0, 1.62), steel, verts=8, rot=(0, 90, 0), bevel=0.0)
+    turret = om.join("Turret", om.parts_since(snap), origin=(-0.2, 0.0, 1.5))
+    om.parent(turret, hull_obj)
+    om.export_glb(os.path.join(OUT, "coalition", "warden.glb"))
+
+
 MODELS = {
     "bulwark": coalition_bulwark,
     "dozer": coalition_dozer,
+    "warden": coalition_warden,
 }
 
 if __name__ == "__main__":

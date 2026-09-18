@@ -1,0 +1,20 @@
+{
+  "id": "coalition_warden",
+  "name": "Warden",
+  "faction": "coalition",
+  "cost": 700,
+  "buildTime": 9,
+  "builtAt": "coalition_motor_pool",
+  "locomotor": "wheeled",
+  "speed": 6.5,
+  "turnRate": 220,
+  "turretTurnRate": 360,
+  "radius": 0.95,
+  "hp": 260,
+  "armour": "light_vehicle",
+  "vision": 10,
+  "weapons": ["warden_mg"],
+  "xpValue": 25,
+  "model": "coalition/warden",
+  "tags": ["vehicle", "light"]
+}

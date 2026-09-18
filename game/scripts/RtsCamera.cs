@@ -12,7 +12,9 @@ public partial class RtsCamera : Node3D
     [Export] public float MaxDistance = 90f;
     [Export] public float ZoomStep = 6f;
     [Export] public float Pitch = -52f;
-    [Export] public Vector2 Bounds = new(200, 200);
+    /// <summary>World-space rectangle the pivot may roam (x, z ranges). Set from the map.</summary>
+    public Vector2 MinBounds = new(-100, -100);
+    public Vector2 MaxBounds = new(100, 100);
 
     public Camera3D Camera { get; private set; } = null!;
 
@@ -62,8 +64,8 @@ public partial class RtsCamera : Node3D
         if (Input.IsActionPressed("camera_rotate_right")) RotateY(Mathf.DegToRad(-RotateSpeed * dt));
 
         Position = new Vector3(
-            Mathf.Clamp(Position.X, -Bounds.X / 2f, Bounds.X / 2f), 0f,
-            Mathf.Clamp(Position.Z, -Bounds.Y / 2f, Bounds.Y / 2f));
+            Mathf.Clamp(Position.X, MinBounds.X, MaxBounds.X), 0f,
+            Mathf.Clamp(Position.Z, MinBounds.Y, MaxBounds.Y));
 
         _distance = Mathf.Lerp(_distance, _targetDistance, Mathf.Min(1f, 10f * dt));
         ApplyCameraTransform();
